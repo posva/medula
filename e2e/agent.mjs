@@ -88,7 +88,7 @@ function runAgent(prompt) {
     const toolCalls = items
       .filter((item) => item.type === 'mcp_tool_call')
       .map((item) => `mcp__${item.server}__${item.tool}`)
-    const text = items.filter((item) => item.type === 'agent_message').at(-1)?.text ?? ''
+    const text = items.findLast((item) => item.type === 'agent_message')?.text ?? ''
     return { text, toolCalls }
   }
   const raw = execFileSync(

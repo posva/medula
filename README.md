@@ -103,6 +103,25 @@ Helpers dispose on their own when called inside an effect scope (component `setu
 `$patch` (keys missing from the new value are removed). In Nuxt, guard calls with
 `if (import.meta.client)` or use a `.client.ts` plugin.
 
+#### Component internals (Vue)
+
+Like Vue DevTools, agents can inspect and edit the internal state of any component, exposed or
+not. Install the plugin once per app:
+
+```ts
+import { mcpDevtoolsVue } from 'mcp-devtools/vue'
+
+createApp(App).use(mcpDevtoolsVue)
+// Nuxt: in a `.client.ts` plugin
+export default defineNuxtPlugin(({ vueApp }) => vueApp.use(mcpDevtoolsVue))
+```
+
+Tools (dev only, while a page is open): `mcp-devtools_vue_list-components` (component tree with
+stable ids, call it first), `mcp-devtools_vue_get-component-state` (`props`, `setupState`, `data`,
+`readonly`; refs unwrapped, Pinia stores shown as `{ $piniaStore: id }`) and
+`mcp-devtools_vue_set-component-state` (`{ id, section, path, value }`: refs get `.value`, objects
+are edited in place, the UI re-renders).
+
 ### React (`mcp-devtools/react`)
 
 ```tsx
@@ -120,6 +139,33 @@ const dispose = exposeStore('cart', useCartStore, { description: 'Shopping cart'
 ```
 
 Hooks dispose on unmount and re-register when `name` changes.
+
+#### Component internals (React)
+
+With a small DevTools hook shim in place, agents also get `mcp-devtools_react_list-components`,
+`mcp-devtools_react_get-component`, `mcp-devtools_react_set-hook-state` and
+`mcp-devtools_react_set-props`: they read and edit `useState`/`useReducer` values, class state and
+props of any mounted component, no `exposeState` needed. Development builds of React only. The hook
+must exist before React loads:
+
+```ts
+// vite.config.ts
+McpDevtools({ react: true }) // inlines the hook at the top of <head>
+```
+
+```tsx
+// Next.js app/layout.tsx (development only)
+import { reactDevtoolsHookScript } from 'mcp-devtools/next'
+
+;<head>
+  {process.env.NODE_ENV === 'development' && (
+    <script dangerouslySetInnerHTML={{ __html: reactDevtoolsHookScript }} />
+  )}
+</head>
+```
+
+Other hosts: inline `REACT_DEVTOOLS_HOOK_SCRIPT` from `mcp-devtools/react` as a classic `<script>`
+in `<head>`. `hooks[].index` is the hook position; `path: []` replaces the whole value.
 
 ### Svelte (`mcp-devtools/svelte`)
 
@@ -139,6 +185,16 @@ exposeStore('total', total, { set: (v) => count.set(v / 2) })
 let name = $state('Eduardo')
 exposeRune('name', { get: () => name, set: (v) => (name = v) })
 ```
+
+#### Svelte internals: why explicit exposure
+
+Svelte 5 cannot be inspected from outside: `$state` compiles to closure-local signals (the dev
+`tag` label only feeds `$inspect.trace`), `component_context` is private to
+`svelte/internal/client`, there are no `SvelteRegisterComponent`-style events, and `__svelte_meta`
+on DOM nodes only carries source locations. The Svelte 4 approach of the official devtools
+(`$capture_state()` / `$inject_state()`) has no Svelte 5 equivalent
+([sveltejs/svelte-devtools#193](https://github.com/sveltejs/svelte-devtools/issues/193)). Expose
+what agents need with `exposeRune` / `exposeStore`; see `playgrounds/svelte-vite`.
 
 ## Connect your agent
 
@@ -162,7 +218,7 @@ Or let `devframe connect` discover every running dev server (this is what `.mcp.
 ## Playgrounds
 
 `pnpm build`, then `pnpm play:vue` (Vite 8 + Vue + Pinia, with Vite DevTools), `pnpm play:react`,
-`pnpm play:next` (Next 16) or `pnpm play:nuxt` (Nuxt 4 + Nuxt DevTools 4 alpha). Open the app,
+`pnpm play:svelte`, `pnpm play:next` (Next 16) or `pnpm play:nuxt` (Nuxt 4 + Nuxt DevTools 4 alpha). Open the app,
 then `/__mcp-devtools/` on the same origin.
 
 `pnpm e2e:agent` starts a fixture app, opens it in a browser and asks Claude Code (or Codex with

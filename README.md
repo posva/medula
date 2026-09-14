@@ -41,7 +41,7 @@ export default withMcpDevtools({/* your config */})
 ```
 
 ```ts
-// app/%5F_mcp-devtools/[[...path]]/route.ts  (Next reserves `_` folders, so the name is URL-encoded)
+// app/%5F_mcp-devtools/[[...path]]/route.ts  (Next reserves `_` folders: URL-encoded name)
 import { createMcpDevtoolsHandler } from 'mcp-devtools/next'
 
 export const runtime = 'nodejs'
@@ -54,143 +54,60 @@ export const DELETE = handler.fetch
 ```
 
 ```tsx
-// app/layout.tsx: connect pages in development only
-{
-  process.env.NODE_ENV === 'development' && (
-    <script type="module" src="/__mcp-devtools/connect.js" />
+// app/layout.tsx
+import { McpDevtools } from 'mcp-devtools/next'
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <head>
+        <McpDevtools /> {/* development only: hook bootstrap + page script */}
+      </head>
+      <body>{children}</body>
+    </html>
   )
 }
 ```
 
-The MCP endpoint is `http://localhost:3000/__mcp-devtools/__mcp`; the RPC socket runs on a
-side-car port advertised by `/__mcp-devtools/__connection.json`. The instance registers itself
-for `devframe connect` on the first request under `/__mcp-devtools/`, so open a page once.
+MCP endpoint: `http://localhost:3000/__mcp-devtools/__mcp`. The RPC socket runs on a side-car port
+advertised by `/__mcp-devtools/__connection.json`; the instance registers itself for
+`devframe connect` on the first request, so open a page once.
 
-## Expose state
+## What agents can do
 
-```ts
-import { exposeState } from 'mcp-devtools/client'
+Open the app in a browser with the dev server running. Tools appear on the MCP endpoint while the
+page is open; arguments go under `arg0`.
 
-let cart = { items: [] }
-exposeState('cart', {
-  description: 'Shopping cart',
-  get: () => cart,
-  set: (value) => (cart = value),
-})
-```
+### Vue, Pinia and Vue Router
 
-Every helper below returns a dispose function, accepts `{ description?: string }` and needs
-JSON-friendly values (see `toJsonValue`).
+The injected bootstrap installs a Vue DevTools hook shim before Vue loads, so every mounted app
+announces itself, and the page script builds tools from what it finds:
 
-### Vue / Pinia (`mcp-devtools/vue`)
+| Tool                                                                                               | What it reaches                                                                                                                                 |
+| -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp-devtools_list-states`, `get-state`, `set-state`, `patch-state`                                | every Pinia store as `pinia:<id>` (`$state`; set replaces it in one `$patch`), including stores created later                                   |
+| `mcp-devtools_vue_list-components`                                                                 | component tree of every app: `{ id, name, file?, inactive?, children }`. Call it first                                                          |
+| `mcp-devtools_vue_get-component-state`                                                             | `{ props, setupState, data, readonly }` of one component; refs and computed unwrapped, functions skipped, stores shown as `{ $piniaStore: id }` |
+| `mcp-devtools_vue_set-component-state`                                                             | write at a path in `props`, `setupState` or `data`: refs get `.value`, objects are edited in place, the UI re-renders                           |
+| `mcp-devtools_router_get-route`, `mcp-devtools_router_list-routes`, `mcp-devtools_router_navigate` | when the app has Vue Router: current route, all route records, `router.push` by path or `{ name, params, query }`                               |
 
-```ts
-import { exposeRef, exposeReactive, exposeStore, piniaMcpDevtools } from 'mcp-devtools/vue'
+### React
 
-// every Pinia store, named by its $id
-pinia.use(piniaMcpDevtools)
+The bootstrap installs a React DevTools hook before React loads, so development builds hand over
+their internals and the page script registers these tools as soon as a renderer appears:
 
-// a ref / shallowRef (also Nuxt useState)
-const draft = ref('')
-exposeRef('todo-draft', draft, { description: 'Text in the new todo input' })
+| Tool                                 | What it does                                                              |
+| ------------------------------------ | ------------------------------------------------------------------------- |
+| `mcp-devtools_react_list-components` | Tree of mounted components: `id`, `name`, `statefulHooks`, `propKeys`     |
+| `mcp-devtools_react_get-component`   | Props, `useState`/`useReducer` values (`hooks[].index`) and class `state` |
+| `mcp-devtools_react_set-hook-state`  | Write a hook value (or a path inside it); class components update `state` |
+| `mcp-devtools_react_set-props`       | Override a prop at a path and re-render                                   |
 
-// a reactive object: set replaces its content in place, references stay valid
-const settings = reactive({ theme: 'light', fontSize: 16 })
-exposeReactive('settings', settings)
+Flow: `list-components`, then `get-component`, then `set-hook-state` / `set-props`. `path: []`
+replaces the whole value. Production builds of React expose no internals: the tools answer with a
+clear error.
 
-// one store, custom name
-exposeStore(useCartStore(), { name: 'cart', description: 'Shopping cart' })
-```
-
-Helpers dispose on their own when called inside an effect scope (component `setup`,
-`effectScope()`, Pinia store). `exposeStore` reads `store.$state` and replaces it with one
-`$patch` (keys missing from the new value are removed). In Nuxt, guard calls with
-`if (import.meta.client)` or use a `.client.ts` plugin.
-
-#### Component internals (Vue)
-
-Like Vue DevTools, agents can inspect and edit the internal state of any component, exposed or
-not. Install the plugin once per app:
-
-```ts
-import { mcpDevtoolsVue } from 'mcp-devtools/vue'
-
-createApp(App).use(mcpDevtoolsVue)
-// Nuxt: in a `.client.ts` plugin
-export default defineNuxtPlugin(({ vueApp }) => vueApp.use(mcpDevtoolsVue))
-```
-
-Tools (dev only, while a page is open): `mcp-devtools_vue_list-components` (component tree with
-stable ids, call it first), `mcp-devtools_vue_get-component-state` (`props`, `setupState`, `data`,
-`readonly`; refs unwrapped, Pinia stores shown as `{ $piniaStore: id }`) and
-`mcp-devtools_vue_set-component-state` (`{ id, section, path, value }`: refs get `.value`, objects
-are edited in place, the UI re-renders).
-
-### React (`mcp-devtools/react`)
-
-```tsx
-import { useExposedState, useExposeState, exposeStore } from 'mcp-devtools/react'
-
-// useState that agents can read and write
-const [todos, setTodos] = useExposedState('todos', [], { description: 'Todo list' })
-
-// expose an existing state/setter pair (useState, useReducer, props...)
-const [state, dispatch] = useReducer(reducer, initial)
-useExposeState('form', state, (value) => dispatch({ type: 'set', value }))
-
-// zustand-like store ({ getState, setState }), outside components
-const dispose = exposeStore('cart', useCartStore, { description: 'Shopping cart' })
-```
-
-Hooks dispose on unmount and re-register when `name` changes.
-
-#### Component internals (React)
-
-With a small DevTools hook shim in place, agents also get `mcp-devtools_react_list-components`,
-`mcp-devtools_react_get-component`, `mcp-devtools_react_set-hook-state` and
-`mcp-devtools_react_set-props`: they read and edit `useState`/`useReducer` values, class state and
-props of any mounted component, no `exposeState` needed. Development builds of React only. The hook
-must exist before React loads:
-
-```ts
-// vite.config.ts
-McpDevtools({ react: true }) // inlines the hook at the top of <head>
-```
-
-```tsx
-// Next.js app/layout.tsx (development only)
-import { reactDevtoolsHookScript } from 'mcp-devtools/next'
-
-;<head>
-  {process.env.NODE_ENV === 'development' && (
-    <script dangerouslySetInnerHTML={{ __html: reactDevtoolsHookScript }} />
-  )}
-</head>
-```
-
-Other hosts: inline `REACT_DEVTOOLS_HOOK_SCRIPT` from `mcp-devtools/react` as a classic `<script>`
-in `<head>`. `hooks[].index` is the hook position; `path: []` replaces the whole value.
-
-### Svelte (`mcp-devtools/svelte`)
-
-```ts
-import { exposeStore, exposeRune } from 'mcp-devtools/svelte'
-import { writable, derived } from 'svelte/store'
-
-// writable store: agents can read and set it
-const count = writable(0)
-exposeStore('count', count, { description: 'Counter shown in the header' })
-
-// readable store: read-only (set throws), or pass a custom setter
-const total = derived(count, (c) => c * 2)
-exposeStore('total', total, { set: (v) => count.set(v / 2) })
-
-// runes ($state cannot be passed by reference): pass accessors
-let name = $state('Eduardo')
-exposeRune('name', { get: () => name, set: (v) => (name = v) })
-```
-
-#### Svelte internals: why explicit exposure
+### Svelte
 
 Svelte 5 cannot be inspected from outside: `$state` compiles to closure-local signals (the dev
 `tag` label only feeds `$inspect.trace`), `component_context` is private to
@@ -198,7 +115,26 @@ Svelte 5 cannot be inspected from outside: `$state` compiles to closure-local si
 on DOM nodes only carries source locations. The Svelte 4 approach of the official devtools
 (`$capture_state()` / `$inject_state()`) has no Svelte 5 equivalent
 ([sveltejs/svelte-devtools#193](https://github.com/sveltejs/svelte-devtools/issues/193)). Expose
-what agents need with `exposeRune` / `exposeStore`; see `playgrounds/svelte-vite`.
+what agents need explicitly (below); see `playgrounds/svelte-vite`.
+
+### Explicit exposure (escape hatch)
+
+For state no devtools can reach, name it yourself from `mcp-devtools/client`; it shows up in the
+`*-state` tools:
+
+```ts
+import { exposeState } from 'mcp-devtools/client'
+
+exposeState('cart', {
+  description: 'Shopping cart',
+  get: () => cart,
+  set: (value) => (cart = value),
+})
+```
+
+Thin helpers exist for Vue (`exposeRef`, `exposeReactive`, `exposeStore`), React
+(`useExposedState`, `useExposeState`, `exposeStore`) and Svelte (`exposeStore`, `exposeRune`).
+Every helper returns a dispose function and needs JSON-friendly values.
 
 ## Connect your agent
 
@@ -226,7 +162,8 @@ Or let `devframe connect` discover every running dev server (this is what `.mcp.
 then `/__mcp-devtools/` on the same origin.
 
 `pnpm e2e:agent` starts a fixture app, opens it in a browser and asks Claude Code (or Codex with
-`pnpm e2e:agent:codex`) to change its state through the `devframe connect` MCP server.
+`pnpm e2e:agent:codex`) to change its state through the `devframe connect` MCP server;
+`pnpm e2e:agent:vue` does the same against the zero-config Vue playground (component + Pinia tools).
 
 ## Development
 

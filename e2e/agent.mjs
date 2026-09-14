@@ -73,7 +73,7 @@ if (!scenario) {
 }
 const port = Number(args[args.indexOf('--port') + 1]) || scenario.port
 const origin = `http://localhost:${port}`
-const base = `${origin}/__mcp-devtools/`
+const base = `${origin}/__medula/`
 
 const children = []
 function cleanup() {

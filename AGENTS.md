@@ -83,13 +83,13 @@ The devframe tarball also carries a local patch (most recently synced page wins 
 
 `.mcp.json` and `.codex/config.toml` register `npx devframe connect` (same shape as pinia-colada):
 one stdio MCP server that discovers running dev servers through `~/.devframe/instances/` (the
-Vite plugin registers with `register: true`). Direct URL: `<origin>/__mcp-devtools/__mcp`.
+Vite plugin registers with `register: true`). Direct URL: `<origin>/__medula/__mcp`.
 
 ## Verifying a change by hand
 
 1. Start a playground, `agent-browser open http://localhost:<port>/` (use
    `AGENT_BROWSER_SESSION=<name>` when several servers run at once).
-2. `curl -s -X POST <origin>/__mcp-devtools/__mcp -H 'Origin: <origin>' -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'`
+2. `curl -s -X POST <origin>/__medula/__mcp -H 'Origin: <origin>' -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'`
 3. `tools/call` with `{"name":"mcp-devtools_patch-state","arguments":{"arg0":{"name":"…","path":["…"],"value":…}}}`.
 
 Routing between pages: the page script only stays connected while its tab is visible and

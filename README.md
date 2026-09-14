@@ -6,7 +6,7 @@ open, through [MCP](https://modelcontextprotocol.io). Built on [devframe](https:
 - **Zero app code.** Add the Vite plugin (or the Nuxt module / Next handler). An injected page
   script reaches framework internals the way the official devtools do: Vue component state,
   Pinia stores and the router, React hook state and props, Svelte 5 `$state`.
-- **The agent is the UI.** No panel to learn: a plain config page at `/__mcp-devtools/` shows how
+- **The agent is the UI.** No panel to learn: a plain config page at `/__medula/` shows how
   to connect Claude Code, Codex, Cursor or any MCP client.
 - Works with Vite, Nuxt and Next.js dev servers.
 
@@ -41,7 +41,7 @@ export default withMcpDevtools({/* your config */})
 ```
 
 ```ts
-// app/%5F_mcp-devtools/[[...path]]/route.ts  (Next reserves `_` folders: URL-encoded name)
+// app/%5F_medula/[[...path]]/route.ts  (Next reserves `_` folders: URL-encoded name)
 import { createMcpDevtoolsHandler } from 'medula/next'
 
 export const runtime = 'nodejs'
@@ -69,8 +69,8 @@ export default function RootLayout({ children }) {
 }
 ```
 
-MCP endpoint: `http://localhost:3000/__mcp-devtools/__mcp`. The RPC socket runs on a side-car port
-advertised by `/__mcp-devtools/__connection.json`; the instance registers itself for
+MCP endpoint: `http://localhost:3000/__medula/__mcp`. The RPC socket runs on a side-car port
+advertised by `/__medula/__connection.json`; the instance registers itself for
 `devframe connect` on the first request, so open a page once.
 
 ## What agents can do
@@ -147,11 +147,11 @@ Every helper returns a dispose function and needs JSON-friendly values.
 
 ## Connect your agent
 
-Open `http://localhost:<port>/__mcp-devtools/` while the dev server runs. It shows the MCP URL and
+Open `http://localhost:<port>/__medula/` while the dev server runs. It shows the MCP URL and
 ready-to-copy snippets, for example:
 
 ```sh
-claude mcp add --transport http mcp-devtools http://localhost:5173/__mcp-devtools/__mcp
+claude mcp add --transport http mcp-devtools http://localhost:5173/__medula/__mcp
 ```
 
 Tools: `mcp-devtools_list-states`, `mcp-devtools_get-state`, `mcp-devtools_set-state`,
@@ -168,7 +168,7 @@ Or let `devframe connect` discover every running dev server (this is what `.mcp.
 
 `pnpm build`, then `pnpm play:vue` (Vite 8 + Vue + Pinia, with Vite DevTools), `pnpm play:react`,
 `pnpm play:svelte`, `pnpm play:next` (Next 16) or `pnpm play:nuxt` (Nuxt 4 + Nuxt DevTools 4 alpha). Open the app,
-then `/__mcp-devtools/` on the same origin.
+then `/__medula/` on the same origin.
 
 `pnpm e2e:agent` starts a fixture app, opens it in a browser and asks Claude Code (or Codex with
 `pnpm e2e:agent:codex`) to change its state through the `devframe connect` MCP server;

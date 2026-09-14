@@ -17,8 +17,8 @@ const visitor = useState('visitor', () => ({ name: 'Anonymous', vip: false }))
       <span v-if="visitor.vip" class="badge">VIP</span>
     </p>
     <p class="hint">
-      Agents talk to this page at <code>/__mcp-devtools/__mcp</code>. Config page:
-      <a href="/__mcp-devtools/" target="_blank">/__mcp-devtools/</a>
+      Agents talk to this page at <code>/__medula/__mcp</code>. Config page:
+      <a href="/__medula/" target="_blank">/__medula/</a>
     </p>
 
     <h2>Cart · total {{ cart.total.toFixed(2) }}</h2>

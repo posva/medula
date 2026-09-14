@@ -21,7 +21,7 @@ pnpm play:svelte    # http://localhost:5175
 Open the page, then from another terminal:
 
 ```bash
-MCP=http://localhost:5175/__mcp-devtools/__mcp
+MCP=http://localhost:5175/__medula/__mcp
 rpc() { curl -s -X POST $MCP -H 'Origin: http://localhost:5175' -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' -d "$1"; echo; }
 
 rpc '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
@@ -33,7 +33,7 @@ rpc '{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"mcp-devtool
 ```
 
 The page updates live and `greeting` / `remaining` follow. The config page is at
-<http://localhost:5175/__mcp-devtools/>. Tools exist only while a page is open in a browser.
+<http://localhost:5175/__medula/>. Tools exist only while a page is open in a browser.
 
 Dev builds only: `vite build` is untouched and `compilerOptions.dev = false` disables the
 instrumentation (the compiler stops emitting the `tag`/`push` metadata the hook relies on).

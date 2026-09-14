@@ -5,7 +5,7 @@ import pkg from '../package.json' with { type: 'json' }
 import { MCP_DEVTOOLS_BASE, MCP_DEVTOOLS_ID } from './shared'
 
 export interface McpDevtoolsOptions {
-  /** Mount base inside the host dev server. @default '/__mcp-devtools/' */
+  /** Mount base inside the host dev server. @default '/__medula/' */
   base?: string
 }
 

@@ -11,8 +11,8 @@ pnpm play:next      # http://localhost:3000
 ```
 
 - `next.config.ts`: `withMcpDevtools({...})`
-- `app/%5F_mcp-devtools/[[...path]]/route.ts`: `createMcpDevtoolsHandler().fetch` as `GET`/`POST`/`DELETE`
+- `app/%5F_medula/[[...path]]/route.ts`: `createMcpDevtoolsHandler().fetch` as `GET`/`POST`/`DELETE`
 - `app/layout.tsx`: `<head><McpDevtools /></head>`
 - `app/profile.tsx`: `Profile` (`useState`), `Greeting` (props), `Clock` (class component)
 
-MCP endpoint: `http://localhost:3000/__mcp-devtools/__mcp`. Config page: `http://localhost:3000/__mcp-devtools/`.
+MCP endpoint: `http://localhost:3000/__medula/__mcp`. Config page: `http://localhost:3000/__medula/`.

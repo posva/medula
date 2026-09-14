@@ -5,8 +5,7 @@ export default function Page() {
     <main>
       <h1>medula Next playground</h1>
       <p>
-        No devtools code in this app. Open <a href="/__mcp-devtools/">/__mcp-devtools/</a> for the
-        MCP config.
+        No devtools code in this app. Open <a href="/__medula/">/__medula/</a> for the MCP config.
       </p>
       <Profile />
       <Greeting name="world" />

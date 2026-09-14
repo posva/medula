@@ -19,8 +19,8 @@ const style = computed(() => ({ fontSize: `${settings.fontSize}px` }))
         <code>{{ settings.fontSize }}px</code>
       </p>
       <p class="hint">
-        Agents talk to this page at <code>/__mcp-devtools/__mcp</code>. Config page:
-        <a href="/__mcp-devtools/" target="_blank">/__mcp-devtools/</a>
+        Agents talk to this page at <code>/__medula/__mcp</code>. Config page:
+        <a href="/__medula/" target="_blank">/__medula/</a>
       </p>
     </header>
     <TodoList />

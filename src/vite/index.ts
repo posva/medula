@@ -11,7 +11,7 @@ export interface McpDevtoolsVitePluginOptions extends Pick<
   InitDevframeOptions,
   'auth' | 'mcp' | 'host' | 'allowedOrigins'
 > {
-  /** Mount base inside the dev server. @default '/__mcp-devtools/' */
+  /** Mount base inside the dev server. @default '/__medula/' */
   base?: string
   /** Pin a side-car WebSocket port instead of sharing Vite's server. */
   port?: number
@@ -26,7 +26,7 @@ export interface McpDevtoolsVitePluginOptions extends Pick<
 
 /**
  * Vite plugin: serves the config page, `connect.js`, the RPC/WebSocket
- * bridge and the MCP route at `<base>` (default `/__mcp-devtools/`) and
+ * bridge and the MCP route at `<base>` (default `/__medula/`) and
  * injects the hook bootstrap + page script in dev. No app code needed: Vue
  * apps, Pinia stores and React components are discovered like the official
  * devtools do.

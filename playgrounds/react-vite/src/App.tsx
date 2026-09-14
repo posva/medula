@@ -117,8 +117,7 @@ export function App() {
     <main>
       <h1>medula React playground</h1>
       <p>
-        No devtools code in this app. Open <a href="/__mcp-devtools/">/__mcp-devtools/</a> for the
-        MCP config.
+        No devtools code in this app. Open <a href="/__medula/">/__medula/</a> for the MCP config.
       </p>
       <Counter />
       <Todos />

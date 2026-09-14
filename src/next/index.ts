@@ -108,12 +108,12 @@ async function loadHandler(options: McpDevtoolsNextHandlerOptions): Promise<Load
 }
 
 /**
- * Route handler for `app/%5F_mcp-devtools/[[...path]]/route.ts` (Next
- * reserves `_`-prefixed folders, so `__mcp-devtools` is URL-encoded). Serves
+ * Route handler for `app/%5F_medula/[[...path]]/route.ts` (Next
+ * reserves `_`-prefixed folders, so `__medula` is URL-encoded). Serves
  * the config page and `connect.js`, runs the RPC side-car and the MCP route.
  * Memoized on `globalThis`, so Next dev reloads reuse the same side-car.
  *
- * Add `<script type="module" src="/__mcp-devtools/connect.js" />` to the
+ * Add `<script type="module" src="/__medula/connect.js" />` to the
  * root layout in development so pages connect.
  *
  * @example

@@ -72,22 +72,24 @@ function runAgent(prompt) {
   // a nested Claude Code refuses to start while CLAUDECODE is set
   const env = { ...process.env, CLAUDECODE: undefined }
   if (agent === 'codex') {
-    const text = execFileSync(
+    // approvals go through Codex's automatic reviewer; the sandbox stays on
+    const raw = execFileSync(
       'codex',
-      [
-        'exec',
-        '--skip-git-repo-check',
-        '-C',
-        root,
-        '-s',
-        'read-only',
-        '-c',
-        'approval_policy="never"',
-        prompt,
-      ],
-      { cwd: root, env, encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] },
+      ['exec', '--skip-git-repo-check', '-C', root, '--approve-for-me', '--json', prompt],
+      { cwd: root, env, encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'], maxBuffer: 64e6 },
     )
-    return { text, toolCalls: [] }
+    const items = raw
+      .trim()
+      .split('\n')
+      .filter((line) => line.startsWith('{'))
+      .map((line) => JSON.parse(line))
+      .map((event) => event.item)
+      .filter(Boolean)
+    const toolCalls = items
+      .filter((item) => item.type === 'mcp_tool_call')
+      .map((item) => `mcp__${item.server}__${item.tool}`)
+    const text = items.filter((item) => item.type === 'agent_message').at(-1)?.text ?? ''
+    return { text, toolCalls }
   }
   const raw = execFileSync(
     'claude',
@@ -168,7 +170,7 @@ async function main() {
   // the page connection can be re-established right after the run
   const after = await waitFor(getCounter, 'state read-back', 30_000)
   console.log('▶ state after:', JSON.stringify(after))
-  const usedMcp = agent !== 'claude' || mcpCalls.length > 0
+  const usedMcp = mcpCalls.length > 0
   const pass = usedMcp && after.count === expected.count && after.label === expected.label
   console.log(pass ? '✔ PASS: the agent changed the page state' : '✘ FAIL: state does not match')
   process.exit(pass ? 0 : 1)

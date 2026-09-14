@@ -21,11 +21,12 @@ const expected = { count: 42, label: 'agent' }
 
 const children = []
 function cleanup() {
-  // pnpm wraps vite: kill the whole process group
   for (const child of children) {
     try {
       process.kill(-child.pid, 'SIGTERM')
-    } catch {}
+    } catch {
+      child.kill()
+    }
   }
   try {
     execFileSync('agent-browser', ['close'], { stdio: 'ignore' })
@@ -136,13 +137,18 @@ function runAgent(prompt) {
 
 async function main() {
   console.log(`▶ starting fixture dev server on ${origin}`)
+  // run vite's bin directly (no pnpm wrapper) in its own process group so
+  // cleanup can kill it reliably
   const vite = spawn(
-    'pnpm',
-    ['exec', 'vite', 'e2e/fixture', '--port', String(port), '--strictPort'],
-    {
-      cwd: root,
-      stdio: 'ignore',
-    },
+    process.execPath,
+    [
+      fileURLToPath(new URL('../node_modules/vite/bin/vite.js', import.meta.url)),
+      'e2e/fixture',
+      '--port',
+      String(port),
+      '--strictPort',
+    ],
+    { cwd: root, stdio: 'ignore', detached: true },
   )
   children.push(vite)
   await waitFor(async () => (await fetch(`${base}__connection.json`)).ok, 'dev server')

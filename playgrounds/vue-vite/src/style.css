@@ -1,0 +1,82 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color-scheme: light dark;
+}
+body {
+  margin: 0;
+}
+main {
+  min-height: 100vh;
+  padding: 2rem;
+  box-sizing: border-box;
+  background: #fafafa;
+  color: #222;
+}
+main.dark {
+  background: #1b1b1f;
+  color: #eee;
+}
+h1 {
+  margin: 0 0 0.25rem;
+}
+.hint {
+  opacity: 0.7;
+  font-size: 0.85em;
+}
+code {
+  background: rgba(127, 127, 127, 0.2);
+  padding: 0 0.3em;
+  border-radius: 3px;
+}
+.todos,
+.settings {
+  max-width: 32rem;
+  margin-top: 1.5rem;
+}
+form {
+  display: flex;
+  gap: 0.5rem;
+}
+form input {
+  flex: 1;
+  padding: 0.5em;
+  font: inherit;
+}
+.filters {
+  display: flex;
+  gap: 0.25rem;
+  margin: 0.75rem 0;
+}
+.filters .active {
+  font-weight: bold;
+  text-decoration: underline;
+}
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+li {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.4em 0;
+  border-bottom: 1px solid rgba(127, 127, 127, 0.3);
+}
+li.done label {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+.remove {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+}
+.settings {
+  display: grid;
+  gap: 0.5rem;
+}
+button {
+  font: inherit;
+  cursor: pointer;
+}

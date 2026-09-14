@@ -24,3 +24,4 @@ export function exposeState<T>(name: string, options: ExposedStateOptions<T>): (
   ensureChannel()
   return register(name, options)
 }
+export { registerAgentTools } from './tools'

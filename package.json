@@ -66,10 +66,13 @@
     "play:vue": "pnpm -C playgrounds/vue-vite dev",
     "play:react": "pnpm -C playgrounds/react-vite dev",
     "play:next": "pnpm -C playgrounds/nextjs dev",
-    "play:nuxt": "pnpm -C playgrounds/nuxt dev"
+    "play:nuxt": "pnpm -C playgrounds/nuxt dev",
+    "e2e:agent": "node e2e/agent.mjs",
+    "e2e:agent:codex": "node e2e/agent.mjs --agent codex"
   },
   "dependencies": {
     "@devframes/next": "file:vendor/devframes-next-0.9.18.tgz",
+    "@modelcontextprotocol/client": "^2.0.0",
     "devframe": "file:vendor/devframe-0.9.18.tgz",
     "zod": "^4.6.4"
   },

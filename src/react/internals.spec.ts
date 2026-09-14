@@ -6,11 +6,16 @@ import { installReactInternals } from './internals'
 
 ;(globalThis as any).IS_REACT_ACT_ENVIRONMENT = true
 
-// the hook must exist before react-dom evaluates
-installReactDevtoolsHook()
-const { createRoot } = await import('react-dom/client')
-
 const REGISTRY_KEY = Symbol.for('devframe:browser-agent-registry')
+
+function reactToolIds(): string[] {
+  const state = (globalThis as any)[REGISTRY_KEY] as { tools: Map<symbol, any> } | undefined
+  return state
+    ? [...state.tools.values()]
+        .map((t) => t.id)
+        .filter((id) => id.startsWith('mcp-devtools:react:'))
+    : []
+}
 
 function tool(name: string): { invoke: (args: Record<string, unknown>) => Promise<any> } {
   const state = (globalThis as any)[REGISTRY_KEY] as { tools: Map<symbol, any> }
@@ -18,6 +23,15 @@ function tool(name: string): { invoke: (args: Record<string, unknown>) => Promis
   if (!found) throw new Error(`missing tool ${name}`)
   return found
 }
+
+// the hook must exist before react-dom evaluates; the tools wait for a renderer
+installReactDevtoolsHook()
+const disposeEarly = installReactInternals()
+const toolsBeforeReact = reactToolIds()
+const { createRoot } = await import('react-dom/client')
+const toolsAfterReact = reactToolIds()
+disposeEarly()
+const toolsAfterDispose = reactToolIds()
 
 function Counter({ label }: { label: string }) {
   const [count, setCount] = useState(0)
@@ -58,6 +72,28 @@ afterEach(() => {
   act(() => root.unmount())
   container.remove()
   dispose()
+})
+
+describe('lazy registration', () => {
+  it('registers the react tools once a renderer injects', () => {
+    expect(toolsBeforeReact).toEqual([])
+    expect(toolsAfterReact.sort()).toEqual([
+      'mcp-devtools:react:get-component',
+      'mcp-devtools:react:list-components',
+      'mcp-devtools:react:set-hook-state',
+      'mcp-devtools:react:set-props',
+    ])
+    // disposed above: gone until installed again
+    expect(toolsAfterDispose).toEqual([])
+    // beforeEach installed again: the recorded renderer is replayed at once
+    expect(reactToolIds()).toHaveLength(4)
+    expect(installReactInternals()).toBe(dispose)
+  })
+
+  it('records renderers for late subscribers', () => {
+    const store = (globalThis as any)[Symbol.for('mcp-devtools:react-hook')]
+    expect(store.renderers.size).toBeGreaterThan(0)
+  })
 })
 
 describe('hook script', () => {

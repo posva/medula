@@ -5,8 +5,9 @@ import { installReactInternals } from './internals'
 
 export { exposeState, toJsonValue } from '../client'
 export type { ExposedStateOptions, JsonValue } from '../client'
-export { REACT_DEVTOOLS_HOOK_SCRIPT, installReactDevtoolsHook } from './hook'
-export { installReactInternals } from './internals'
+export { REACT_DEVTOOLS_HOOK_SCRIPT, REACT_HOOK_STORE_KEY, installReactDevtoolsHook } from './hook'
+export type { ReactHookStore } from './hook'
+export { installReactInternals, onReactRenderer } from './internals'
 export type {
   ComponentDetails,
   ComponentSummary,

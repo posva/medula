@@ -1,5 +1,4 @@
-import { useReducer, useState } from 'react'
-import { useExposeState, useExposedState } from 'mcp-devtools/react'
+import { Component, useReducer, useState } from 'react'
 import { settingsStore, useSettings } from './store'
 
 interface Todo {
@@ -9,10 +8,10 @@ interface Todo {
 }
 
 function Counter() {
-  const [count, setCount] = useExposedState('counter', 0, { description: 'Simple counter' })
+  const [count, setCount] = useState(0)
   return (
     <section>
-      <h2>useExposedState</h2>
+      <h2>useState</h2>
       <p>
         Count: <output>{count}</output>
       </p>
@@ -22,10 +21,7 @@ function Counter() {
   )
 }
 
-type TodoAction =
-  | { type: 'add'; title: string }
-  | { type: 'toggle'; id: number }
-  | { type: 'set'; todos: Todo[] }
+type TodoAction = { type: 'add'; title: string } | { type: 'toggle'; id: number }
 
 function todosReducer(todos: Todo[], action: TodoAction): Todo[] {
   switch (action.type) {
@@ -33,8 +29,6 @@ function todosReducer(todos: Todo[], action: TodoAction): Todo[] {
       return [...todos, { id: Date.now(), title: action.title, done: false }]
     case 'toggle':
       return todos.map((t) => (t.id === action.id ? { ...t, done: !t.done } : t))
-    case 'set':
-      return action.todos
   }
 }
 
@@ -42,12 +36,9 @@ function Todos() {
   const [todos, dispatch] = useReducer(todosReducer, [
     { id: 1, title: 'Try the MCP tools', done: false },
   ])
-  useExposeState('todos', todos, (value) => dispatch({ type: 'set', todos: value }), {
-    description: 'Todo list: { id, title, done }[]',
-  })
   return (
     <section>
-      <h2>useExposeState + useReducer</h2>
+      <h2>useReducer</h2>
       <ul>
         {todos.map((t) => (
           <li key={t.id} className={t.done ? 'done' : ''}>
@@ -73,7 +64,7 @@ function Settings() {
   const settings = useSettings()
   return (
     <section style={{ fontSize: settings.fontSize }}>
-      <h2>exposeStore</h2>
+      <h2>useSyncExternalStore</h2>
       <p>
         Theme: <output>{settings.theme}</output>, font size: <output>{settings.fontSize}</output>
       </p>
@@ -91,12 +82,11 @@ function Settings() {
   )
 }
 
-// internal state, not exposed: reachable through the mcp-devtools_react_* tools
 function Greeting({ name }: { name: string }) {
   const [greeting, setGreeting] = useState('Hello')
   return (
     <section>
-      <h2>internal state (React DevTools tools)</h2>
+      <h2>props</h2>
       <p>
         <output>{greeting}</output>, <output>{name}</output>!
       </p>
@@ -107,17 +97,34 @@ function Greeting({ name }: { name: string }) {
   )
 }
 
+class Clock extends Component<{ label: string }, { ticks: number }> {
+  state = { ticks: 0 }
+  render() {
+    return (
+      <section>
+        <h2>class component</h2>
+        <p>
+          <output>{this.props.label}</output>: <output>{this.state.ticks}</output>
+        </p>
+        <button onClick={() => this.setState({ ticks: this.state.ticks + 1 })}>tick</button>
+      </section>
+    )
+  }
+}
+
 export function App() {
   return (
     <main>
       <h1>mcp-devtools React playground</h1>
       <p>
-        Open <a href="/__mcp-devtools/">/__mcp-devtools/</a> for the MCP config.
+        No devtools code in this app. Open <a href="/__mcp-devtools/">/__mcp-devtools/</a> for the
+        MCP config.
       </p>
       <Counter />
       <Todos />
       <Settings />
       <Greeting name="world" />
+      <Clock label="ticks" />
     </main>
   )
 }

@@ -1,10 +1,12 @@
 import type { InPageChannelProtocol } from 'devframe/in-page-channel'
 import { z } from 'zod'
 import { registerAgentTools } from '../client/tools'
-import { getAtPath, setAtPath } from '../client/path'
+import { setAtPath } from '../client/path'
 import type { StatePath } from '../client/path'
 import { toJsonValue } from '../client/serialize'
 import type { JsonValue } from '../client/serialize'
+import { REACT_HOOK_STORE_KEY } from './hook'
+import type { ReactHookStore } from './hook'
 
 // react-reconciler work tags
 const FunctionComponent = 0
@@ -223,16 +225,44 @@ function details(id: number, fiber: Fiber): ComponentDetails {
   return out
 }
 
+/**
+ * Run `listener` for every injected React renderer, past and future. The
+ * store is shared with the hook shim, which may run before or after this.
+ */
+export function onReactRenderer(listener: (id: number, renderer: unknown) => void): () => void {
+  const g = globalThis as unknown as Record<symbol, ReactHookStore | undefined>
+  const store = (g[REACT_HOOK_STORE_KEY] ??= { renderers: new Map(), listeners: new Set() })
+  store.listeners.add(listener)
+  for (const [id, renderer] of store.renderers) listener(id, renderer)
+  return () => {
+    store.listeners.delete(listener)
+  }
+}
+
 let dispose: (() => void) | undefined
 
 /**
  * Register the `react` agent tools (`mcp-devtools_react_*`): inspect and edit
- * component hooks/props like React DevTools. Idempotent, browser only. Needs
- * the DevTools hook installed before React and a development build of React.
+ * component hooks/props like React DevTools. The tools appear once a React
+ * renderer injects into the DevTools hook (installed before React by the
+ * bootstrap script). Idempotent, browser only.
  */
 export function installReactInternals(): () => void {
   if (dispose || typeof window === 'undefined') return dispose ?? (() => {})
-  const stop = registerAgentTools<McpDevtoolsReactProtocol>('react', {
+  let stopTools: (() => void) | undefined
+  const stopListening = onReactRenderer(() => {
+    stopTools ??= registerTools()
+  })
+  dispose = () => {
+    stopListening()
+    stopTools?.()
+    dispose = undefined
+  }
+  return dispose
+}
+
+function registerTools(): () => void {
+  return registerAgentTools<McpDevtoolsReactProtocol>('react', {
     'list-components': {
       type: 'query',
       jsonSerializable: true,
@@ -282,12 +312,10 @@ export function installReactInternals(): () => void {
         const { fiber, renderer } = requireFiber(id)
         if (fiber.tag === ClassComponent) {
           const instance = fiber.stateNode
-          instance.setState(setAtPath(instance.state, path, value))
-          return {
-            index: hookIndex,
-            kind: 'other',
-            value: toJsonValue(getAtPath(instance.state, path)),
-          }
+          // setState is async: report the state we asked for
+          const next = setAtPath(instance.state, path, value)
+          instance.setState(next)
+          return { index: hookIndex, kind: 'other', value: toJsonValue(next) }
         }
         if (typeof renderer.overrideHookState !== 'function') throw new Error(INTERNALS_MISSING)
         const hook = [...hooksOf(fiber)].find(([index]) => index === hookIndex)
@@ -330,9 +358,4 @@ export function installReactInternals(): () => void {
       },
     },
   })
-  dispose = () => {
-    stop()
-    dispose = undefined
-  }
-  return dispose
 }

@@ -3,6 +3,8 @@ import { exposeRef } from 'mcp-devtools/vue'
 import { useCartStore } from '~/stores/cart'
 
 const cart = useCartStore()
+// not exposed: reachable through mcp-devtools_vue_set-component-state
+const greeting = ref('Hello')
 // shared SSR-friendly state
 const visitor = useState('visitor', () => ({ name: 'Anonymous', vip: false }))
 
@@ -16,7 +18,7 @@ if (import.meta.client) {
   <main :class="{ vip: visitor.vip }">
     <h1>mcp-devtools · Nuxt</h1>
     <p>
-      Hello <strong>{{ visitor.name }}</strong>
+      {{ greeting }} <strong>{{ visitor.name }}</strong>
       <span v-if="visitor.vip" class="badge">VIP</span>
     </p>
     <p class="hint">

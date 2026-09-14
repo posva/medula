@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useTodosStore } from './stores/todos'
 import { settings } from './settings'
 import TodoList from './components/TodoList.vue'
 
 const todos = useTodosStore()
+// not exposed: reachable through mcp-devtools_vue_set-component-state
+const title = ref('mcp-devtools · Vue')
 const style = computed(() => ({ fontSize: `${settings.fontSize}px` }))
 </script>
 
 <template>
   <main :class="settings.theme" :style="style">
     <header>
-      <h1>mcp-devtools · Vue</h1>
+      <h1>{{ title }}</h1>
       <p>
         {{ todos.remaining }} remaining · theme <code>{{ settings.theme }}</code> · font
         <code>{{ settings.fontSize }}px</code>

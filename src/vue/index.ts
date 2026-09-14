@@ -96,3 +96,12 @@ export function exposeStore<S extends StateTree>(
 export const piniaMcpDevtools: PiniaPlugin = ({ store }) => {
   exposeStore(store)
 }
+
+export { mcpDevtoolsVue } from './internal'
+export type {
+  ComponentNode,
+  ComponentSectionValue,
+  ComponentState,
+  ComponentStateSection,
+  McpDevtoolsVueProtocol,
+} from './internal'

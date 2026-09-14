@@ -47,6 +47,8 @@ export function McpDevtools(options: McpDevtoolsVitePluginOptions = {}): Plugin[
           auth: options.auth ?? false,
           // client tools arrive after startup, so 'auto' would never mount
           mcp: options.mcp ?? true,
+          // lets `devframe connect` discover this dev server
+          register: true,
           host: options.host,
           allowedOrigins: options.allowedOrigins,
           ...(options.port != null
@@ -71,6 +73,7 @@ export function McpDevtools(options: McpDevtoolsVitePluginOptions = {}): Plugin[
     },
   ]
   if (options.inject !== false) {
+    const connectUrl = connectScriptUrl(base)
     plugins.push({
       name: 'mcp-devtools:inject',
       apply: (_config, env) => env.command === 'serve' && !env.isSsrBuild,
@@ -79,9 +82,11 @@ export function McpDevtools(options: McpDevtoolsVitePluginOptions = {}): Plugin[
         handler: (_html, ctx) =>
           ctx.server
             ? [
+                // classic inline script: Vite would try to warm up a module
+                // `src` through its own pipeline, but the middleware serves it
                 {
                   tag: 'script',
-                  attrs: { type: 'module', src: connectScriptUrl(base) },
+                  children: `document.head.append(Object.assign(document.createElement('script'),{type:'module',src:${JSON.stringify(connectUrl)}}))`,
                   injectTo: 'body',
                 },
               ]

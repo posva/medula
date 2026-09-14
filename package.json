@@ -70,7 +70,8 @@
     "e2e:agent": "node e2e/agent.mjs",
     "e2e:agent:codex": "node e2e/agent.mjs --agent codex",
     "play:svelte": "pnpm -C playgrounds/svelte-vite dev",
-    "e2e:agent:vue": "node e2e/agent.mjs --scenario vue"
+    "e2e:agent:vue": "node e2e/agent.mjs --scenario vue",
+    "e2e:agent:svelte": "node e2e/agent.mjs --scenario svelte"
   },
   "dependencies": {
     "@devframes/next": "file:vendor/devframes-next-0.9.18.tgz",

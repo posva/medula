@@ -15,7 +15,7 @@ pnpm test:types                              # tsc
 pnpm play:vue | play:react | play:svelte | play:next | play:nuxt   # playgrounds (run pnpm build first)
 pnpm e2e:agent                               # Claude Code changes the fixture state over MCP
 pnpm e2e:agent:codex                         # same with Codex
-pnpm e2e:agent:vue                           # zero-config Vue playground scenario
+pnpm e2e:agent:vue | e2e:agent:svelte        # zero-config playground scenarios
 ```
 
 Playground ports: vue-vite 5173, react-vite 5174, svelte-vite 5175, e2e fixture 5199, nextjs 3000,

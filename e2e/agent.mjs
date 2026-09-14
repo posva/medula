@@ -6,6 +6,7 @@
  *
  *   node e2e/agent.mjs                       # Claude Code, explicit exposeState fixture
  *   node e2e/agent.mjs --scenario vue        # zero-config Vue playground (component + Pinia tools)
+ *   node e2e/agent.mjs --scenario svelte     # zero-config Svelte playground
  *   node e2e/agent.mjs --agent codex
  */
 import { execFileSync, spawn } from 'node:child_process'
@@ -50,10 +51,26 @@ const scenarios = {
     check: (value) =>
       value.title === 'Title set by the agent' && value.todos?.value?.filter === 'done',
   },
+  svelte: {
+    port: 5175,
+    viteRoot: 'playgrounds/svelte-vite',
+    readyTool: 'mcp-devtools_svelte_list-components',
+    read: async () => {
+      const tree = await callTool('mcp-devtools_svelte_list-components', {})
+      const app = flatten(tree).find((node) => node.name === 'App')
+      const state = await callTool('mcp-devtools_svelte_get-component-state', { id: app.id })
+      return { id: app.id, count: state.state.count, city: state.state.user?.address?.city }
+    },
+    prompt:
+      'call mcp-devtools_svelte_list-components, find the "App" component, read it with mcp-devtools_svelte_get-component-state, then use mcp-devtools_svelte_set-component-state to set its "count" state to 42 (empty path) and the "user" state at path ["address","city"] to "Lyon". Tool arguments are wrapped in an "arg0" object.',
+    check: (value) => value.count === 42 && value.city === 'Lyon',
+  },
 }
+const flatten = (nodes) => nodes.flatMap((node) => [node, ...flatten(node.children ?? [])])
 const scenario = scenarios[scenarioName]
-if (!scenario)
-  {throw new Error(`Unknown scenario "${scenarioName}" (${Object.keys(scenarios).join(', ')})`)}
+if (!scenario) {
+  throw new Error(`Unknown scenario "${scenarioName}" (${Object.keys(scenarios).join(', ')})`)
+}
 const port = Number(args[args.indexOf('--port') + 1]) || scenario.port
 const origin = `http://localhost:${port}`
 const base = `${origin}/__mcp-devtools/`

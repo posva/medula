@@ -5,7 +5,7 @@ open, through [MCP](https://modelcontextprotocol.io). Built on [devframe](https:
 
 - **Zero app code.** Add the Vite plugin (or the Nuxt module / Next handler). An injected page
   script reaches framework internals the way the official devtools do: Vue component state,
-  Pinia stores and the router, React hook state and props.
+  Pinia stores and the router, React hook state and props, Svelte 5 `$state`.
 - **The agent is the UI.** No panel to learn: a plain config page at `/__mcp-devtools/` shows how
   to connect Claude Code, Codex, Cursor or any MCP client.
 - Works with Vite, Nuxt and Next.js dev servers.
@@ -107,15 +107,22 @@ Flow: `list-components`, then `get-component`, then `set-hook-state` / `set-prop
 replaces the whole value. Production builds of React expose no internals: the tools answer with a
 clear error.
 
-### Svelte
+### Svelte 5
 
-Svelte 5 cannot be inspected from outside: `$state` compiles to closure-local signals (the dev
-`tag` label only feeds `$inspect.trace`), `component_context` is private to
-`svelte/internal/client`, there are no `SvelteRegisterComponent`-style events, and `__svelte_meta`
-on DOM nodes only carries source locations. The Svelte 4 approach of the official devtools
-(`$capture_state()` / `$inject_state()`) has no Svelte 5 equivalent
-([sveltejs/svelte-devtools#193](https://github.com/sveltejs/svelte-devtools/issues/193)). Expose
-what agents need explicitly (below); see `playgrounds/svelte-vite`.
+With `McpDevtools()` in `vite.config.ts`, agents inspect and edit component state of any Svelte 5
+dev build. The plugin serves an instrumented wrapper in place of `svelte/internal/client`, the
+module every compiled component imports, and records components and their labelled
+`$state`/`$derived` signals, like a devtools would.
+
+| Tool                                      | What it does                                                                                                                                                                                                                                            |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp-devtools_svelte_list-components`     | Tree of mounted components: `id`, `name`, `file`, `state` labels (writable), `derived` labels (read-only), prop names. Module-level `$state` (`.svelte.ts`) appears under the pseudo component `module`.                                                |
+| `mcp-devtools_svelte_get-component-state` | `{ props, state, derived }` snapshot of one component.                                                                                                                                                                                                  |
+| `mcp-devtools_svelte_set-component-state` | `{ id, label, path, value }`: writes a `$state` variable. Empty `path` replaces the value (an object `$state` the component never reassigns is replaced in place); nested paths mutate through the reactive proxy. `derived` and `props` are read-only. |
+
+Dev builds only (`vite build` and `compilerOptions.dev = false` are untouched). Components
+pre-bundled from `node_modules` are not instrumented. Props show what the parent passed, not
+`$props()` fallbacks.
 
 ### Explicit exposure (escape hatch)
 
@@ -133,7 +140,8 @@ exposeState('cart', {
 ```
 
 Thin helpers exist for Vue (`exposeRef`, `exposeReactive`, `exposeStore`), React
-(`useExposedState`, `useExposeState`, `exposeStore`) and Svelte (`exposeStore`, `exposeRune`).
+(`useExposedState`, `useExposeState`, `exposeStore`) and Svelte (`exposeStore`, `exposeRune`);
+none of them is needed for Vue, React or Svelte apps.
 Every helper returns a dispose function and needs JSON-friendly values.
 
 ## Connect your agent
@@ -163,7 +171,8 @@ then `/__mcp-devtools/` on the same origin.
 
 `pnpm e2e:agent` starts a fixture app, opens it in a browser and asks Claude Code (or Codex with
 `pnpm e2e:agent:codex`) to change its state through the `devframe connect` MCP server;
-`pnpm e2e:agent:vue` does the same against the zero-config Vue playground (component + Pinia tools).
+`pnpm e2e:agent:vue` and `pnpm e2e:agent:svelte` do the same against the zero-config Vue and
+Svelte playgrounds (component tools).
 
 ## Development
 

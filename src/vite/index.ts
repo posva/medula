@@ -3,6 +3,7 @@ import { initDevframe } from 'devframe/initiate'
 import type { DevframeInstance, InitDevframeOptions } from 'devframe/initiate'
 import type { Plugin } from 'vite'
 import { createMcpDevtools } from '../devframe'
+import { REACT_DEVTOOLS_HOOK_SCRIPT } from '../react/hook'
 import { MCP_DEVTOOLS_BASE, connectScriptUrl } from '../shared'
 
 export interface McpDevtoolsVitePluginOptions extends Pick<
@@ -20,6 +21,13 @@ export interface McpDevtoolsVitePluginOptions extends Pick<
    * @default true
    */
   inject?: boolean
+  /**
+   * Inline the React DevTools hook shim at the top of `<head>` so the
+   * `mcp-devtools_react_*` component tools work (React registers its
+   * internals only with a hook that exists before it loads).
+   * @default false
+   */
+  react?: boolean
 }
 
 /**
@@ -72,6 +80,19 @@ export function McpDevtools(options: McpDevtoolsVitePluginOptions = {}): Plugin[
       },
     },
   ]
+  if (options.react) {
+    plugins.push({
+      name: 'mcp-devtools:react-hook',
+      apply: (_config, env) => env.command === 'serve' && !env.isSsrBuild,
+      transformIndexHtml: {
+        order: 'pre',
+        handler: (_html, ctx) =>
+          ctx.server
+            ? [{ tag: 'script', children: REACT_DEVTOOLS_HOOK_SCRIPT, injectTo: 'head-prepend' }]
+            : [],
+      },
+    })
+  }
   if (options.inject !== false) {
     const connectUrl = connectScriptUrl(base)
     plugins.push({

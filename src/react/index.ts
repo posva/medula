@@ -1,9 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { exposeState } from '../client'
+import { installReactInternals } from './internals'
 
 export { exposeState, toJsonValue } from '../client'
 export type { ExposedStateOptions, JsonValue } from '../client'
+export { REACT_DEVTOOLS_HOOK_SCRIPT, installReactDevtoolsHook } from './hook'
+export { installReactInternals } from './internals'
+export type {
+  ComponentDetails,
+  ComponentSummary,
+  HookValue,
+  McpDevtoolsReactProtocol,
+} from './internals'
+
+// component inspection tools ride along with the state helpers
+installReactInternals()
 
 export interface ExposeStateOptions {
   /** Tells the agent what this state is and how to use it. */

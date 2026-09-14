@@ -3,9 +3,16 @@ import type {
   DevframeNextConfig,
   DevframeNextHandler,
 } from '@devframes/next/single'
+import { REACT_DEVTOOLS_HOOK_SCRIPT } from '../react/hook'
 import { MCP_DEVTOOLS_BASE, MCP_DEVTOOLS_ID, connectScriptUrl } from '../shared'
 
 export { MCP_DEVTOOLS_BASE, connectScriptUrl }
+/**
+ * Inline this in `<head>` of the root layout (development only) so the
+ * `mcp-devtools_react_*` component tools work:
+ * `<script dangerouslySetInnerHTML={{ __html: reactDevtoolsHookScript }} />`
+ */
+export const reactDevtoolsHookScript: string = REACT_DEVTOOLS_HOOK_SCRIPT
 export type { DevframeNextConfig as McpDevtoolsNextConfig }
 
 export type McpDevtoolsNextHandlerOptions = Omit<CreateDevframeNextHandlerOptions, 'flags'>

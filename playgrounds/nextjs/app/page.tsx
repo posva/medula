@@ -1,4 +1,4 @@
-import { Profile } from './profile'
+import { Greeting, Profile } from './profile'
 
 export default function Page() {
   return (
@@ -8,6 +8,7 @@ export default function Page() {
         Open <a href="/__mcp-devtools/">/__mcp-devtools/</a> for the MCP config.
       </p>
       <Profile />
+      <Greeting name="world" />
     </main>
   )
 }

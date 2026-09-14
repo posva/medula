@@ -1,4 +1,4 @@
-import { useReducer } from 'react'
+import { useReducer, useState } from 'react'
 import { useExposeState, useExposedState } from 'mcp-devtools/react'
 import { settingsStore, useSettings } from './store'
 
@@ -91,6 +91,22 @@ function Settings() {
   )
 }
 
+// internal state, not exposed: reachable through the mcp-devtools_react_* tools
+function Greeting({ name }: { name: string }) {
+  const [greeting, setGreeting] = useState('Hello')
+  return (
+    <section>
+      <h2>internal state (React DevTools tools)</h2>
+      <p>
+        <output>{greeting}</output>, <output>{name}</output>!
+      </p>
+      <button onClick={() => setGreeting(greeting === 'Hello' ? 'Hi' : 'Hello')}>
+        toggle greeting
+      </button>
+    </section>
+  )
+}
+
 export function App() {
   return (
     <main>
@@ -101,6 +117,7 @@ export function App() {
       <Counter />
       <Todos />
       <Settings />
+      <Greeting name="world" />
     </main>
   )
 }

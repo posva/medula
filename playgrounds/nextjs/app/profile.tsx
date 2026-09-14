@@ -1,4 +1,5 @@
 'use client'
+import { useState } from 'react'
 import { useExposedState } from 'mcp-devtools/react'
 
 interface Profile {
@@ -25,6 +26,22 @@ export function Profile() {
         onClick={() => setProfile((p) => ({ ...p, tags: [...p.tags, `tag${p.tags.length + 1}`] }))}
       >
         add tag
+      </button>
+    </section>
+  )
+}
+
+// internal state, not exposed: reachable through the mcp-devtools_react_* tools
+export function Greeting({ name }: { name: string }) {
+  const [greeting, setGreeting] = useState('Hello')
+  return (
+    <section>
+      <h2>internal state (React DevTools tools)</h2>
+      <p>
+        <output>{greeting}</output>, <output>{name}</output>!
+      </p>
+      <button onClick={() => setGreeting(greeting === 'Hello' ? 'Hi' : 'Hello')}>
+        toggle greeting
       </button>
     </section>
   )

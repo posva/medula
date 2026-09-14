@@ -115,12 +115,6 @@ importers:
 
   .:
     dependencies:
-      '@devframes/hub-ui':
-        specifier: file:vendor/devframes-hub-ui-0.9.19.tgz
-        version: file:vendor/devframes-hub-ui-0.9.19.tgz(@devframes/hub@file:vendor/devframes-hub-0.9.19.tgz(crossws@0.4.12(srvx@1.0.4))(devframe@file:vendor/devframe-0.9.19.tgz(@modelcontextprotocol/client@2.0.0)(cac@7.0.0)(srvx@1.0.4)))(devframe@file:vendor/devframe-0.9.19.tgz(@modelcontextprotocol/client@2.0.0)(cac@7.0.0)(srvx@1.0.4))
-      '@devframes/next':
-        specifier: file:vendor/devframes-next-0.9.19.tgz
-        version: file:vendor/devframes-next-0.9.19.tgz(@devframes/hub-ui@file:vendor/devframes-hub-ui-0.9.19.tgz(@devframes/hub@file:vendor/devframes-hub-0.9.19.tgz(crossws@0.4.12(srvx@1.0.4))(devframe@file:vendor/devframe-0.9.19.tgz(@modelcontextprotocol/client@2.0.0)(cac@7.0.0)(srvx@1.0.4)))(devframe@file:vendor/devframe-0.9.19.tgz(@modelcontextprotocol/client@2.0.0)(cac@7.0.0)(srvx@1.0.4)))(@devframes/hub@file:vendor/devframes-hub-0.9.19.tgz(crossws@0.4.12(srvx@1.0.4))(devframe@file:vendor/devframe-0.9.19.tgz(@modelcontextprotocol/client@2.0.0)(cac@7.0.0)(srvx@1.0.4)))(crossws@0.4.12(srvx@1.0.4))(devframe@file:vendor/devframe-0.9.19.tgz(@modelcontextprotocol/client@2.0.0)(cac@7.0.0)(srvx@1.0.4))(next@16.3.5(@babel/core@7.29.7(supports-color@10.2.2))(@types/node@26.4.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)
       '@modelcontextprotocol/client':
         specifier: ^2.0.0
         version: 2.0.0
@@ -134,6 +128,9 @@ importers:
         specifier: ^4.6.4
         version: 4.6.4
     devDependencies:
+      '@devframes/next':
+        specifier: file:vendor/devframes-next-0.9.19.tgz
+        version: file:vendor/devframes-next-0.9.19.tgz(@devframes/hub-ui@file:vendor/devframes-hub-ui-0.9.19.tgz(@devframes/hub@file:vendor/devframes-hub-0.9.19.tgz(crossws@0.4.12(srvx@1.0.4))(devframe@file:vendor/devframe-0.9.19.tgz(@modelcontextprotocol/client@2.0.0)(cac@7.0.0)(srvx@1.0.4)))(devframe@file:vendor/devframe-0.9.19.tgz(@modelcontextprotocol/client@2.0.0)(cac@7.0.0)(srvx@1.0.4)))(@devframes/hub@file:vendor/devframes-hub-0.9.19.tgz(crossws@0.4.12(srvx@1.0.4))(devframe@file:vendor/devframe-0.9.19.tgz(@modelcontextprotocol/client@2.0.0)(cac@7.0.0)(srvx@1.0.4)))(crossws@0.4.12(srvx@1.0.4))(devframe@file:vendor/devframe-0.9.19.tgz(@modelcontextprotocol/client@2.0.0)(cac@7.0.0)(srvx@1.0.4))(next@16.3.5(@babel/core@7.29.7(supports-color@10.2.2))(@types/node@26.4.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)
       '@nuxt/kit':
         specifier: ^4.5.2
         version: 4.5.2(magic-string@1.2.3)(magicast@0.5.4)(rolldown@1.2.7)(unplugin@3.3.0(esbuild@0.28.2)(rolldown@1.2.7)(rollup@4.63.2)(vite@8.3.0))
@@ -227,6 +224,9 @@ importers:
 
   playgrounds/nextjs:
     dependencies:
+      '@devframes/next':
+        specifier: file:../../vendor/devframes-next-0.9.19.tgz
+        version: file:vendor/devframes-next-0.9.19.tgz(@devframes/hub-ui@file:vendor/devframes-hub-ui-0.9.19.tgz(@devframes/hub@file:vendor/devframes-hub-0.9.19.tgz(crossws@0.4.12(srvx@1.0.4))(devframe@file:vendor/devframe-0.9.19.tgz(@modelcontextprotocol/client@2.0.0)(cac@7.0.0)(srvx@1.0.4)))(devframe@file:vendor/devframe-0.9.19.tgz(@modelcontextprotocol/client@2.0.0)(cac@7.0.0)(srvx@1.0.4)))(@devframes/hub@file:vendor/devframes-hub-0.9.19.tgz(crossws@0.4.12(srvx@1.0.4))(devframe@file:vendor/devframe-0.9.19.tgz(@modelcontextprotocol/client@2.0.0)(cac@7.0.0)(srvx@1.0.4)))(crossws@0.4.12(srvx@1.0.4))(devframe@file:vendor/devframe-0.9.19.tgz(@modelcontextprotocol/client@2.0.0)(cac@7.0.0)(srvx@1.0.4))(next@16.3.5(@babel/core@7.29.7(supports-color@10.2.2))(@types/node@26.4.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)
       medula:
         specifier: link:../..
         version: link:../..

@@ -35,7 +35,6 @@ export default defineConfig({
       'react',
       'svelte',
       'devframe',
-      '@devframes/next',
       '@vitejs/devtools-kit',
       'zod',
       '@nuxt/kit',

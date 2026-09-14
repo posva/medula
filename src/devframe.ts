@@ -36,6 +36,25 @@ export function medulaDockClientScript(base: string = MEDULA_BASE): {
 }
 
 /**
+ * Mount entry for a devframes hub (`@devframes/next/hub`, `@devframes/vite/hub`):
+ * medula as a dock with its page script. A hub serves every dock at
+ * `<hubBase><id>/`, so the script URL follows the hub base.
+ *
+ * @example
+ * nextDevframeHub({ devframes: [medulaHubEntry()] })
+ */
+export function medulaHubEntry(hubBase: string = '/__devframes/'): {
+  devframe: DevframeDefinition
+  dock: { clientScript: { importFrom: string; eager: boolean } }
+} {
+  const base = hubBase.endsWith('/') ? hubBase : `${hubBase}/`
+  return {
+    devframe: createMedula(),
+    dock: { clientScript: medulaDockClientScript(`${base}${MEDULA_ID}/`) },
+  }
+}
+
+/**
  * The headless devframe: no UI besides a plain config page, meant to run as a
  * hub dock (Vite DevTools, Nuxt DevTools, a Next hub). The state tools come
  * from the page itself (see `medula/client`) and appear as MCP tools of the

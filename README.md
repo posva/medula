@@ -3,10 +3,10 @@
 Headless devtools for web apps: let a coding agent read and change the state of the page you have
 open, through [MCP](https://modelcontextprotocol.io). Built on [devframe](https://devfra.me).
 
-- **Zero app code.** Add the Vite plugin (or the Nuxt module / Next handler). An injected page
+- **Zero app code.** Add the Vite plugin (or the Nuxt module, or a `@devframes/next` hub with `medulaHubEntry()`). An injected page
   script reaches framework internals the way the official devtools do: Vue component state,
   Pinia stores and the router, React hook state and props, Svelte 5 `$state`.
-- **The agent is the UI.** No panel to learn: a plain config page at `/__medula/` shows how
+- **The agent is the UI.** No panel to learn: a plain page in the medula dock shows how
   to connect Claude Code, Codex, Cursor or any MCP client.
 - Works with Vite, Nuxt and Next.js dev servers.
 
@@ -43,25 +43,31 @@ export default defineNuxtConfig({
 
 ### Next.js (App Router)
 
-Install `@devframes/hub-ui` too (the hub UI that loads the page script).
+A plain [devframes hub](https://devfra.me) with medula as its dock, the same setup as the
+`hub-next` example of devframe. Install `@devframes/next` and `@devframes/hub-ui`.
 
 ```ts
 // next.config.ts
-import { withMedula } from 'medula/next'
-export default withMedula({/* your config */})
+import { withDevframe } from '@devframes/next/single'
+export default withDevframe({/* your config */})
 ```
 
 ```ts
 // app/%5F_devframes/[[...path]]/route.ts  (Next reserves `_` folders: URL-encoded name)
-import { createMedulaHandler } from 'medula/next'
+import { nextDevframeHub } from '@devframes/next/hub'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-const handler = createMedulaHandler()
-export const GET = handler.fetch
-export const POST = handler.fetch
-export const DELETE = handler.fetch
+// bundler-ignored import: Node reads medula's published `dist` at request time
+const hub = nextDevframeHub({
+  devframes: [() => import(/* webpackIgnore: true */ 'medula').then((m) => m.medulaHubEntry())],
+  auth: false, // single-user localhost
+  register: true, // lets `devframe connect` discover this dev server
+})
+
+const handler = (request: Request) => hub.handler(request)
+export { handler as DELETE, handler as GET, handler as POST }
 ```
 
 ```tsx
@@ -72,17 +78,20 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        <Medula /> {/* development only: hook bootstrap + hub UI */}
+        <Medula /> {/* development only: hook shims, before React loads */}
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <script type="module" src="/__devframes/embedded.js" /> {/* the hub UI */}
+      </body>
     </html>
   )
 }
 ```
 
 MCP endpoint: `http://localhost:3000/__devframes/__mcp`. The RPC socket runs on a side-car port
-advertised by `/__devframes/__connection.json`; the instance registers itself for
-`devframe connect` on the first request, so open a page once.
+advertised by `/__devframes/__connection.json`; `register: true` publishes the hub for
+`devframe connect`.
 
 ## What agents can do
 

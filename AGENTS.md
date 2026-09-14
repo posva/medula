@@ -43,7 +43,7 @@ medula as a hub dock; the hub client runtime imports the page script (the dock `
 | `src/react/internals.ts` | browser | Fiber walker + `overrideHookState`/`overrideProps` through the hook shim (mirrors React DevTools)                                                                 |
 | `medula`                 | node    | `createMedula()` devframe definition (+ `help` tool and resource), `medulaDockClientScript()`                                                                     |
 | `medula/vite`            | node    | `medula()` Vite plugins: `createPluginFromDevframe` (Vite DevTools dock at `/__medula/`) + bootstrap injection + Svelte instrumentation. Needs Vite DevTools.     |
-| `medula/next`            | node    | `createMedulaHandler()`: `nextDevframeHub` (`@devframes/next/hub`) with medula as dock at `/__devframes/medula/`, `withMedula()`, `<Medula />` head component     |
+| `medula/next`            | node    | `<Medula />` head component (hook shims only). The hub is the app's: `nextDevframeHub({ devframes: [medulaHubEntry()] })` as in devframe's `hub-next` example     |
 | `medula/nuxt`            | node    | Nuxt module: adds the Vite plugins (Nuxt DevTools 4 hosts Vite DevTools docks), inlines the bootstrap through `app.head`                                          |
 | `medula/client`          | browser | Manual escape hatch: `exposeState(name, { get, set })` for state no devtools can reach                                                                            |
 | `medula/vue              | react   | svelte`                                                                                                                                                           | browser | Manual helpers over `exposeState`; not needed for Vue/React apps |
@@ -99,7 +99,7 @@ the cached copy otherwise). Replace with npm versions once the PR is released.
 `.mcp.json` and `.codex/config.toml` register `npx devframe connect` (same shape as pinia-colada):
 one stdio MCP server that discovers running dev servers through `~/.devframe/instances/` (Vite
 DevTools does not publish itself there, so `medula/vite` registers its hub when the dev server
-listens; the Next handler registers on the first loopback request). Direct URL:
+listens; the Next hub passes `register: true`). Direct URL:
 `<origin>/__devtools/__mcp` (Vite/Nuxt DevTools) or `<origin>/__devframes/__mcp` (Next).
 
 ## Verifying a change by hand
@@ -131,9 +131,9 @@ such as `overrideHookState`; must run before React loads).
 
 - `isolatedDeclarations` is on (oxc dts): every export needs an explicit type, default exports
   must be identifiers.
-- Auth and MCP belong to the hub. Vite/Nuxt DevTools: the app config decides (`clientAuth`). The
-  Next hub medula creates has auth off and `mcp: true` (client tools arrive after startup, so
-  `'auto'` would never mount).
+- Auth and MCP belong to the hub. Vite/Nuxt DevTools: the app config decides (`clientAuth`). In
+  Next the app owns the hub (`@devframes/next/hub`); medula only contributes `medulaHubEntry()`
+  and the `<Medula />` head shims, so keep `medula/next` free of hub code.
 - The dock page cannot compute the MCP URL alone: the hub meta served under the dock base carries
   `mcp.path` relative to the hub base. It reads the parent window's connection instead, so the URL
   only shows inside the dock.

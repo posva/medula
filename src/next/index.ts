@@ -33,25 +33,63 @@ export function withMcpDevtools<T extends DevframeNextConfig>(nextConfig: T = {}
 // non-literal, otherwise tsdown resolves the self-import to a relative chunk
 const selfPackage: string = MCP_DEVTOOLS_ID
 
+interface LoadedHandler {
+  handler: DevframeNextHandler
+  register: (request: Request) => void
+}
+
+const REGISTRATIONS = Symbol.for('mcp-devtools:next-registrations')
+const registrations: Map<string, { unregister: () => void }> = ((globalThis as any)[
+  REGISTRATIONS
+] ??= new Map())
+
 // Bundler-ignored so Node loads the published `dist` at request time: a
 // bundled copy breaks the `import.meta.url` lookup of `dist-client`.
-async function loadHandler(options: McpDevtoolsNextHandlerOptions): Promise<DevframeNextHandler> {
-  const [{ createMcpDevtools }, { createDevframeNextHandler }] = await Promise.all([
-    import(/* webpackIgnore: true */ /* turbopackIgnore: true */ selfPackage) as Promise<
-      typeof import('mcp-devtools')
-    >,
-    import(
-      /* webpackIgnore: true */ /* turbopackIgnore: true */ '@devframes/next/single'
-    ) as Promise<typeof import('@devframes/next/single')>,
-  ])
+async function loadHandler(options: McpDevtoolsNextHandlerOptions): Promise<LoadedHandler> {
+  const [{ createMcpDevtools }, { createDevframeNextHandler }, { registerDevframeInstance }] =
+    await Promise.all([
+      import(/* webpackIgnore: true */ /* turbopackIgnore: true */ selfPackage) as Promise<
+        typeof import('mcp-devtools')
+      >,
+      import(
+        /* webpackIgnore: true */ /* turbopackIgnore: true */ '@devframes/next/single'
+      ) as Promise<typeof import('@devframes/next/single')>,
+      import(/* webpackIgnore: true */ /* turbopackIgnore: true */ 'devframe/internal') as Promise<
+        typeof import('devframe/internal')
+      >,
+    ])
   const base = options.base ?? MCP_DEVTOOLS_BASE
-  return createDevframeNextHandler(createMcpDevtools({ base }), {
+  const mcp = options.mcp ?? true
+  const handler = createDevframeNextHandler(createMcpDevtools({ base }), {
     ...options,
     base,
     auth: options.auth ?? false,
     // client tools arrive after startup, so 'auto' would never mount
-    mcp: options.mcp ?? true,
+    mcp,
   })
+  // The side-car does not know the Next origin, so publish the instance to
+  // `~/.devframe/instances/` (what `devframe connect` reads) from the first
+  // request. Loopback only: a forwarded Host must not end up in the registry.
+  const register = (request: Request): void => {
+    if (registrations.has(base)) return
+    const url = new URL(request.url)
+    if (!['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)) return
+    const port = Number(url.port) || (url.protocol === 'https:' ? 443 : 80)
+    const registration = registerDevframeInstance({
+      pid: process.pid,
+      port,
+      origin: url.origin,
+      basePath: base,
+      id: MCP_DEVTOOLS_ID,
+      name: 'MCP DevTools',
+      rootDir: process.cwd(),
+      mcp: mcp === false ? null : { path: `${base}__mcp` },
+      startedAt: Date.now(),
+    })
+    registrations.set(base, registration)
+    process.once('exit', () => registration.unregister())
+  }
+  return { handler, register }
 }
 
 /**
@@ -74,10 +112,20 @@ async function loadHandler(options: McpDevtoolsNextHandlerOptions): Promise<Devf
 export function createMcpDevtoolsHandler(
   options: McpDevtoolsNextHandlerOptions = {},
 ): DevframeNextHandler {
-  const handler = loadHandler(options)
+  const loaded = loadHandler(options)
+  const base = options.base ?? MCP_DEVTOOLS_BASE
   return {
-    fetch: (request) => handler.then((h) => h.fetch(request)),
-    ready: handler.then((h) => h.ready),
-    close: () => handler.then((h) => h.close()),
+    fetch: (request) =>
+      loaded.then(({ handler, register }) => {
+        register(request)
+        return handler.fetch(request)
+      }),
+    ready: loaded.then(({ handler }) => handler.ready),
+    close: () =>
+      loaded.then(({ handler }) => {
+        registrations.get(base)?.unregister()
+        registrations.delete(base)
+        return handler.close()
+      }),
   }
 }

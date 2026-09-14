@@ -60,7 +60,8 @@ export const DELETE = handler.fetch
 ```
 
 The MCP endpoint is `http://localhost:3000/__mcp-devtools/__mcp`; the RPC socket runs on a
-side-car port advertised by `/__mcp-devtools/__connection.json`.
+side-car port advertised by `/__mcp-devtools/__connection.json`. The instance registers itself
+for `devframe connect` on the first request under `/__mcp-devtools/`, so open a page once.
 
 ## Expose state
 

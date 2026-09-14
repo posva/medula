@@ -1,3 +1,19 @@
+# [0.1.0](https://github.com/posva/medula/compare/v0.0.2...v0.1.0) (2026-09-14)
+
+- refactor(next)!: follow the devframe hub-next example ([9094419](https://github.com/posva/medula/commit/9094419ceff6aefdc3b083614ad5c0d82a0c8890))
+- feat!: run as a hub dock instead of a standalone devframe ([582dd64](https://github.com/posva/medula/commit/582dd641bd56fe85095bfe689bc65602ecd9c7fd))
+
+### BREAKING CHANGES
+
+- createMedulaHandler, withMedula and the Next handler
+  options are removed from medula/next; @devframes/next is no longer a
+  dependency of medula.
+- medula/vite requires Vite DevTools and drops the
+  auth, mcp, host, port and inject options. medula/next mounts a hub at
+  /__devframes/ (route folder app/%5F_devframes/) and needs
+  @devframes/hub-ui. The MCP route is the hub's: /__devtools/__mcp or
+  /__devframes/__mcp.
+
 ## 0.0.2 (2026-09-14)
 
 ### Bug Fixes

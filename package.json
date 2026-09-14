@@ -1,0 +1,113 @@
+{
+  "name": "template-lib-ts",
+  "version": "0.0.0",
+  "packageManager": "pnpm@12.3.4",
+  "description": "Modern, ai-ready TypeScript library template",
+  "keywords": [
+    "your keywords here"
+  ],
+  "homepage": "https://github.com/posva/template-lib-ts",
+  "bugs": {
+    "url": "https://github.com/posva/template-lib-ts/issues"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Eduardo San Martin Morote",
+    "email": "posva13@gmail.com"
+  },
+  "repository": "posva/template-lib-ts",
+  "funding": "https://github.com/sponsors/posva",
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "types": "./dist/index.d.mts",
+  "typesVersions": {
+    "*": {
+      "*": [
+        "./dist/*",
+        "./*"
+      ]
+    }
+  },
+  "exports": {
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsdown",
+    "dev": "vitest --ui",
+    "test": "pnpm run build && pnpm run test:cov && pnpm run test:types --force",
+    "test:cov": "vitest run --coverage",
+    "test:types": "tsc --build ./tsconfig.json",
+    "lint": "oxlint ${CI:+--deny-warnings} .",
+    "lint:fix": "oxlint --fix .",
+    "fmt": "oxfmt",
+    "prepare": "simple-git-hooks",
+    "release": "node scripts/release.ts",
+    "prepublishOnly": "pnpm run build",
+    "size": "size-limit"
+  },
+  "devDependencies": {
+    "@posva/prompts": "^2.4.4",
+    "@size-limit/esbuild-why": "^13.0.3",
+    "@size-limit/preset-small-lib": "^13.0.3",
+    "@types/node": "^26.4.0",
+    "@types/semver": "^7.8.0",
+    "@vitejs/plugin-vue": "^6.0.8",
+    "@vitest/coverage-v8": "^5.0.0",
+    "@vitest/ui": "^5.0.0",
+    "@vue/test-utils": "^2.5.0",
+    "conventional-changelog": "^8.1.3",
+    "conventional-changelog-angular": "^9.4.0",
+    "happy-dom": "^20.12.0",
+    "lint-staged": "^17.4.1",
+    "oxfmt": "^0.66.0",
+    "oxlint": "^1.80.0",
+    "oxlint-plugin-posva": "^0.0.2",
+    "semver": "^7.8.5",
+    "simple-git-hooks": "^2.14.0",
+    "size-limit": "^13.0.3",
+    "tsdown": "^0.23.0",
+    "typescript": "~7.0.2",
+    "vitest": "^5.0.0",
+    "vue": "^3.5.42"
+  },
+  "peerDependencies": {
+    "vue": "^3.5.17"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm lint-staged",
+    "commit-msg": "node scripts/verifyCommit.js"
+  },
+  "lint-staged": {
+    "*": [
+      "oxfmt --no-error-on-unmatched-pattern",
+      "oxlint --no-error-on-unmatched-pattern --fix"
+    ]
+  },
+  "size-limit": [
+    {
+      "name": "everything from source",
+      "path": "src/index.ts",
+      "import": "*",
+      "ignore": [
+        "vue"
+      ]
+    },
+    {
+      "name": "everything from dist",
+      "path": "dist/index.mjs",
+      "import": "*",
+      "ignore": [
+        "vue"
+      ]
+    }
+  ]
+}

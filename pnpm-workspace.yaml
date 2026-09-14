@@ -1,0 +1,5 @@
+ignoreWorkspaceRootCheck: true
+strictPeerDependencies: false
+allowBuilds:
+  esbuild: true
+  simple-git-hooks: true

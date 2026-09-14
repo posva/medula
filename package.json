@@ -68,7 +68,8 @@
     "play:next": "pnpm -C playgrounds/nextjs dev",
     "play:nuxt": "pnpm -C playgrounds/nuxt dev",
     "e2e:agent": "node e2e/agent.mjs",
-    "e2e:agent:codex": "node e2e/agent.mjs --agent codex"
+    "e2e:agent:codex": "node e2e/agent.mjs --agent codex",
+    "play:svelte": "pnpm -C playgrounds/svelte-vite dev"
   },
   "dependencies": {
     "@devframes/next": "file:vendor/devframes-next-0.9.18.tgz",

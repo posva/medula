@@ -1,0 +1,19 @@
+{
+  "name": "playground-svelte-vite",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "mcp-devtools": "link:../..",
+    "svelte": "^5.57.0"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^7.3.0",
+    "typescript": "~7.0.2",
+    "vite": "^8.3.0"
+  }
+}

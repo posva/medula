@@ -3,9 +3,12 @@
 Headless devtools for web apps: let a coding agent read and change the state of the page you have
 open, through [MCP](https://modelcontextprotocol.io). Built on [devframe](https://devfra.me).
 
-- Expose any state with `exposeState()`; helpers for Vue, Pinia, React and Svelte.
+- **Zero app code.** Add the Vite plugin (or the Nuxt module / Next handler). An injected page
+  script reaches framework internals the way the official devtools do: Vue component state,
+  Pinia stores and the router, React hook state and props.
+- **The agent is the UI.** No panel to learn: a plain config page at `/__mcp-devtools/` shows how
+  to connect Claude Code, Codex, Cursor or any MCP client.
 - Works with Vite, Nuxt and Next.js dev servers.
-- No UI to learn: a plain config page at `/__mcp-devtools/` shows how to connect your agent.
 
 ## Setup
 

@@ -21,7 +21,12 @@ const expected = { count: 42, label: 'agent' }
 
 const children = []
 function cleanup() {
-  for (const child of children) child.kill()
+  // pnpm wraps vite: kill the whole process group
+  for (const child of children) {
+    try {
+      process.kill(-child.pid, 'SIGTERM')
+    } catch {}
+  }
   try {
     execFileSync('agent-browser', ['close'], { stdio: 'ignore' })
   } catch {}

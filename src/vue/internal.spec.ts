@@ -1,19 +1,23 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeAll, describe, expect, it } from 'vitest'
 import { computed, createApp, defineComponent, h, nextTick, reactive, ref } from 'vue'
-import { createPinia, defineStore, setActivePinia } from 'pinia'
-import { mcpDevtoolsVue } from './index'
+import type { App } from 'vue'
+import { createPinia, defineStore } from 'pinia'
+import { installVueDevtoolsHook } from '../page/vue-hook'
+import { installVueInternals } from './internal'
+import { getExposedState, listExposedStates } from '../client/registry'
 
 // the channel registers agent tools in devframe's global browser-agent registry
 const REGISTRY_KEY = Symbol.for('devframe:browser-agent-registry')
 
 function tool(name: string): { invoke: (args: Record<string, unknown>) => Promise<any> } {
   const state = (globalThis as any)[REGISTRY_KEY] as { tools: Map<symbol, any> }
-  const found = [...state.tools.values()].find((t) => t.id === `mcp-devtools:vue:${name}`)
+  const found = [...state.tools.values()].find((t) => t.id === `mcp-devtools:${name}`)
   if (!found) throw new Error(`missing tool ${name}`)
   return found
 }
 
 const useDemoStore = defineStore('demo', { state: () => ({ n: 1 }) })
+const useLateStore = defineStore('late', { state: () => ({ ok: false }) })
 
 const Child = defineComponent({
   name: 'Child',
@@ -39,16 +43,22 @@ const Root = defineComponent({
   },
 })
 
-describe('mcpDevtoolsVue', () => {
+describe('zero-config Vue internals', () => {
   const cleanups: Array<() => void> = []
   afterEach(() => cleanups.splice(0).forEach((c) => c()))
 
-  function mount() {
+  beforeAll(() => {
+    // vue loaded first: the shim replays its pending hook registration
+    installVueDevtoolsHook(globalThis)
+    installVueInternals()
+  })
+
+  // no `app.use()` of anything from mcp-devtools
+  function mount(setup: (app: App) => void = () => {}) {
     const el = document.createElement('div')
     document.body.append(el)
-    const pinia = createPinia()
-    setActivePinia(pinia)
-    const app = createApp(Root).use(pinia).use(mcpDevtoolsVue)
+    const app = createApp(Root).use(createPinia())
+    setup(app)
     app.mount(el)
     cleanups.push(() => {
       app.unmount()
@@ -59,7 +69,7 @@ describe('mcpDevtoolsVue', () => {
 
   it('lists the component tree of mounted apps', async () => {
     const { app } = mount()
-    const tree = await tool('list-components').invoke({ arg0: {} })
+    const tree = await tool('vue:list-components').invoke({ arg0: {} })
     expect(tree).toEqual([
       {
         id: expect.any(String),
@@ -68,20 +78,20 @@ describe('mcpDevtoolsVue', () => {
       },
     ])
     // stable ids
-    expect(await tool('list-components').invoke({ arg0: {} })).toEqual(tree)
+    expect(await tool('vue:list-components').invoke({ arg0: {} })).toEqual(tree)
     app.unmount()
-    expect(await tool('list-components').invoke({ arg0: {} })).toEqual([])
+    expect(await tool('vue:list-components').invoke({ arg0: {} })).toEqual([])
   })
 
   it('reads props, setupState (refs unwrapped, functions skipped) and data', async () => {
     mount()
-    const [root] = await tool('list-components').invoke({ arg0: {} })
+    const [root] = await tool('vue:list-components').invoke({ arg0: {} })
     const child = root.children[0]
-    expect(await tool('get-component-state').invoke({ arg0: { id: child.id } })).toEqual({
+    expect(await tool('vue:get-component-state').invoke({ arg0: { id: child.id } })).toEqual({
       id: child.id,
       name: 'Child',
       props: { label: 'hi' },
-      // stores are summarized: agents use the Pinia adapter for them
+      // stores are summarized: agents use the pinia:* states for them
       setupState: {
         count: 1,
         settings: { theme: 'light' },
@@ -91,22 +101,22 @@ describe('mcpDevtoolsVue', () => {
       data: {},
       readonly: ['double'],
     })
-    expect(await tool('get-component-state').invoke({ arg0: { id: root.id } })).toMatchObject({
+    expect(await tool('vue:get-component-state').invoke({ arg0: { id: root.id } })).toMatchObject({
       name: 'Root',
       props: {},
       setupState: {},
       data: { title: 'hi' },
     })
-    await expect(tool('get-component-state').invoke({ arg0: { id: 'nope' } })).rejects.toThrow(
+    await expect(tool('vue:get-component-state').invoke({ arg0: { id: 'nope' } })).rejects.toThrow(
       /Unknown component/,
     )
   })
 
   it('writes setupState, data and props and re-renders', async () => {
     const { el } = mount()
-    const [root] = await tool('list-components').invoke({ arg0: {} })
+    const [root] = await tool('vue:list-components').invoke({ arg0: {} })
     const child = root.children[0]
-    const set = (arg0: Record<string, unknown>) => tool('set-component-state').invoke({ arg0 })
+    const set = (arg0: Record<string, unknown>) => tool('vue:set-component-state').invoke({ arg0 })
 
     expect(await set({ id: child.id, section: 'setupState', path: ['count'], value: 5 })).toEqual({
       id: child.id,
@@ -131,5 +141,76 @@ describe('mcpDevtoolsVue', () => {
     await expect(
       set({ id: child.id, section: 'setupState', path: ['missing', 'x'], value: 1 }),
     ).rejects.toThrow(/not found/)
+  })
+
+  it('exposes every Pinia store as pinia:<id>, including late ones', async () => {
+    const { app } = mount()
+    expect(listExposedStates().map((s) => s.name)).toContain('pinia:demo')
+    const demo = getExposedState('pinia:demo')!
+    expect(demo.get()).toEqual({ n: 1 })
+    demo.set({ n: 7 })
+    await nextTick()
+    expect(getExposedState('pinia:demo')!.get()).toEqual({ n: 7 })
+
+    // store created after discovery
+    const late = useLateStore(app.config.globalProperties.$pinia)
+    expect(getExposedState('pinia:late')!.get()).toEqual({ ok: false })
+    getExposedState('pinia:late')!.set({ ok: true })
+    expect(late.ok).toBe(true)
+  })
+
+  it('registers router tools when the app has $router', async () => {
+    // duck-typed router: vue-router is not a dependency of this repo
+    const routes = [
+      { name: 'home', path: '/', meta: {} },
+      { name: 'user', path: '/users/:id', meta: { auth: true } },
+    ]
+    const current = ref({
+      fullPath: '/',
+      path: '/',
+      name: 'home',
+      params: {},
+      query: {},
+      hash: '',
+      meta: {},
+      matched: [routes[0]],
+    })
+    const router = {
+      currentRoute: current,
+      getRoutes: () => routes,
+      push: async (to: any) => {
+        current.value = {
+          fullPath: `/users/${to.params.id}?tab=${to.query.tab}`,
+          path: `/users/${to.params.id}`,
+          name: 'user',
+          params: to.params,
+          query: to.query,
+          hash: '',
+          meta: { auth: true },
+          matched: [routes[1]],
+        }
+      },
+    }
+    mount((app) => {
+      ;(app.config.globalProperties as any).$router = router
+    })
+    expect(await tool('router:get-route').invoke({ arg0: {} })).toEqual({
+      fullPath: '/',
+      path: '/',
+      name: 'home',
+      params: {},
+      query: {},
+      hash: '',
+      meta: {},
+      matched: ['home'],
+    })
+    expect(await tool('router:list-routes').invoke({ arg0: {} })).toEqual([
+      { name: 'home', path: '/', meta: {} },
+      { name: 'user', path: '/users/:id', meta: { auth: true } },
+    ])
+    const after = await tool('router:navigate').invoke({
+      arg0: { to: { name: 'user', params: { id: '3' }, query: { tab: 'x' } } },
+    })
+    expect(after).toMatchObject({ name: 'user', fullPath: '/users/3?tab=x', matched: ['user'] })
   })
 })

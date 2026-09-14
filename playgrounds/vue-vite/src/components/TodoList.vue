@@ -1,13 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { exposeRef } from 'mcp-devtools/vue'
 import { useTodosStore } from '../stores/todos'
 import { settings } from '../settings'
 
 const todos = useTodosStore()
 const draft = ref('')
-// component local state: disposed with the component
-exposeRef('todo-draft', draft, { description: 'Text typed in the "new todo" input' })
 
 function submit() {
   const text = draft.value.trim()

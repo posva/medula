@@ -2,6 +2,7 @@ import { getCurrentScope, onScopeDispose } from 'vue'
 import type { Ref } from 'vue'
 import type { PiniaPlugin, StateTree, Store } from 'pinia'
 import { exposeState } from '../client'
+import { replaceInPlace } from './utils'
 
 export { exposeState, toJsonValue } from '../client'
 export type { ExposedStateOptions, JsonValue } from '../client'
@@ -19,14 +20,6 @@ export interface ExposeStoreOptions extends ExposeOptions {
 function autoDispose(dispose: () => void): () => void {
   if (getCurrentScope()) onScopeDispose(dispose)
   return dispose
-}
-
-/** Mutate `target` so it has the same content as `value`, keeping the reference. */
-function replaceInPlace(target: Record<string, unknown>, value: Record<string, unknown>): void {
-  for (const key of Object.keys(target)) {
-    if (!(key in value)) delete target[key]
-  }
-  Object.assign(target, value)
 }
 
 /**
@@ -97,7 +90,15 @@ export const piniaMcpDevtools: PiniaPlugin = ({ store }) => {
   exposeStore(store)
 }
 
-export { mcpDevtoolsVue } from './internal'
+export { installVueInternals, mcpDevtoolsVue } from './internal'
+export { installPiniaInternals, piniaStateName } from './pinia'
+export { installRouterInternals } from './router'
+export type {
+  McpDevtoolsRouterProtocol,
+  NavigateTarget,
+  RouteInfo,
+  RouteRecordInfo,
+} from './router'
 export type {
   ComponentNode,
   ComponentSectionValue,

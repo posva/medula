@@ -1,17 +1,12 @@
 <script setup lang="ts">
-import { exposeRef } from 'mcp-devtools/vue'
 import { useCartStore } from '~/stores/cart'
 
+// nothing from mcp-devtools here: the module injects the page script
 const cart = useCartStore()
-// not exposed: reachable through mcp-devtools_vue_set-component-state
+// component state: agents reach it through mcp-devtools_vue_set-component-state
 const greeting = ref('Hello')
-// shared SSR-friendly state
+// shared SSR-friendly state, also in setupState
 const visitor = useState('visitor', () => ({ name: 'Anonymous', vip: false }))
-
-// the registry exists in the browser only
-if (import.meta.client) {
-  exposeRef('visitor', visitor, { description: 'Current visitor: name and vip flag' })
-}
 </script>
 
 <template>

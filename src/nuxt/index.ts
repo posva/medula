@@ -28,11 +28,11 @@ const mcpDevtoolsModule: NuxtModule<McpDevtoolsNuxtOptions> =
       // does not apply: add the script to the head instead.
       addVitePlugin(McpDevtools({ ...options, base, inject: false }), { server: false })
       nuxt.options.app.head.script ??= []
-      nuxt.options.app.head.script.push({
-        type: 'module',
-        src: connectScriptUrl(base),
-        tagPosition: 'bodyClose',
-      })
+      nuxt.options.app.head.script.push(
+        // devtools hooks: must run before Vue loads
+        { innerHTML: BOOTSTRAP_SCRIPT, tagPosition: 'head', tagPriority: 'critical' },
+        { type: 'module', src: connectScriptUrl(base), tagPosition: 'bodyClose' },
+      )
     },
   })
 

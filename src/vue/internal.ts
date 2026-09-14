@@ -1,9 +1,11 @@
-import { isReactive, isReadonly, isRef, isVNode } from 'vue'
 import type { App, ComponentInternalInstance, Plugin, VNode } from 'vue'
 import type { InPageChannelProtocol } from 'devframe/in-page-channel'
 import { z } from 'zod'
 import { registerAgentTools, toJsonValue } from '../client'
 import { onVueApp } from '../page/vue-hook'
+import { installPiniaInternals } from './pinia'
+import { installRouterInternals } from './router'
+import { isReactive, isReadonly, isRef, isVNode } from './utils'
 import type { JsonValue, StatePath } from '../client'
 
 export interface ComponentNode {
@@ -371,20 +373,30 @@ function registerVueTools(): void {
  * @example
  * createApp(App).use(mcpDevtoolsVue)
  */
+function registerApp(app: App): void {
+  if (typeof window === 'undefined') return
+  shared.apps.add(app)
+  registerVueTools()
+}
+
 export const mcpDevtoolsVue: Plugin = {
   install(app) {
-    if (typeof window === 'undefined') return
-    shared.apps.add(app)
-    registerVueTools()
+    registerApp(app)
   },
 }
 
 /**
  * Zero-config entry used by the page script: picks up every Vue app announced
  * through the devtools hook (installed by the bootstrap script) and registers
- * the component tools.
+ * the component tools, the Pinia stores (`pinia:<id>` states) and the Vue
+ * Router tools when present.
  */
 export function installVueInternals(): () => void {
   if (typeof window === 'undefined') return () => {}
-  return onVueApp((app) => mcpDevtoolsVue.install(app as App))
+  return onVueApp((value) => {
+    const app = value as App
+    registerApp(app)
+    installPiniaInternals(app)
+    installRouterInternals(app)
+  })
 }

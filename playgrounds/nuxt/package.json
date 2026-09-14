@@ -4,8 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "nuxt dev",
-    "build": "nuxt build",
-    "prepare": "nuxt prepare"
+    "build": "nuxt build"
   },
   "dependencies": {
     "@pinia/nuxt": "^1.0.2",

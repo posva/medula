@@ -116,3 +116,6 @@ such as `overrideHookState`; must run before React loads).
 - Tests: `src/**/*.spec.ts`, happy-dom, keep them simple. Playgrounds have no tests.
 - Playgrounds live in `playgrounds/*` (pnpm workspace) and depend on `medula` via
   `link:../..`, so run `pnpm build` before `pnpm play:*`.
+- The Nuxt playground must not run `nuxt prepare` during install: `medula/nuxt` needs
+  the library build first. To generate Nuxt types, run
+  `pnpm -C playgrounds/nuxt exec nuxt prepare` after `pnpm build`.

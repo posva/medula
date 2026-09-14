@@ -76,7 +76,8 @@ advertised by `/__mcp-devtools/__connection.json`; the instance registers itself
 ## What agents can do
 
 Open the app in a browser with the dev server running. Tools appear on the MCP endpoint while the
-page is open; arguments go under `arg0`.
+page is open; arguments go under `arg0`. With several tabs of the app open, calls go to the tab you
+focused last (background tabs disconnect).
 
 ### Vue, Pinia and Vue Router
 

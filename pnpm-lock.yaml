@@ -2890,7 +2890,7 @@ packages:
     resolution: {integrity: sha512-po4PAY5c53tw5XMocSnf8A/5OHhbbUftpr93aEN6BBoAdntUmK7vu7wOATqvt7cXO7m1Cl4gMVn6p7n6n4mj0w==}
 
   devframe@file:vendor/devframe-0.9.18.tgz:
-    resolution: {integrity: sha512-Bkxqi7SjY1CEok+8I/++mNDur9YqC/XNcH+o6HBK6azERRFOUuSMyRMsjx+k+1u3385D2JwpPd4lW6Sy3DgAxg==, tarball: file:vendor/devframe-0.9.18.tgz}
+    resolution: {integrity: sha512-J9QCC9hqnaNe8dbRku9p3GPyxLFDPYmI2KEhTeQibnzCztOQu6wtdjvrpbfYXmc5xIvcR6tuZjrdrnZwZZ6crA==, tarball: file:vendor/devframe-0.9.18.tgz}
     version: 0.9.18
     hasBin: true
     peerDependencies:

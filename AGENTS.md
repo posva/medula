@@ -75,7 +75,9 @@ pnpm exec turbo run build --filter=devframe --filter=@devframes/vite --filter=@d
 for p in devframe vite next; do (cd packages/$p && pnpm pack --pack-destination ~/oss/mcp-devtools/vendor); done
 ```
 
-Replace with npm versions once the PR is released.
+The devframe tarball also carries a local patch (most recently synced page wins in
+`node/client-agent.ts`); after repacking, update the tarball integrity in `pnpm-lock.yaml`
+(pnpm keeps the cached copy otherwise). Replace with npm versions once the PR is released.
 
 ## Agent access
 
@@ -90,10 +92,15 @@ Vite plugin registers with `register: true`). Direct URL: `<origin>/__mcp-devtoo
 2. `curl -s -X POST <origin>/__mcp-devtools/__mcp -H 'Origin: <origin>' -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'`
 3. `tools/call` with `{"name":"mcp-devtools_patch-state","arguments":{"arg0":{"name":"…","path":["…"],"value":…}}}`.
 
-Known devframe caveats: tools act on the FIRST connected page (a stray tab on the same origin, for
-example another `agent-browser` daemon, receives the calls), and when that tab navigates away the
-next call can hit `[birpc] timeout on calling "devframe:agent:invoke-client-tool"` before calls
-succeed again. Use a private port and `AGENT_BROWSER_SESSION` when verifying.
+Routing between pages: the page script only stays connected while its tab is visible and
+reconnects on `focus`, and the vendored devframe is patched so the MOST RECENTLY synced page wins
+(`packages/devframe/src/node/client-agent.ts` in the worktree, uncommitted there: later manifests
+overwrite earlier ones and a re-sync moves the session last). So tool calls go to the page the user
+looked at last. Stray headless pages (`agent-browser close --all`) still compete until they lose
+focus. When a connected tab goes away, the next call can hit
+`[birpc] timeout on calling "devframe:agent:invoke-client-tool"` before calls succeed again. Use a
+private port and `AGENT_BROWSER_SESSION` when verifying; `agent-browser tab N` does not switch the
+`eval` target, use one session per page.
 
 Adapter-specific tools use `registerAgentTools(namespace, functions)` (`src/client/tools.ts`):
 `src/vue/internal.ts` (component tree walker + StateEditor-like setter, mirrors Vue DevTools) and

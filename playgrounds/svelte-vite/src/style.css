@@ -51,3 +51,7 @@ button {
   font: inherit;
   cursor: pointer;
 }
+
+li.highlighted {
+  background: rgba(127, 127, 127, 0.15);
+}

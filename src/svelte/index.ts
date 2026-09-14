@@ -4,6 +4,21 @@ import { exposeState } from '../client'
 
 export { exposeState } from '../client'
 export type { ExposedState, ExposedStateOptions } from '../client'
+export { installSvelteInternals, onSvelteComponent } from './internals'
+export type {
+  McpDevtoolsSvelteProtocol,
+  SvelteComponentNode,
+  SvelteComponentState,
+  SvelteStateValue,
+} from './internals'
+export { SVELTE_STORE_KEY, installSvelteRuntimeHook } from './hook'
+export type {
+  SvelteComponentRecord,
+  SvelteHookStore,
+  SvelteRuntimeInternal,
+  SvelteSignalEntry,
+  SvelteSignalKind,
+} from './hook'
 
 export interface ExposeStoreOptions<T> {
   /** Tells the agent what this state is and how to use it. */

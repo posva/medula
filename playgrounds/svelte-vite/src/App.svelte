@@ -1,59 +1,58 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte'
-  import { exposeRune } from 'mcp-devtools/svelte'
-  import { settings, summary } from './settings'
+  import Item from './Item.svelte'
+  import { settings } from './settings.svelte'
 
+  // primitive $state: a signal
   let count = $state(0)
+  // object $state that is reassigned: a signal holding a proxy
   let todos = $state([
     { id: 1, text: 'Open the page', done: true },
-    { id: 2, text: 'Call mcp-devtools_list-states', done: false },
+    { id: 2, text: 'Call mcp-devtools_svelte_list-components', done: false },
   ])
+  // object $state never reassigned: only the proxy exists
+  let user = $state({ name: 'Ada', address: { city: 'Paris' } })
   let remaining = $derived(todos.filter((t) => !t.done).length)
+  let greeting = $derived(`Hello ${user.name} from ${user.address.city}`)
 
-  // $state cannot be passed by reference: expose accessors
-  onDestroy(exposeRune('count', { get: () => count, set: (v) => (count = v) }, { description: 'Click counter' }))
-  onDestroy(
-    exposeRune(
-      'todos',
-      { get: () => $state.snapshot(todos), set: (v) => (todos = v) },
-      { description: 'Todo list: { id, text, done }[]' },
-    ),
-  )
+  function addTodo() {
+    todos = [...todos, { id: Date.now(), text: `Todo ${todos.length + 1}`, done: false }]
+  }
 </script>
 
-<main class={$settings.theme} style:font-size="{$settings.fontSize}px">
+<main class={settings.theme} style:font-size="{settings.fontSize}px">
   <header>
     <h1>mcp-devtools · Svelte</h1>
-    <p>{remaining} remaining · <code>{$summary}</code></p>
+    <p>{greeting} · {remaining} remaining</p>
     <p class="hint">
-      Agents talk to this page at <code>/__mcp-devtools/__mcp</code>. Config page:
+      No app code: agents talk to this page at <code>/__mcp-devtools/__mcp</code>. Config page:
       <a href="/__mcp-devtools/" target="_blank">/__mcp-devtools/</a>
     </p>
   </header>
 
   <section>
     <button onclick={() => count++}>count is {count}</button>
+    <button onclick={addTodo}>add todo</button>
   </section>
 
   <ul>
     {#each todos as todo (todo.id)}
-      <li class:done={todo.done}>
-        <label><input type="checkbox" bind:checked={todo.done} /> {todo.text}</label>
-      </li>
+      <Item label={todo.text} bind:done={todo.done} />
     {/each}
   </ul>
 
-  <section class="settings">
-    <label>
-      Theme
-      <select bind:value={$settings.theme}>
-        <option value="light">light</option>
-        <option value="dark">dark</option>
-      </select>
-    </label>
-    <label>
-      Font size
-      <input type="range" min="12" max="24" bind:value={$settings.fontSize} />
-    </label>
-  </section>
+  {#if settings.showSettings}
+    <section class="settings">
+      <label>
+        Theme
+        <select bind:value={settings.theme}>
+          <option value="light">light</option>
+          <option value="dark">dark</option>
+        </select>
+      </label>
+      <label>
+        Font size
+        <input type="range" min="12" max="24" bind:value={settings.fontSize} />
+      </label>
+    </section>
+  {/if}
 </main>

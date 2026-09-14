@@ -5,6 +5,7 @@ import type { Plugin } from 'vite'
 import { createMcpDevtools } from '../devframe'
 import { BOOTSTRAP_SCRIPT } from '../page/bootstrap'
 import { MCP_DEVTOOLS_BASE, connectScriptUrl } from '../shared'
+import { svelteInstrumentation } from './svelte'
 
 export interface McpDevtoolsVitePluginOptions extends Pick<
   InitDevframeOptions,
@@ -99,6 +100,8 @@ export function McpDevtools(options: McpDevtoolsVitePluginOptions = {}): Plugin[
       },
     })
   }
+  // Svelte 5 components import `svelte/internal/client`; the wrapper records them
+  plugins.push(svelteInstrumentation())
   return plugins
 }
 

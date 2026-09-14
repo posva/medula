@@ -8,6 +8,7 @@
 import { connectDevframe } from 'devframe/client'
 import { ensureChannel } from '../client/channel'
 import { installReactInternals } from '../react/internals'
+import { installSvelteInternals } from '../svelte/internals'
 import { installVueInternals } from '../vue/internal'
 
 const KEY = Symbol.for('mcp-devtools:connect')
@@ -17,6 +18,7 @@ g[KEY] ??= (() => {
   ensureChannel()
   installVueInternals()
   installReactInternals()
+  installSvelteInternals()
   // this script lives at `<base>connect.js`; shared chunks live deeper, so resolve
   // `__connection.json` from here instead of from the executing chunk
   return connectDevframe({ baseURL: new URL('./', import.meta.url).href }).catch((error) => {

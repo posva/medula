@@ -53,7 +53,7 @@ describe('zero-config Vue internals', () => {
     installVueInternals()
   })
 
-  // no `app.use()` of anything from mcp-devtools
+  // no `app.use()` of anything from medula
   function mount(setup: (app: App) => void = () => {}) {
     const el = document.createElement('div')
     document.body.append(el)

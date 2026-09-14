@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
-import { McpDevtools } from 'mcp-devtools/next'
+import { McpDevtools } from 'medula/next'
 import './globals.css'
 
 export const metadata = {
-  title: 'mcp-devtools next playground',
+  title: 'medula next playground',
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {

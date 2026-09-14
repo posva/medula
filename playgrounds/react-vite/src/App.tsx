@@ -115,7 +115,7 @@ class Clock extends Component<{ label: string }, { ticks: number }> {
 export function App() {
   return (
     <main>
-      <h1>mcp-devtools React playground</h1>
+      <h1>medula React playground</h1>
       <p>
         No devtools code in this app. Open <a href="/__mcp-devtools/">/__mcp-devtools/</a> for the
         MCP config.

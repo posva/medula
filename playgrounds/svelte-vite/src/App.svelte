@@ -21,7 +21,7 @@
 
 <main class={settings.theme} style:font-size="{settings.fontSize}px">
   <header>
-    <h1>mcp-devtools · Svelte</h1>
+    <h1>medula · Svelte</h1>
     <p>{greeting} · {remaining} remaining</p>
     <p class="hint">
       No app code: agents talk to this page at <code>/__mcp-devtools/__mcp</code>. Config page:

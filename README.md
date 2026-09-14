@@ -1,4 +1,4 @@
-# mcp-devtools
+# medula
 
 Headless devtools for web apps: let a coding agent read and change the state of the page you have
 open, through [MCP](https://modelcontextprotocol.io). Built on [devframe](https://devfra.me).
@@ -16,7 +16,7 @@ open, through [MCP](https://modelcontextprotocol.io). Built on [devframe](https:
 
 ```ts
 // vite.config.ts
-import { McpDevtools } from 'mcp-devtools/vite'
+import { McpDevtools } from 'medula/vite'
 
 export default defineConfig({
   plugins: [McpDevtools()],
@@ -28,7 +28,7 @@ export default defineConfig({
 ```ts
 // nuxt.config.ts
 export default defineNuxtConfig({
-  modules: ['mcp-devtools/nuxt'],
+  modules: ['medula/nuxt'],
 })
 ```
 
@@ -36,13 +36,13 @@ export default defineNuxtConfig({
 
 ```ts
 // next.config.ts
-import { withMcpDevtools } from 'mcp-devtools/next'
+import { withMcpDevtools } from 'medula/next'
 export default withMcpDevtools({/* your config */})
 ```
 
 ```ts
 // app/%5F_mcp-devtools/[[...path]]/route.ts  (Next reserves `_` folders: URL-encoded name)
-import { createMcpDevtoolsHandler } from 'mcp-devtools/next'
+import { createMcpDevtoolsHandler } from 'medula/next'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -55,7 +55,7 @@ export const DELETE = handler.fetch
 
 ```tsx
 // app/layout.tsx
-import { McpDevtools } from 'mcp-devtools/next'
+import { McpDevtools } from 'medula/next'
 
 export default function RootLayout({ children }) {
   return (
@@ -127,11 +127,11 @@ pre-bundled from `node_modules` are not instrumented. Props show what the parent
 
 ### Explicit exposure (escape hatch)
 
-For state no devtools can reach, name it yourself from `mcp-devtools/client`; it shows up in the
+For state no devtools can reach, name it yourself from `medula/client`; it shows up in the
 `*-state` tools:
 
 ```ts
-import { exposeState } from 'mcp-devtools/client'
+import { exposeState } from 'medula/client'
 
 exposeState('cart', {
   description: 'Shopping cart',

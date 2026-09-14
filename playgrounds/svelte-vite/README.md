@@ -1,6 +1,6 @@
 # Svelte + Vite playground
 
-Small counter/todo app (Svelte 5 runes, Vite 8) with **no `mcp-devtools` code in `src/`**. The
+Small counter/todo app (Svelte 5 runes, Vite 8) with **no `medula` code in `src/`**. The
 `McpDevtools()` Vite plugin instruments `svelte/internal/client` in dev, so agents list the
 components and read/write their `$state` like a devtools would.
 

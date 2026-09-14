@@ -46,7 +46,7 @@ export function withMcpDevtools<T extends DevframeNextConfig>(nextConfig: T = {}
 }
 
 // non-literal, otherwise tsdown resolves the self-import to a relative chunk
-const selfPackage: string = MCP_DEVTOOLS_ID
+const selfPackage: string = 'medula'
 
 interface LoadedHandler {
   handler: DevframeNextHandler
@@ -64,7 +64,7 @@ async function loadHandler(options: McpDevtoolsNextHandlerOptions): Promise<Load
   const [{ createMcpDevtools }, { createDevframeNextHandler }, { registerDevframeInstance }] =
     await Promise.all([
       import(/* webpackIgnore: true */ /* turbopackIgnore: true */ selfPackage) as Promise<
-        typeof import('mcp-devtools')
+        typeof import('medula')
       >,
       import(
         /* webpackIgnore: true */ /* turbopackIgnore: true */ '@devframes/next/single'

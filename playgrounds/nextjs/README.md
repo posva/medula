@@ -1,6 +1,6 @@
 # playground-nextjs
 
-Next 16 (App Router) playground. The app imports nothing from `mcp-devtools` besides the
+Next 16 (App Router) playground. The app imports nothing from `medula` besides the
 host setup: `<McpDevtools />` in the root layout `<head>` (development only) inlines the
 hook bootstrap and loads the page script, and the `mcp-devtools_react_*` tools edit component
 state and props like React DevTools.

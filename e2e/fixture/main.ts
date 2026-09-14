@@ -1,4 +1,4 @@
-import { exposeState } from 'mcp-devtools/client'
+import { exposeState } from 'medula/client'
 
 let counter = { count: 1, label: 'fixture' }
 const el = document.getElementById('state')!

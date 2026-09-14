@@ -6,7 +6,7 @@ import TodoList from './components/TodoList.vue'
 
 const todos = useTodosStore()
 // component state: agents reach it through mcp-devtools_vue_set-component-state
-const title = ref('mcp-devtools · Vue')
+const title = ref('medula · Vue')
 const style = computed(() => ({ fontSize: `${settings.fontSize}px` }))
 </script>
 

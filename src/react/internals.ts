@@ -122,7 +122,7 @@ const componentDetailsSchema = z.object({
 })
 
 const HOOK_MISSING =
-  '[mcp-devtools] React DevTools hook not found before React loaded. Enable it: `McpDevtools({ react: true })` in Vite, or inline `reactDevtoolsHookScript` from mcp-devtools/next in <head>.'
+  '[mcp-devtools] React DevTools hook not found before React loaded. Enable it: `McpDevtools({ react: true })` in Vite, or inline `reactDevtoolsHookScript` from medula/next in <head>.'
 const INTERNALS_MISSING =
   '[mcp-devtools] React internals are not available: this needs a development build of React.'
 

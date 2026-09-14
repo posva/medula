@@ -12,12 +12,12 @@ export type McpDevtoolsNuxtOptions = Omit<McpDevtoolsVitePluginOptions, 'inject'
  * connect script to the app head in development. Does nothing in production.
  *
  * @example
- * export default defineNuxtConfig({ modules: ['mcp-devtools/nuxt'] })
+ * export default defineNuxtConfig({ modules: ['medula/nuxt'] })
  */
 const mcpDevtoolsModule: NuxtModule<McpDevtoolsNuxtOptions> =
   defineNuxtModule<McpDevtoolsNuxtOptions>({
     meta: {
-      name: 'mcp-devtools',
+      name: 'medula',
       configKey: 'mcpDevtools',
       compatibility: { nuxt: '^4.0.0 || ^5.0.0-0' },
     },

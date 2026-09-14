@@ -25,7 +25,7 @@ If these tools are missing, no page is connected: open the app in a browser (dev
 
 /**
  * The headless devframe: no UI besides a plain config page. The state tools
- * come from the page itself (see `mcp-devtools/client`) and appear as MCP
+ * come from the page itself (see `medula/client`) and appear as MCP
  * tools while a page is connected.
  */
 export function createMcpDevtools(options: McpDevtoolsOptions = {}): DevframeDefinition {

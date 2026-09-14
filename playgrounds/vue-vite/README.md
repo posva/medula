@@ -1,6 +1,6 @@
 # Vue + Vite playground
 
-Small todo app (Vue 3 + Pinia, Vite 8). It imports nothing from `mcp-devtools`: the only
+Small todo app (Vue 3 + Pinia, Vite 8). It imports nothing from `medula`: the only
 integration is `McpDevtools()` in `vite.config.ts`, next to `@vitejs/plugin-vue` and the Vite
 DevTools dock (`devtools: true`).
 

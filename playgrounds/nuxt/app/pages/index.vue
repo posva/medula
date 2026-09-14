@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
 
-// nothing from mcp-devtools here: the module injects the page script
+// nothing from medula here: the module injects the page script
 const cart = useCartStore()
 // component state: agents reach it through mcp-devtools_vue_set-component-state
 const greeting = ref('Hello')
@@ -11,7 +11,7 @@ const visitor = useState('visitor', () => ({ name: 'Anonymous', vip: false }))
 
 <template>
   <main :class="{ vip: visitor.vip }">
-    <h1>mcp-devtools · Nuxt</h1>
+    <h1>medula · Nuxt</h1>
     <p>
       {{ greeting }} <strong>{{ visitor.name }}</strong>
       <span v-if="visitor.vip" class="badge">VIP</span>

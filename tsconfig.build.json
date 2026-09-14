@@ -11,8 +11,8 @@
     "noEmit": false,
     "jsx": "react-jsx",
     "paths": {
-      "mcp-devtools": ["./src/index.ts"],
-      "mcp-devtools/*": ["./src/*/index.ts"]
+      "medula": ["./src/index.ts"],
+      "medula/*": ["./src/*/index.ts"]
     }
   },
   "include": ["src/**/*"],

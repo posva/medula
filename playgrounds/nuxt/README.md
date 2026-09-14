@@ -1,8 +1,8 @@
 # Nuxt playground
 
 Nuxt 4 + `@pinia/nuxt`, with `@nuxt/devtools` 4 alpha enabled. The app imports nothing from
-`mcp-devtools`: the only integration is the module in `nuxt.config.ts`
-(`modules: ['@pinia/nuxt', 'mcp-devtools/nuxt']`).
+`medula`: the only integration is the module in `nuxt.config.ts`
+(`modules: ['@pinia/nuxt', 'medula/nuxt']`).
 
 The module adds the Vite plugin to the client build, puts the bootstrap script (Vue DevTools hook
 shim) at the top of `<head>` and the page script before `</body>`. SSR is untouched. Agents get,

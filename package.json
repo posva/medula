@@ -1,5 +1,5 @@
 {
-  "name": "mcp-devtools",
+  "name": "medula",
   "version": "0.0.0",
   "packageManager": "pnpm@12.3.4",
   "description": "Headless devtools that let a coding agent read and change the state of an open web page through MCP",

@@ -157,8 +157,8 @@ describe('svelteWrapperSource', () => {
     for (const name of ['push', 'tag', 'tag_proxy']) {
       expect(code).toContain(`export const ${name} =`)
     }
-    // self-contained: the hook is inlined, nothing imported from mcp-devtools
-    expect(code).not.toContain('mcp-devtools/')
+    // self-contained: the hook is inlined, nothing imported from medula
+    expect(code).not.toContain('medula/')
     expect(code).toMatch(/Symbol\.for\(['"]mcp-devtools:svelte['"]\)/)
   })
 })

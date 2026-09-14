@@ -1,4 +1,4 @@
-import { createMcpDevtoolsHandler } from 'mcp-devtools/next'
+import { createMcpDevtoolsHandler } from 'medula/next'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'

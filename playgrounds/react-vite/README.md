@@ -1,6 +1,6 @@
 # playground-react-vite
 
-React 19 + Vite 8 playground. The app imports nothing from `mcp-devtools`: the Vite plugin
+React 19 + Vite 8 playground. The app imports nothing from `medula`: the Vite plugin
 injects the hook bootstrap and the page script, and the `mcp-devtools_react_*` tools edit
 component state and props like React DevTools.
 

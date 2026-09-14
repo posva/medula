@@ -1,4 +1,4 @@
-# mcp-devtools
+# medula
 
 Headless devtools built on [devframe](https://devfra.me). A coding agent reads and changes the
 state of an open web page through MCP. No panel UI: only a plain HTML config page.
@@ -36,12 +36,12 @@ discovers frameworks like the official devtools do.
 | `src/panel/connect.ts`   | browser | The page script (`dist-client/connect.js`): state channel + Vue/Pinia/Router discovery + React discovery + `connectDevframe()`                                    |
 | `src/vue/internal.ts`    | browser | Component tree walker + StateEditor-like setter (mirrors Vue DevTools), Pinia/Router tools                                                                        |
 | `src/react/internals.ts` | browser | Fiber walker + `overrideHookState`/`overrideProps` through the hook shim (mirrors React DevTools)                                                                 |
-| `mcp-devtools`           | node    | `createMcpDevtools()` devframe definition (+ `help` tool and resource)                                                                                            |
-| `mcp-devtools/vite`      | node    | `McpDevtools()` Vite plugin: bridge + config page + injects bootstrap and `connect.js`                                                                            |
-| `mcp-devtools/next`      | node    | `createMcpDevtoolsHandler()` route handler, `withMcpDevtools()`, `<McpDevtools />` head component                                                                 |
-| `mcp-devtools/nuxt`      | node    | Nuxt module: adds the Vite plugin, injects bootstrap and `connect.js` through `app.head`                                                                          |
-| `mcp-devtools/client`    | browser | Manual escape hatch: `exposeState(name, { get, set })` for state no devtools can reach                                                                            |
-| `mcp-devtools/vue        | react   | svelte`                                                                                                                                                           | browser | Manual helpers over `exposeState`; not needed for Vue/React apps |
+| `medula`                 | node    | `createMcpDevtools()` devframe definition (+ `help` tool and resource)                                                                                            |
+| `medula/vite`            | node    | `McpDevtools()` Vite plugin: bridge + config page + injects bootstrap and `connect.js`                                                                            |
+| `medula/next`            | node    | `createMcpDevtoolsHandler()` route handler, `withMcpDevtools()`, `<McpDevtools />` head component                                                                 |
+| `medula/nuxt`            | node    | Nuxt module: adds the Vite plugin, injects bootstrap and `connect.js` through `app.head`                                                                          |
+| `medula/client`          | browser | Manual escape hatch: `exposeState(name, { get, set })` for state no devtools can reach                                                                            |
+| `medula/vue              | react   | svelte`                                                                                                                                                           | browser | Manual helpers over `exposeState`; not needed for Vue/React apps |
 
 `src/panel/` also holds the config page (plain HTML + CSS); `panel.vite.config.ts` builds it and
 `connect.js` into `dist-client/`, which is the definition's `clientAssets`.
@@ -114,5 +114,5 @@ such as `overrideHookState`; must run before React loads).
 - Auth is off by default in the host adapters (single-user localhost). MCP route is forced on
   (`mcp: true`) because client tools arrive after startup.
 - Tests: `src/**/*.spec.ts`, happy-dom, keep them simple. Playgrounds have no tests.
-- Playgrounds live in `playgrounds/*` (pnpm workspace) and depend on `mcp-devtools` via
+- Playgrounds live in `playgrounds/*` (pnpm workspace) and depend on `medula` via
   `link:../..`, so run `pnpm build` before `pnpm play:*`.

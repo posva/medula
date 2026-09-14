@@ -1,5 +1,5 @@
 import type { NextConfig } from 'next'
-import { withMcpDevtools } from 'mcp-devtools/next'
+import { withMcpDevtools } from 'medula/next'
 
 const nextConfig: NextConfig = withMcpDevtools({
   agentRules: false,

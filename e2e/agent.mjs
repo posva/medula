@@ -73,7 +73,8 @@ if (!scenario) {
 }
 const port = Number(args[args.indexOf('--port') + 1]) || scenario.port
 const origin = `http://localhost:${port}`
-const base = `${origin}/__medula/`
+// medula is a Vite DevTools dock: the hub owns the connection meta and the MCP route
+const base = `${origin}/__devtools/`
 
 const children = []
 function cleanup() {

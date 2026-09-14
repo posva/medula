@@ -12,4 +12,4 @@ pnpm play:react     # http://localhost:5174
 Components: `Counter` (`useState`), `Todos` (`useReducer`), `Settings` (`useSyncExternalStore`),
 `Greeting` (props), `Clock` (class component state + props).
 
-MCP endpoint: `http://localhost:5174/__medula/__mcp`. Config page: `http://localhost:5174/__medula/`.
+MCP endpoint: `http://localhost:5174/__devtools/__mcp`. medula dock page: `http://localhost:5174/__medula/` (open it from the Vite DevTools dock).

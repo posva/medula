@@ -15,4 +15,4 @@ pnpm play:next      # http://localhost:3000
 - `app/layout.tsx`: `<head><Medula /></head>`
 - `app/profile.tsx`: `Profile` (`useState`), `Greeting` (props), `Clock` (class component)
 
-MCP endpoint: `http://localhost:3000/__medula/__mcp`. Config page: `http://localhost:3000/__medula/`.
+MCP endpoint: `http://localhost:3000/__devframes/__mcp`. medula dock page: `http://localhost:3000/__devframes/medula/`.

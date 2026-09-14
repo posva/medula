@@ -21,7 +21,7 @@ pnpm play:svelte    # http://localhost:5175
 Open the page, then from another terminal:
 
 ```bash
-MCP=http://localhost:5175/__medula/__mcp
+MCP=http://localhost:5175/__devtools/__mcp
 rpc() { curl -s -X POST $MCP -H 'Origin: http://localhost:5175' -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' -d "$1"; echo; }
 
 rpc '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'

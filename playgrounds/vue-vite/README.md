@@ -22,7 +22,7 @@ pnpm play:vue       # http://localhost:5173
 Open the page, then from another terminal:
 
 ```bash
-MCP=http://localhost:5173/__medula/__mcp
+MCP=http://localhost:5173/__devtools/__mcp
 rpc() { curl -s -X POST $MCP -H 'Origin: http://localhost:5173' -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' -d "$1"; echo; }
 
 rpc '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
@@ -35,5 +35,5 @@ rpc '{"jsonrpc":"2.0","id":5,"method":"tools/call","params":{"name":"medula_vue_
 rpc '{"jsonrpc":"2.0","id":6,"method":"tools/call","params":{"name":"medula_vue_set-component-state","arguments":{"arg0":{"id":"0:root","section":"setupState","path":["settings","theme"],"value":"dark"}}}}'
 ```
 
-The page updates live. The config page is at <http://localhost:5173/__medula/>. Tools exist
+The page updates live. The medula dock page is at <http://localhost:5173/__medula/> (open it from the devtools dock). Tools exist
 only while a page is open in a browser.

@@ -3,7 +3,7 @@ import { initDevframe } from 'devframe/initiate'
 import type { DevframeInstance, InitDevframeOptions } from 'devframe/initiate'
 import type { Plugin } from 'vite'
 import { createMcpDevtools } from '../devframe'
-import { REACT_DEVTOOLS_HOOK_SCRIPT } from '../react/hook'
+import { BOOTSTRAP_SCRIPT } from '../page/bootstrap'
 import { MCP_DEVTOOLS_BASE, connectScriptUrl } from '../shared'
 
 export interface McpDevtoolsVitePluginOptions extends Pick<
@@ -21,19 +21,14 @@ export interface McpDevtoolsVitePluginOptions extends Pick<
    * @default true
    */
   inject?: boolean
-  /**
-   * Inline the React DevTools hook shim at the top of `<head>` so the
-   * `mcp-devtools_react_*` component tools work (React registers its
-   * internals only with a hook that exists before it loads).
-   * @default false
-   */
-  react?: boolean
 }
 
 /**
  * Vite plugin: serves the config page, `connect.js`, the RPC/WebSocket
  * bridge and the MCP route at `<base>` (default `/__mcp-devtools/`) and
- * injects the connect script in dev.
+ * injects the hook bootstrap + page script in dev. No app code needed: Vue
+ * apps, Pinia stores and React components are discovered like the official
+ * devtools do.
  *
  * Auth is off by default: this is a single-user localhost tool. Pass
  * `auth: true` for devframe's one-time-code gate.
@@ -80,19 +75,6 @@ export function McpDevtools(options: McpDevtoolsVitePluginOptions = {}): Plugin[
       },
     },
   ]
-  if (options.react) {
-    plugins.push({
-      name: 'mcp-devtools:react-hook',
-      apply: (_config, env) => env.command === 'serve' && !env.isSsrBuild,
-      transformIndexHtml: {
-        order: 'pre',
-        handler: (_html, ctx) =>
-          ctx.server
-            ? [{ tag: 'script', children: REACT_DEVTOOLS_HOOK_SCRIPT, injectTo: 'head-prepend' }]
-            : [],
-      },
-    })
-  }
   if (options.inject !== false) {
     const connectUrl = connectScriptUrl(base)
     plugins.push({
@@ -103,6 +85,8 @@ export function McpDevtools(options: McpDevtoolsVitePluginOptions = {}): Plugin[
         handler: (_html, ctx) =>
           ctx.server
             ? [
+                // hook shims must run before the frameworks load
+                { tag: 'script', children: BOOTSTRAP_SCRIPT, injectTo: 'head-prepend' },
                 // classic inline script: Vite would try to warm up a module
                 // `src` through its own pipeline, but the middleware serves it
                 {

@@ -85,15 +85,17 @@ export type McpDevtoolsChannel = ReturnType<
   typeof createPageScriptChannel<McpDevtoolsChannelProtocol>
 >
 
-let channel: McpDevtoolsChannel | undefined
+// one channel per page even when several bundles load this module
+const CHANNEL_KEY = Symbol.for('mcp-devtools:channel')
+const g = globalThis as { [CHANNEL_KEY]?: McpDevtoolsChannel }
 
 /**
  * Create the in-page channel once. Its `agent` functions become MCP tools as
  * soon as a devframe RPC client runs in the page (see `connect.js`).
  */
 export function ensureChannel(): McpDevtoolsChannel | undefined {
-  if (channel || typeof window === 'undefined') return channel
-  channel = createPageScriptChannel<McpDevtoolsChannelProtocol>({
+  if (g[CHANNEL_KEY] || typeof window === 'undefined') return g[CHANNEL_KEY]
+  g[CHANNEL_KEY] = createPageScriptChannel<McpDevtoolsChannelProtocol>({
     name: MCP_DEVTOOLS_CHANNEL,
     functions: {
       'list-states': {
@@ -167,5 +169,5 @@ export function ensureChannel(): McpDevtoolsChannel | undefined {
       },
     },
   })
-  return channel
+  return g[CHANNEL_KEY]
 }

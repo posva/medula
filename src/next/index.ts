@@ -3,16 +3,31 @@ import type {
   DevframeNextConfig,
   DevframeNextHandler,
 } from '@devframes/next/single'
-import { REACT_DEVTOOLS_HOOK_SCRIPT } from '../react/hook'
+import { createElement } from 'react'
+import type { ReactElement } from 'react'
+import { BOOTSTRAP_SCRIPT } from '../page/bootstrap'
 import { MCP_DEVTOOLS_BASE, MCP_DEVTOOLS_ID, connectScriptUrl } from '../shared'
 
 export { MCP_DEVTOOLS_BASE, connectScriptUrl }
+/** Hook shims to inline at the top of `<head>` (see {@link McpDevtools}). */
+export const bootstrapScript: string = BOOTSTRAP_SCRIPT
+
 /**
- * Inline this in `<head>` of the root layout (development only) so the
- * `mcp-devtools_react_*` component tools work:
- * `<script dangerouslySetInnerHTML={{ __html: reactDevtoolsHookScript }} />`
+ * Server component for the root layout `<head>`: in development it inlines
+ * the hook shims and loads the page script, so components and state are
+ * discovered with no other app code.
+ *
+ * @example
+ * <head><McpDevtools /></head>
  */
-export const reactDevtoolsHookScript: string = REACT_DEVTOOLS_HOOK_SCRIPT
+export function McpDevtools(props: { base?: string } = {}): ReactElement | null {
+  if (process.env.NODE_ENV !== 'development') return null
+  return createElement('script', {
+    dangerouslySetInnerHTML: {
+      __html: `${BOOTSTRAP_SCRIPT}document.head.append(Object.assign(document.createElement('script'),{type:'module',src:${JSON.stringify(connectScriptUrl(props.base ?? MCP_DEVTOOLS_BASE))}}))`,
+    },
+  })
+}
 export type { DevframeNextConfig as McpDevtoolsNextConfig }
 
 export type McpDevtoolsNextHandlerOptions = Omit<CreateDevframeNextHandlerOptions, 'flags'>

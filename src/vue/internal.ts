@@ -3,6 +3,7 @@ import type { App, ComponentInternalInstance, Plugin, VNode } from 'vue'
 import type { InPageChannelProtocol } from 'devframe/in-page-channel'
 import { z } from 'zod'
 import { registerAgentTools, toJsonValue } from '../client'
+import { onVueApp } from '../page/vue-hook'
 import type { JsonValue, StatePath } from '../client'
 
 export interface ComponentNode {
@@ -376,4 +377,14 @@ export const mcpDevtoolsVue: Plugin = {
     shared.apps.add(app)
     registerVueTools()
   },
+}
+
+/**
+ * Zero-config entry used by the page script: picks up every Vue app announced
+ * through the devtools hook (installed by the bootstrap script) and registers
+ * the component tools.
+ */
+export function installVueInternals(): () => void {
+  if (typeof window === 'undefined') return () => {}
+  return onVueApp((app) => mcpDevtoolsVue.install(app as App))
 }

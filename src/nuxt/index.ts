@@ -2,6 +2,7 @@ import { addVitePlugin, defineNuxtModule } from '@nuxt/kit'
 import type { NuxtModule } from '@nuxt/schema'
 import { McpDevtools } from '../vite'
 import type { McpDevtoolsVitePluginOptions } from '../vite'
+import { BOOTSTRAP_SCRIPT } from '../page/bootstrap'
 import { MCP_DEVTOOLS_BASE, connectScriptUrl } from '../shared'
 
 export type McpDevtoolsNuxtOptions = Omit<McpDevtoolsVitePluginOptions, 'inject'>

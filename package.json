@@ -74,12 +74,14 @@
     "e2e:agent:svelte": "node e2e/agent.mjs --scenario svelte"
   },
   "dependencies": {
-    "@devframes/next": "file:vendor/devframes-next-0.9.18.tgz",
+    "@devframes/next": "file:vendor/devframes-next-0.9.19.tgz",
     "@modelcontextprotocol/client": "^2.0.0",
-    "devframe": "file:vendor/devframe-0.9.18.tgz",
+    "@vitejs/devtools-kit": "^0.7.3",
+    "devframe": "file:vendor/devframe-0.9.19.tgz",
     "zod": "^4.6.4"
   },
   "peerDependencies": {
+    "@devframes/hub-ui": "^0.9.16",
     "@nuxt/kit": "^4.0.0 || ^5.0.0-0",
     "next": "^15.0.0 || ^16.0.0",
     "pinia": "^3.0.0 || ^4.0.0",
@@ -89,6 +91,9 @@
     "vue": "^3.5.0"
   },
   "peerDependenciesMeta": {
+    "@devframes/hub-ui": {
+      "optional": true
+    },
     "@nuxt/kit": {
       "optional": true
     },
@@ -119,6 +124,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
     "@types/semver": "^7.8.0",
+    "@vitejs/devtools": "^0.7.3",
     "@vitejs/plugin-vue": "^6.0.8",
     "@vitest/coverage-v8": "^5.0.0",
     "@vitest/ui": "^5.0.0",

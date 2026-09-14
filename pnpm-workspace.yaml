@@ -5,8 +5,10 @@ packages:
 # Local devframe build from PR devframes/devframe#376 (branch eager-client-script).
 # Replace with npm versions once the PR is released.
 overrides:
-  devframe: file:./vendor/devframe-0.9.18.tgz
-  '@devframes/next': file:./vendor/devframes-next-0.9.18.tgz
+  devframe: file:./vendor/devframe-0.9.19.tgz
+  '@devframes/next': file:./vendor/devframes-next-0.9.19.tgz
+  '@devframes/hub': file:./vendor/devframes-hub-0.9.19.tgz
+  '@devframes/hub-ui': file:./vendor/devframes-hub-ui-0.9.19.tgz
 allowBuilds:
   esbuild: true
   simple-git-hooks: true
@@ -17,3 +19,4 @@ minimumReleaseAgeExclude:
   - '@nuxt/devtools-kit@4.0.0-alpha.19'
   - '@nuxt/devtools@4.0.0-alpha.19'
   - '@devframes/vite@0.9.19'
+  - '@devframes/hub-ui@0.9.19'

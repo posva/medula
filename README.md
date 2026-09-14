@@ -16,10 +16,10 @@ open, through [MCP](https://modelcontextprotocol.io). Built on [devframe](https:
 
 ```ts
 // vite.config.ts
-import { Medula } from 'medula/vite'
+import { medula } from 'medula/vite'
 
 export default defineConfig({
-  plugins: [Medula()],
+  plugins: [medula()],
 })
 ```
 
@@ -110,7 +110,7 @@ clear error.
 
 ### Svelte 5
 
-With `Medula()` in `vite.config.ts`, agents inspect and edit component state of any Svelte 5
+With `medula()` in `vite.config.ts`, agents inspect and edit component state of any Svelte 5
 dev build. The plugin serves an instrumented wrapper in place of `svelte/internal/client`, the
 module every compiled component imports, and records components and their labelled
 `$state`/`$derived` signals, like a devtools would.

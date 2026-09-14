@@ -122,7 +122,7 @@ const componentDetailsSchema = z.object({
 })
 
 const HOOK_MISSING =
-  '[medula] React DevTools hook not found before React loaded. Enable it: `Medula({ react: true })` in Vite, or inline `reactDevtoolsHookScript` from medula/next in <head>.'
+  '[medula] React DevTools hook not found before React loaded. Enable it with the `medula()` Vite plugin, or inline `reactDevtoolsHookScript` from medula/next in <head>.'
 const INTERNALS_MISSING =
   '[medula] React internals are not available: this needs a development build of React.'
 

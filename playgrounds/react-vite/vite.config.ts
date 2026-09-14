@@ -1,8 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { Medula } from 'medula/vite'
+import { medula } from 'medula/vite'
 
 export default defineConfig({
-  plugins: [react(), Medula()],
+  plugins: [react(), medula()],
   server: { port: 5174 },
 })

@@ -90,7 +90,7 @@ function requireInternal(): SvelteRuntimeInternal {
   const internal = getStore().internal
   if (!internal) {
     throw new Error(
-      '[medula] Svelte runtime not instrumented: this needs the Vite plugin (Medula()) and a dev build (compilerOptions.dev).',
+      '[medula] Svelte runtime not instrumented: this needs the Vite plugin (medula()) and a dev build (compilerOptions.dev).',
     )
   }
   return internal

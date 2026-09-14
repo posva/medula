@@ -1,7 +1,7 @@
 # Svelte + Vite playground
 
 Small counter/todo app (Svelte 5 runes, Vite 8) with **no `medula` code in `src/`**. The
-`Medula()` Vite plugin instruments `svelte/internal/client` in dev, so agents list the
+`medula()` Vite plugin instruments `svelte/internal/client` in dev, so agents list the
 components and read/write their `$state` like a devtools would.
 
 | What                                 | Where                    | Exposed as                                   |

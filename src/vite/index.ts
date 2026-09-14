@@ -34,7 +34,7 @@ export interface MedulaVitePluginOptions extends Pick<
  * Auth is off by default: this is a single-user localhost tool. Pass
  * `auth: true` for devframe's one-time-code gate.
  */
-export function Medula(options: MedulaVitePluginOptions = {}): Plugin[] {
+export function medula(options: MedulaVitePluginOptions = {}): Plugin[] {
   const base = options.base ?? MEDULA_BASE
   const def = createMedula({ base })
   let instance: DevframeInstance | undefined
@@ -105,4 +105,4 @@ export function Medula(options: MedulaVitePluginOptions = {}): Plugin[] {
   return plugins
 }
 
-export default Medula
+export default medula

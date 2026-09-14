@@ -37,7 +37,7 @@ discovers frameworks like the official devtools do.
 | `src/vue/internal.ts`    | browser | Component tree walker + StateEditor-like setter (mirrors Vue DevTools), Pinia/Router tools                                                                        |
 | `src/react/internals.ts` | browser | Fiber walker + `overrideHookState`/`overrideProps` through the hook shim (mirrors React DevTools)                                                                 |
 | `medula`                 | node    | `createMedula()` devframe definition (+ `help` tool and resource)                                                                                                 |
-| `medula/vite`            | node    | `Medula()` Vite plugin: bridge + config page + injects bootstrap and `connect.js`                                                                                 |
+| `medula/vite`            | node    | `medula()` Vite plugin: bridge + config page + injects bootstrap and `connect.js`                                                                                 |
 | `medula/next`            | node    | `createMedulaHandler()` route handler, `withMedula()`, `<Medula />` head component                                                                                |
 | `medula/nuxt`            | node    | Nuxt module: adds the Vite plugin, injects bootstrap and `connect.js` through `app.head`                                                                          |
 | `medula/client`          | browser | Manual escape hatch: `exposeState(name, { get, set })` for state no devtools can reach                                                                            |

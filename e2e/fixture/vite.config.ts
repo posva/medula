@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
-import { Medula } from 'medula/vite'
+import { medula } from 'medula/vite'
 
 export default defineConfig({
-  plugins: [Medula()],
+  plugins: [medula()],
 })

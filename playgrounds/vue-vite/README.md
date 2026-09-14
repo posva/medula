@@ -1,7 +1,7 @@
 # Vue + Vite playground
 
 Small todo app (Vue 3 + Pinia, Vite 8). It imports nothing from `medula`: the only
-integration is `Medula()` in `vite.config.ts`, next to `@vitejs/plugin-vue` and the Vite
+integration is `medula()` in `vite.config.ts`, next to `@vitejs/plugin-vue` and the Vite
 DevTools dock (`devtools: true`).
 
 The plugin injects a bootstrap script (Vue DevTools hook shim) and the page script. From there

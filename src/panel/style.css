@@ -87,26 +87,6 @@ summary {
 .muted {
   color: var(--muted);
 }
-.tools {
-  list-style: none;
-  padding: 0;
-  margin: 0.5rem 0 0;
-  display: grid;
-  gap: 0.5rem;
-}
-.tools li {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.5rem 0.75rem;
-}
-.tools li b {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-}
-.tools li span {
-  display: block;
-  color: var(--muted);
-  font-size: 0.9em;
-}
 button {
   font: inherit;
   padding: 0.35rem 0.75rem;

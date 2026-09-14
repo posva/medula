@@ -3,13 +3,13 @@ import type { NuxtModule } from '@nuxt/schema'
 import { medula } from '../vite'
 import type { MedulaVitePluginOptions } from '../vite'
 import { BOOTSTRAP_SCRIPT } from '../page/bootstrap'
-import { MEDULA_BASE, connectScriptUrl } from '../shared'
+import { MEDULA_BASE } from '../shared'
 
-export type MedulaNuxtOptions = Omit<MedulaVitePluginOptions, 'inject'>
+export type MedulaNuxtOptions = MedulaVitePluginOptions
 
 /**
- * Nuxt module: mounts the devframe on the Vite dev server and adds the
- * connect script to the app head in development. Does nothing in production.
+ * Nuxt module: registers medula as a Nuxt DevTools dock and inlines the hook
+ * bootstrap in the app head in development. Does nothing in production.
  *
  * @example
  * export default defineNuxtConfig({ modules: ['medula/nuxt'] })
@@ -22,16 +22,21 @@ const medulaModule: NuxtModule<MedulaNuxtOptions> = defineNuxtModule<MedulaNuxtO
   },
   setup(options, nuxt) {
     if (!nuxt.options.dev) return
+    const devtools = nuxt.options.devtools
+    if (devtools === false || (typeof devtools === 'object' && devtools.enabled === false)) {
+      console.warn('[medula] Nuxt DevTools is disabled: medula runs as one of its docks.')
+      return
+    }
     const base = options.base ?? MEDULA_BASE
-    // Nuxt renders the HTML itself, so the Vite `transformIndexHtml` injection
-    // does not apply: add the script to the head instead.
-    addVitePlugin(medula({ ...options, base, inject: false }), { server: false })
+    // Nuxt DevTools hosts Vite DevTools docks; Nuxt renders the HTML itself, so
+    // the Vite `transformIndexHtml` injection does not apply: add the shims to the head.
+    addVitePlugin(medula({ ...options, base }), { server: false })
     nuxt.options.app.head.script ??= []
-    nuxt.options.app.head.script.push(
-      // devtools hooks: must run before Vue loads
-      { innerHTML: BOOTSTRAP_SCRIPT, tagPosition: 'head', tagPriority: 'critical' },
-      { type: 'module', src: connectScriptUrl(base), tagPosition: 'bodyClose' },
-    )
+    nuxt.options.app.head.script.push({
+      innerHTML: BOOTSTRAP_SCRIPT,
+      tagPosition: 'head',
+      tagPriority: 'critical',
+    })
   },
 })
 

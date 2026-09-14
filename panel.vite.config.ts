@@ -13,6 +13,8 @@ export default defineConfig({
     outDir: resolve(import.meta.dirname, 'dist-client'),
     emptyOutDir: true,
     rollupOptions: {
+      // the hub runtime calls the default export of connect.js
+      preserveEntrySignatures: 'exports-only',
       input: {
         index: resolve(panelDir, 'index.html'),
         connect: resolve(panelDir, 'connect.ts'),

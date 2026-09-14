@@ -14,23 +14,25 @@
           Let a coding agent read and change the state of the page you have open. There is no UI
           here: the agent is the UI.
         </p>
-        <p id="status" class="status">Loading connection…</p>
+        <p id="status" class="status">Looking for the devtools connection…</p>
       </header>
 
       <section>
         <h2>1. Point your agent at the MCP endpoint</h2>
-        <p>Streamable HTTP endpoint of this dev server:</p>
-        <pre><code id="mcp-url">…</code></pre>
+        <div id="mcp" hidden>
+          <p>Streamable HTTP endpoint of this dev server (shared with the other devtools):</p>
+          <pre><code id="mcp-url">…</code></pre>
 
+          <details open>
+            <summary>Claude Code</summary>
+            <pre><code id="snippet-claude">…</code></pre>
+          </details>
+          <details>
+            <summary><code>.mcp.json</code> / Cursor / Windsurf / VS Code</summary>
+            <pre><code id="snippet-json">…</code></pre>
+          </details>
+        </div>
         <details open>
-          <summary>Claude Code</summary>
-          <pre><code id="snippet-claude">…</code></pre>
-        </details>
-        <details>
-          <summary><code>.mcp.json</code> / Cursor / Windsurf / VS Code</summary>
-          <pre><code id="snippet-json">…</code></pre>
-        </details>
-        <details>
           <summary>Any running dev server (devframe connect)</summary>
           <p>
             One stdio server that discovers every running devframe dev server on this machine, so
@@ -47,8 +49,11 @@
       <section>
         <h2>2. Expose state from your app</h2>
         <p>
-          Tools appear while a page of your app is open in the browser. Expose state with the
-          framework helpers:
+          Tools appear while a page of your app is open in the browser:
+          <code>medula_list-states</code>, <code>medula_get-state</code>,
+          <code>medula_set-state</code>, <code>medula_patch-state</code>, plus component tools for
+          Vue, Pinia, Vue Router, React and Svelte. Call <code>medula_help</code> for the details.
+          Expose extra state with the helpers:
         </p>
         <pre><code>import { exposeState } from 'medula/client'
 
@@ -61,15 +66,6 @@ exposeState('cart', {
           See <code>medula/vue</code>, <code>medula/react</code> and <code>medula/svelte</code> for
           refs, stores and hooks.
         </p>
-      </section>
-
-      <section>
-        <h2>3. Tools currently available</h2>
-        <p class="muted">
-          Refreshes when a page connects. Open your app in another tab if the state tools are
-          missing.
-        </p>
-        <ul id="tools" class="tools"></ul>
       </section>
     </main>
     <script type="module" src="./main.ts"></script>

@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url'
 import { defineDevframe } from 'devframe'
 import type { DevframeDefinition } from 'devframe'
 import pkg from '../package.json' with { type: 'json' }
-import { MEDULA_BASE, MEDULA_ID } from './shared'
+import { MEDULA_BASE, MEDULA_ID, connectScriptUrl } from './shared'
 
 export interface MedulaOptions {
   /** Mount base inside the host dev server. @default '/__medula/' */
@@ -20,13 +20,26 @@ The open web page exposes its state through these MCP tools:
 
 Arguments are passed as a single object under \`arg0\`, for example \`{ "arg0": { "name": "cart" } }\`.
 
-If these tools are missing, no page is connected: open the app in a browser (dev server running) and list the tools again. Each open tab is a separate page; the tools act on the tab that connected first.
+If these tools are missing, no page is connected: open the app in a browser (dev server running) and list the tools again. Each open tab is a separate page; the tools act on the tab that synced last, the one the user looked at most recently.
 `
 
 /**
- * The headless devframe: no UI besides a plain config page. The state tools
- * come from the page itself (see `medula/client`) and appear as MCP
- * tools while a page is connected.
+ * Dock client script entry: the page script served with the config page at
+ * `base`. A hub imports it into the app page; it needs no app code. `eager`:
+ * the tools must exist before anyone opens the medula dock.
+ */
+export function medulaDockClientScript(base: string = MEDULA_BASE): {
+  importFrom: string
+  eager: boolean
+} {
+  return { importFrom: connectScriptUrl(base), eager: true }
+}
+
+/**
+ * The headless devframe: no UI besides a plain config page, meant to run as a
+ * hub dock (Vite DevTools, Nuxt DevTools, a Next hub). The state tools come
+ * from the page itself (see `medula/client`) and appear as MCP tools of the
+ * hub while a page is connected.
  */
 export function createMedula(options: MedulaOptions = {}): DevframeDefinition {
   return defineDevframe({

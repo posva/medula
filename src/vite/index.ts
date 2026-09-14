@@ -1,108 +1,81 @@
-import type { Server } from 'node:http'
-import { initDevframe } from 'devframe/initiate'
-import type { DevframeInstance, InitDevframeOptions } from 'devframe/initiate'
+import type { AddressInfo } from 'node:net'
+import { DEVTOOLS_MOUNT_PATH } from '@vitejs/devtools-kit/constants'
+import { createPluginFromDevframe } from '@vitejs/devtools-kit/node'
+import { registerDevframeInstance } from 'devframe/internal'
 import type { Plugin } from 'vite'
-import { createMedula } from '../devframe'
+import { createMedula, medulaDockClientScript } from '../devframe'
 import { BOOTSTRAP_SCRIPT } from '../page/bootstrap'
-import { MEDULA_BASE, connectScriptUrl } from '../shared'
+import { MEDULA_BASE, MEDULA_ID } from '../shared'
 import { svelteInstrumentation } from './svelte'
 
-export interface MedulaVitePluginOptions extends Pick<
-  InitDevframeOptions,
-  'auth' | 'mcp' | 'host' | 'allowedOrigins'
-> {
-  /** Mount base inside the dev server. @default '/__medula/' */
+export interface MedulaVitePluginOptions {
+  /** Mount base of the medula dock page inside the dev server. @default '/__medula/' */
   base?: string
-  /** Pin a side-car WebSocket port instead of sharing Vite's server. */
-  port?: number
-  /**
-   * Inject `<script type="module" src="<base>connect.js">` into the served
-   * HTML so the page connects on its own. Set to `false` when the app loads
-   * the script itself (for example a framework that owns the HTML).
-   * @default true
-   */
-  inject?: boolean
 }
 
 /**
- * Vite plugin: serves the config page, `connect.js`, the RPC/WebSocket
- * bridge and the MCP route at `<base>` (default `/__medula/`) and
- * injects the hook bootstrap + page script in dev. No app code needed: Vue
- * apps, Pinia stores and React components are discovered like the official
- * devtools do.
+ * Vite plugin: registers medula as a dock of Vite DevTools (the hub Nuxt
+ * DevTools 4 runs too). The hub serves the config page at `<base>`, loads the
+ * page script into the app and exposes the page tools on its own MCP route.
+ * The plugin also inlines the hook bootstrap in dev so Vue apps, Pinia stores,
+ * React and Svelte components are discovered like the official devtools do.
  *
- * Auth is off by default: this is a single-user localhost tool. Pass
- * `auth: true` for devframe's one-time-code gate.
+ * Requires Vite DevTools: `devtools: true` in the Vite config with
+ * `@vitejs/devtools` installed, or Nuxt DevTools in a Nuxt app.
  */
 export function medula(options: MedulaVitePluginOptions = {}): Plugin[] {
   const base = options.base ?? MEDULA_BASE
-  const def = createMedula({ base })
-  let instance: DevframeInstance | undefined
-
-  const plugins: Plugin[] = [
+  let warned = false
+  return [
+    createPluginFromDevframe(createMedula({ base }), {
+      base,
+      dock: { clientScript: medulaDockClientScript(base) },
+    }),
     {
-      name: 'medula',
-      apply: 'serve',
-      async configureServer(server) {
-        // Vite re-runs this on restarts: drop the previous WS transport first
-        await instance?.close().catch(() => {})
-        instance = initDevframe(def, {
-          base,
-          auth: options.auth ?? false,
-          // client tools arrive after startup, so 'auto' would never mount
-          mcp: options.mcp ?? true,
-          // lets `devframe connect` discover this dev server
-          register: true,
-          host: options.host,
-          allowedOrigins: options.allowedOrigins,
-          ...(options.port != null
-            ? { ws: { port: options.port } }
-            : server.httpServer
-              ? { server: server.httpServer as Server }
-              : { ws: { sidecar: true } }),
-        })
-        const current = instance
-        server.httpServer?.once('close', () => {
-          if (instance === current) {
-            instance = undefined
-            void current.close().catch(() => {})
-          }
-        })
-        server.middlewares.use(base, (req, res, next) => {
-          // the middleware sees paths relative to `base`; devframe expects them full
-          req.url = base.slice(0, -1) + (req.url ?? '/')
-          current.nodeMiddleware(req, res, next)
-        })
-      },
-    },
-  ]
-  if (options.inject !== false) {
-    const connectUrl = connectScriptUrl(base)
-    plugins.push({
       name: 'medula:inject',
       apply: (_config, env) => env.command === 'serve' && !env.isSsrBuild,
+      configResolved(config) {
+        if (warned || config.devtools) return
+        if (config.plugins.some((plugin) => plugin.name.startsWith('vite:devtools'))) return
+        warned = true
+        console.warn(
+          '[medula] medula runs as a Vite DevTools dock. Enable Vite DevTools (`devtools: true` in vite.config with `@vitejs/devtools` installed) or Nuxt DevTools, otherwise no tool reaches MCP.',
+        )
+      },
+      configureServer(server) {
+        // Vite DevTools does not publish itself to `~/.devframe/instances/`;
+        // register its hub so `devframe connect` discovers this dev server.
+        const httpServer = server.httpServer
+        if (!httpServer) return
+        httpServer.once('listening', () => {
+          const address = httpServer.address() as AddressInfo | string | null
+          if (!address || typeof address === 'string') return
+          const registration = registerDevframeInstance({
+            pid: process.pid,
+            port: address.port,
+            origin: `http://localhost:${address.port}`,
+            basePath: DEVTOOLS_MOUNT_PATH,
+            id: MEDULA_ID,
+            name: 'medula',
+            rootDir: server.config.root,
+            mcp: { path: `${DEVTOOLS_MOUNT_PATH}__mcp` },
+            startedAt: Date.now(),
+          })
+          httpServer.once('close', () => registration.unregister())
+        })
+      },
       transformIndexHtml: {
         order: 'pre',
         handler: (_html, ctx) =>
+          // hook shims must run before the frameworks load
           ctx.server
-            ? [
-                // hook shims must run before the frameworks load
-                { tag: 'script', children: BOOTSTRAP_SCRIPT, injectTo: 'head-prepend' },
-                // classic inline script: Vite would try to warm up a module
-                // `src` through its own pipeline, but the middleware serves it
-                {
-                  tag: 'script',
-                  children: `document.head.append(Object.assign(document.createElement('script'),{type:'module',src:${JSON.stringify(connectUrl)}}))`,
-                  injectTo: 'body',
-                },
-              ]
+            ? [{ tag: 'script', children: BOOTSTRAP_SCRIPT, injectTo: 'head-prepend' }]
             : [],
       },
-    })
-  }
-  // Svelte 5 components import `svelte/internal/client`; the wrapper records them
-  plugins.push(svelteInstrumentation())
-  return plugins
+    },
+    // Svelte 5 components import `svelte/internal/client`; the wrapper records them
+    svelteInstrumentation(),
+  ]
 }
 
 export default medula

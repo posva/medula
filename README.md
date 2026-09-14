@@ -12,18 +12,27 @@ open, through [MCP](https://modelcontextprotocol.io). Built on [devframe](https:
 
 ## Setup
 
+medula is a dock of a [devframe](https://devfra.me) hub: Vite DevTools, Nuxt DevTools 4 or a
+hub of its own in Next. The hub owns the connection, the auth gate and the MCP route; medula only
+adds its page script and its tools.
+
 ### Vite
+
+Requires Vite DevTools (`@vitejs/devtools`):
 
 ```ts
 // vite.config.ts
 import { medula } from 'medula/vite'
 
 export default defineConfig({
+  devtools: true, // or { clientAuth: false } to skip the one-time code on a single-user machine
   plugins: [medula()],
 })
 ```
 
 ### Nuxt
+
+Requires Nuxt DevTools 4 (enabled by default):
 
 ```ts
 // nuxt.config.ts
@@ -34,6 +43,8 @@ export default defineNuxtConfig({
 
 ### Next.js (App Router)
 
+Install `@devframes/hub-ui` too (the hub UI that loads the page script).
+
 ```ts
 // next.config.ts
 import { withMedula } from 'medula/next'
@@ -41,7 +52,7 @@ export default withMedula({/* your config */})
 ```
 
 ```ts
-// app/%5F_medula/[[...path]]/route.ts  (Next reserves `_` folders: URL-encoded name)
+// app/%5F_devframes/[[...path]]/route.ts  (Next reserves `_` folders: URL-encoded name)
 import { createMedulaHandler } from 'medula/next'
 
 export const runtime = 'nodejs'
@@ -61,7 +72,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        <Medula /> {/* development only: hook bootstrap + page script */}
+        <Medula /> {/* development only: hook bootstrap + hub UI */}
       </head>
       <body>{children}</body>
     </html>
@@ -69,8 +80,8 @@ export default function RootLayout({ children }) {
 }
 ```
 
-MCP endpoint: `http://localhost:3000/__medula/__mcp`. The RPC socket runs on a side-car port
-advertised by `/__medula/__connection.json`; the instance registers itself for
+MCP endpoint: `http://localhost:3000/__devframes/__mcp`. The RPC socket runs on a side-car port
+advertised by `/__devframes/__connection.json`; the instance registers itself for
 `devframe connect` on the first request, so open a page once.
 
 ## What agents can do
@@ -147,15 +158,17 @@ Every helper returns a dispose function and needs JSON-friendly values.
 
 ## Connect your agent
 
-Open `http://localhost:<port>/__medula/` while the dev server runs. It shows the MCP URL and
+Open your app, then the **medula** dock in the devtools. It shows the MCP URL of the hub and
 ready-to-copy snippets, for example:
 
 ```sh
-claude mcp add --transport http medula http://localhost:5173/__medula/__mcp
+claude mcp add --transport http medula http://localhost:5173/__devtools/__mcp
 ```
 
 Tools: `medula_list-states`, `medula_get-state`, `medula_set-state`,
-`medula_patch-state`. They exist while a page of your app is open in the browser.
+`medula_patch-state` (Pinia stores are `pinia:<id>` states), plus the framework tools
+(`medula_vue_*`, `medula_router_*`, `medula_react_*`, `medula_svelte_*`). They exist while a page
+of your app is open in the browser, next to the tools of the other docks.
 
 Or let `devframe connect` discover every running dev server (this is what `.mcp.json` and
 `.codex/config.toml` in this repo do):
@@ -166,9 +179,9 @@ Or let `devframe connect` discover every running dev server (this is what `.mcp.
 
 ## Playgrounds
 
-`pnpm build`, then `pnpm play:vue` (Vite 8 + Vue + Pinia, with Vite DevTools), `pnpm play:react`,
-`pnpm play:svelte`, `pnpm play:next` (Next 16) or `pnpm play:nuxt` (Nuxt 4 + Nuxt DevTools 4 alpha). Open the app,
-then `/__medula/` on the same origin.
+`pnpm build`, then `pnpm play:vue` (Vite 8 + Vue + Pinia), `pnpm play:react`, `pnpm play:svelte`
+(all with Vite DevTools), `pnpm play:next` (Next 16, own hub) or `pnpm play:nuxt` (Nuxt 4 + Nuxt
+DevTools 4 alpha). Open the app, then the medula dock.
 
 `pnpm e2e:agent` starts a fixture app, opens it in a browser and asks Claude Code (or Codex with
 `pnpm e2e:agent:codex`) to change its state through the `devframe connect` MCP server;

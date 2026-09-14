@@ -3,7 +3,7 @@ import { useCartStore } from '~/stores/cart'
 
 // nothing from medula here: the module injects the page script
 const cart = useCartStore()
-// component state: agents reach it through mcp-devtools_vue_set-component-state
+// component state: agents reach it through medula_vue_set-component-state
 const greeting = ref('Hello')
 // shared SSR-friendly state, also in setupState
 const visitor = useState('visitor', () => ({ name: 'Anonymous', vip: false }))

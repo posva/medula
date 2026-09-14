@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
-import { McpDevtools } from 'medula/vite'
+import { Medula } from 'medula/vite'
 
 export default defineConfig({
-  plugins: [McpDevtools()],
+  plugins: [Medula()],
 })

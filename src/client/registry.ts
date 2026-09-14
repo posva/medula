@@ -17,7 +17,7 @@ interface Registry {
 }
 
 // Shared across bundles (app code + connect script) that load their own copy.
-const REGISTRY_KEY = Symbol.for('mcp-devtools:registry')
+const REGISTRY_KEY = Symbol.for('medula:registry')
 const registry: Registry = ((globalThis as any)[REGISTRY_KEY] ??= {
   states: new Map(),
   listeners: new Set(),

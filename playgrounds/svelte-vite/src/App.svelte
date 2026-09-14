@@ -7,7 +7,7 @@
   // object $state that is reassigned: a signal holding a proxy
   let todos = $state([
     { id: 1, text: 'Open the page', done: true },
-    { id: 2, text: 'Call mcp-devtools_svelte_list-components', done: false },
+    { id: 2, text: 'Call medula_svelte_list-components', done: false },
   ])
   // object $state never reassigned: only the proxy exists
   let user = $state({ name: 'Ada', address: { city: 'Paris' } })

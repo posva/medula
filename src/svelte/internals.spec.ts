@@ -8,15 +8,13 @@ const REGISTRY_KEY = Symbol.for('devframe:browser-agent-registry')
 function toolIds(): string[] {
   const state = (globalThis as any)[REGISTRY_KEY] as { tools: Map<symbol, any> } | undefined
   return state
-    ? [...state.tools.values()]
-        .map((t) => t.id)
-        .filter((id) => id.startsWith('mcp-devtools:svelte:'))
+    ? [...state.tools.values()].map((t) => t.id).filter((id) => id.startsWith('medula:svelte:'))
     : []
 }
 
 function tool(name: string): { invoke: (args: Record<string, unknown>) => Promise<any> } {
   const state = (globalThis as any)[REGISTRY_KEY] as { tools: Map<symbol, any> }
-  const found = [...state.tools.values()].find((t) => t.id === `mcp-devtools:svelte:${name}`)
+  const found = [...state.tools.values()].find((t) => t.id === `medula:svelte:${name}`)
   if (!found) throw new Error(`missing tool ${name}`)
   return found
 }
@@ -107,9 +105,9 @@ describe('svelte internals tools', () => {
     expect(toolIds()).toEqual([])
     mountApp()
     expect(toolIds().sort()).toEqual([
-      'mcp-devtools:svelte:get-component-state',
-      'mcp-devtools:svelte:list-components',
-      'mcp-devtools:svelte:set-component-state',
+      'medula:svelte:get-component-state',
+      'medula:svelte:list-components',
+      'medula:svelte:set-component-state',
     ])
   })
 

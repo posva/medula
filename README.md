@@ -16,10 +16,10 @@ open, through [MCP](https://modelcontextprotocol.io). Built on [devframe](https:
 
 ```ts
 // vite.config.ts
-import { McpDevtools } from 'medula/vite'
+import { Medula } from 'medula/vite'
 
 export default defineConfig({
-  plugins: [McpDevtools()],
+  plugins: [Medula()],
 })
 ```
 
@@ -36,18 +36,18 @@ export default defineNuxtConfig({
 
 ```ts
 // next.config.ts
-import { withMcpDevtools } from 'medula/next'
-export default withMcpDevtools({/* your config */})
+import { withMedula } from 'medula/next'
+export default withMedula({/* your config */})
 ```
 
 ```ts
 // app/%5F_medula/[[...path]]/route.ts  (Next reserves `_` folders: URL-encoded name)
-import { createMcpDevtoolsHandler } from 'medula/next'
+import { createMedulaHandler } from 'medula/next'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-const handler = createMcpDevtoolsHandler()
+const handler = createMedulaHandler()
 export const GET = handler.fetch
 export const POST = handler.fetch
 export const DELETE = handler.fetch
@@ -55,13 +55,13 @@ export const DELETE = handler.fetch
 
 ```tsx
 // app/layout.tsx
-import { McpDevtools } from 'medula/next'
+import { Medula } from 'medula/next'
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        <McpDevtools /> {/* development only: hook bootstrap + page script */}
+        <Medula /> {/* development only: hook bootstrap + page script */}
       </head>
       <body>{children}</body>
     </html>
@@ -84,25 +84,25 @@ focused last (background tabs disconnect).
 The injected bootstrap installs a Vue DevTools hook shim before Vue loads, so every mounted app
 announces itself, and the page script builds tools from what it finds:
 
-| Tool                                                                                               | What it reaches                                                                                                                                 |
-| -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp-devtools_list-states`, `get-state`, `set-state`, `patch-state`                                | every Pinia store as `pinia:<id>` (`$state`; set replaces it in one `$patch`), including stores created later                                   |
-| `mcp-devtools_vue_list-components`                                                                 | component tree of every app: `{ id, name, file?, inactive?, children }`. Call it first                                                          |
-| `mcp-devtools_vue_get-component-state`                                                             | `{ props, setupState, data, readonly }` of one component; refs and computed unwrapped, functions skipped, stores shown as `{ $piniaStore: id }` |
-| `mcp-devtools_vue_set-component-state`                                                             | write at a path in `props`, `setupState` or `data`: refs get `.value`, objects are edited in place, the UI re-renders                           |
-| `mcp-devtools_router_get-route`, `mcp-devtools_router_list-routes`, `mcp-devtools_router_navigate` | when the app has Vue Router: current route, all route records, `router.push` by path or `{ name, params, query }`                               |
+| Tool                                                                             | What it reaches                                                                                                                                 |
+| -------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `medula_list-states`, `get-state`, `set-state`, `patch-state`                    | every Pinia store as `pinia:<id>` (`$state`; set replaces it in one `$patch`), including stores created later                                   |
+| `medula_vue_list-components`                                                     | component tree of every app: `{ id, name, file?, inactive?, children }`. Call it first                                                          |
+| `medula_vue_get-component-state`                                                 | `{ props, setupState, data, readonly }` of one component; refs and computed unwrapped, functions skipped, stores shown as `{ $piniaStore: id }` |
+| `medula_vue_set-component-state`                                                 | write at a path in `props`, `setupState` or `data`: refs get `.value`, objects are edited in place, the UI re-renders                           |
+| `medula_router_get-route`, `medula_router_list-routes`, `medula_router_navigate` | when the app has Vue Router: current route, all route records, `router.push` by path or `{ name, params, query }`                               |
 
 ### React
 
 The bootstrap installs a React DevTools hook before React loads, so development builds hand over
 their internals and the page script registers these tools as soon as a renderer appears:
 
-| Tool                                 | What it does                                                              |
-| ------------------------------------ | ------------------------------------------------------------------------- |
-| `mcp-devtools_react_list-components` | Tree of mounted components: `id`, `name`, `statefulHooks`, `propKeys`     |
-| `mcp-devtools_react_get-component`   | Props, `useState`/`useReducer` values (`hooks[].index`) and class `state` |
-| `mcp-devtools_react_set-hook-state`  | Write a hook value (or a path inside it); class components update `state` |
-| `mcp-devtools_react_set-props`       | Override a prop at a path and re-render                                   |
+| Tool                           | What it does                                                              |
+| ------------------------------ | ------------------------------------------------------------------------- |
+| `medula_react_list-components` | Tree of mounted components: `id`, `name`, `statefulHooks`, `propKeys`     |
+| `medula_react_get-component`   | Props, `useState`/`useReducer` values (`hooks[].index`) and class `state` |
+| `medula_react_set-hook-state`  | Write a hook value (or a path inside it); class components update `state` |
+| `medula_react_set-props`       | Override a prop at a path and re-render                                   |
 
 Flow: `list-components`, then `get-component`, then `set-hook-state` / `set-props`. `path: []`
 replaces the whole value. Production builds of React expose no internals: the tools answer with a
@@ -110,16 +110,16 @@ clear error.
 
 ### Svelte 5
 
-With `McpDevtools()` in `vite.config.ts`, agents inspect and edit component state of any Svelte 5
+With `Medula()` in `vite.config.ts`, agents inspect and edit component state of any Svelte 5
 dev build. The plugin serves an instrumented wrapper in place of `svelte/internal/client`, the
 module every compiled component imports, and records components and their labelled
 `$state`/`$derived` signals, like a devtools would.
 
-| Tool                                      | What it does                                                                                                                                                                                                                                            |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp-devtools_svelte_list-components`     | Tree of mounted components: `id`, `name`, `file`, `state` labels (writable), `derived` labels (read-only), prop names. Module-level `$state` (`.svelte.ts`) appears under the pseudo component `module`.                                                |
-| `mcp-devtools_svelte_get-component-state` | `{ props, state, derived }` snapshot of one component.                                                                                                                                                                                                  |
-| `mcp-devtools_svelte_set-component-state` | `{ id, label, path, value }`: writes a `$state` variable. Empty `path` replaces the value (an object `$state` the component never reassigns is replaced in place); nested paths mutate through the reactive proxy. `derived` and `props` are read-only. |
+| Tool                                | What it does                                                                                                                                                                                                                                            |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `medula_svelte_list-components`     | Tree of mounted components: `id`, `name`, `file`, `state` labels (writable), `derived` labels (read-only), prop names. Module-level `$state` (`.svelte.ts`) appears under the pseudo component `module`.                                                |
+| `medula_svelte_get-component-state` | `{ props, state, derived }` snapshot of one component.                                                                                                                                                                                                  |
+| `medula_svelte_set-component-state` | `{ id, label, path, value }`: writes a `$state` variable. Empty `path` replaces the value (an object `$state` the component never reassigns is replaced in place); nested paths mutate through the reactive proxy. `derived` and `props` are read-only. |
 
 Dev builds only (`vite build` and `compilerOptions.dev = false` are untouched). Components
 pre-bundled from `node_modules` are not instrumented. Props show what the parent passed, not
@@ -151,11 +151,11 @@ Open `http://localhost:<port>/__medula/` while the dev server runs. It shows the
 ready-to-copy snippets, for example:
 
 ```sh
-claude mcp add --transport http mcp-devtools http://localhost:5173/__medula/__mcp
+claude mcp add --transport http medula http://localhost:5173/__medula/__mcp
 ```
 
-Tools: `mcp-devtools_list-states`, `mcp-devtools_get-state`, `mcp-devtools_set-state`,
-`mcp-devtools_patch-state`. They exist while a page of your app is open in the browser.
+Tools: `medula_list-states`, `medula_get-state`, `medula_set-state`,
+`medula_patch-state`. They exist while a page of your app is open in the browser.
 
 Or let `devframe connect` discover every running dev server (this is what `.mcp.json` and
 `.codex/config.toml` in this repo do):

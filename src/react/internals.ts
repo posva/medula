@@ -79,7 +79,7 @@ export interface ComponentDetails {
   state?: JsonValue
 }
 
-export interface McpDevtoolsReactProtocol extends InPageChannelProtocol {
+export interface MedulaReactProtocol extends InPageChannelProtocol {
   pageScript: {
     'list-components': () => ComponentSummary[]
     'get-component': (args: { id: number }) => ComponentDetails
@@ -122,9 +122,9 @@ const componentDetailsSchema = z.object({
 })
 
 const HOOK_MISSING =
-  '[mcp-devtools] React DevTools hook not found before React loaded. Enable it: `McpDevtools({ react: true })` in Vite, or inline `reactDevtoolsHookScript` from medula/next in <head>.'
+  '[medula] React DevTools hook not found before React loaded. Enable it: `Medula({ react: true })` in Vite, or inline `reactDevtoolsHookScript` from medula/next in <head>.'
 const INTERNALS_MISSING =
-  '[mcp-devtools] React internals are not available: this needs a development build of React.'
+  '[medula] React internals are not available: this needs a development build of React.'
 
 function getHook(): DevtoolsHook {
   const hook = (globalThis as any).__REACT_DEVTOOLS_GLOBAL_HOOK__ as DevtoolsHook | undefined
@@ -211,7 +211,7 @@ function requireFiber(id: number): { fiber: Fiber; renderer: RendererInternals }
     const fiber = findFiber(root.current, id)
     if (fiber) return { fiber, renderer }
   }
-  throw new Error(`[mcp-devtools] Unknown component id ${id}. Call list-components first.`)
+  throw new Error(`[medula] Unknown component id ${id}. Call list-components first.`)
 }
 
 function details(id: number, fiber: Fiber): ComponentDetails {
@@ -242,7 +242,7 @@ export function onReactRenderer(listener: (id: number, renderer: unknown) => voi
 let dispose: (() => void) | undefined
 
 /**
- * Register the `react` agent tools (`mcp-devtools_react_*`): inspect and edit
+ * Register the `react` agent tools (`medula_react_*`): inspect and edit
  * component hooks/props like React DevTools. The tools appear once a React
  * renderer injects into the DevTools hook (installed before React by the
  * bootstrap script). Idempotent, browser only.
@@ -262,7 +262,7 @@ export function installReactInternals(): () => void {
 }
 
 function registerTools(): () => void {
-  return registerAgentTools<McpDevtoolsReactProtocol>('react', {
+  return registerAgentTools<MedulaReactProtocol>('react', {
     'list-components': {
       type: 'query',
       jsonSerializable: true,
@@ -320,9 +320,7 @@ function registerTools(): () => void {
         if (typeof renderer.overrideHookState !== 'function') throw new Error(INTERNALS_MISSING)
         const hook = [...hooksOf(fiber)].find(([index]) => index === hookIndex)
         if (!hook) {
-          throw new Error(
-            `[mcp-devtools] Component ${id} has no stateful hook at index ${hookIndex}.`,
-          )
+          throw new Error(`[medula] Component ${id} has no stateful hook at index ${hookIndex}.`)
         }
         renderer.overrideHookState(fiber, hookIndex, path, value)
         return hookValue(hookIndex, hook[1])

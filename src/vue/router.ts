@@ -50,7 +50,7 @@ export type NavigateTarget =
     }
   | { path: string; query?: Record<string, unknown>; hash?: string }
 
-export interface McpDevtoolsRouterProtocol extends InPageChannelProtocol {
+export interface MedulaRouterProtocol extends InPageChannelProtocol {
   pageScript: {
     'get-route': () => RouteInfo
     'list-routes': () => RouteRecordInfo[]
@@ -112,13 +112,13 @@ let registered = false
 
 /**
  * Zero config: when the app has Vue Router (`$router`), register the
- * `mcp-devtools_router_*` tools once per page.
+ * `medula_router_*` tools once per page.
  */
 export function installRouterInternals(app: App): void {
   const router = app.config.globalProperties.$router as RouterLike | undefined
   if (registered || !router || typeof router.push !== 'function' || !router.currentRoute) return
   registered = true
-  registerAgentTools<McpDevtoolsRouterProtocol>('router', {
+  registerAgentTools<MedulaRouterProtocol>('router', {
     'get-route': {
       type: 'query',
       jsonSerializable: true,

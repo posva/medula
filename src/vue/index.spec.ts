@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { createApp, effectScope, reactive, ref, shallowRef } from 'vue'
 import { createPinia, defineStore, disposePinia, setActivePinia } from 'pinia'
-import { exposeReactive, exposeRef, exposeStore, piniaMcpDevtools } from './index'
+import { exposeReactive, exposeRef, exposeStore, piniaMedula } from './index'
 import { getExposedState } from '../client/registry'
 
 describe('vue adapter', () => {
@@ -50,9 +50,9 @@ describe('vue adapter', () => {
     expect(getExposedState('my-cart')!.description).toBe('Cart')
   })
 
-  it('piniaMcpDevtools exposes every store', () => {
+  it('piniaMedula exposes every store', () => {
     // plugins run only once pinia is installed on an app
-    const pinia = createPinia().use(piniaMcpDevtools)
+    const pinia = createPinia().use(piniaMedula)
     createApp({}).use(pinia)
     setActivePinia(pinia)
     const useA = defineStore('a', { state: () => ({ n: 1 }) })

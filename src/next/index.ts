@@ -6,10 +6,10 @@ import type {
 import { createElement } from 'react'
 import type { ReactElement } from 'react'
 import { BOOTSTRAP_SCRIPT } from '../page/bootstrap'
-import { MCP_DEVTOOLS_BASE, MCP_DEVTOOLS_ID, connectScriptUrl } from '../shared'
+import { MEDULA_BASE, MEDULA_ID, connectScriptUrl } from '../shared'
 
-export { MCP_DEVTOOLS_BASE, connectScriptUrl }
-/** Hook shims to inline at the top of `<head>` (see {@link McpDevtools}). */
+export { MEDULA_BASE, connectScriptUrl }
+/** Hook shims to inline at the top of `<head>` (see {@link Medula}). */
 export const bootstrapScript: string = BOOTSTRAP_SCRIPT
 
 /**
@@ -18,19 +18,19 @@ export const bootstrapScript: string = BOOTSTRAP_SCRIPT
  * discovered with no other app code.
  *
  * @example
- * <head><McpDevtools /></head>
+ * <head><Medula /></head>
  */
-export function McpDevtools(props: { base?: string } = {}): ReactElement | null {
+export function Medula(props: { base?: string } = {}): ReactElement | null {
   if (process.env.NODE_ENV !== 'development') return null
   return createElement('script', {
     dangerouslySetInnerHTML: {
-      __html: `${BOOTSTRAP_SCRIPT}document.head.append(Object.assign(document.createElement('script'),{type:'module',src:${JSON.stringify(connectScriptUrl(props.base ?? MCP_DEVTOOLS_BASE))}}))`,
+      __html: `${BOOTSTRAP_SCRIPT}document.head.append(Object.assign(document.createElement('script'),{type:'module',src:${JSON.stringify(connectScriptUrl(props.base ?? MEDULA_BASE))}}))`,
     },
   })
 }
-export type { DevframeNextConfig as McpDevtoolsNextConfig }
+export type { DevframeNextConfig as MedulaNextConfig }
 
-export type McpDevtoolsNextHandlerOptions = Omit<CreateDevframeNextHandlerOptions, 'flags'>
+export type MedulaNextHandlerOptions = Omit<CreateDevframeNextHandlerOptions, 'flags'>
 
 /**
  * Wrap `next.config` with the settings the devframe host needs. Mirrors
@@ -38,9 +38,9 @@ export type McpDevtoolsNextHandlerOptions = Omit<CreateDevframeNextHandlerOption
  * Next bundle of this module stays free of the node-only runtime.
  *
  * @example
- * export default withMcpDevtools({ reactStrictMode: true })
+ * export default withMedula({ reactStrictMode: true })
  */
-export function withMcpDevtools<T extends DevframeNextConfig>(nextConfig: T = {} as T): T {
+export function withMedula<T extends DevframeNextConfig>(nextConfig: T = {} as T): T {
   // relative assets under `<base>` must not hit Next's trailing-slash redirect
   return { ...nextConfig, skipTrailingSlashRedirect: true }
 }
@@ -53,15 +53,15 @@ interface LoadedHandler {
   register: (request: Request) => void
 }
 
-const REGISTRATIONS = Symbol.for('mcp-devtools:next-registrations')
+const REGISTRATIONS = Symbol.for('medula:next-registrations')
 const registrations: Map<string, { unregister: () => void }> = ((globalThis as any)[
   REGISTRATIONS
 ] ??= new Map())
 
 // Bundler-ignored so Node loads the published `dist` at request time: a
 // bundled copy breaks the `import.meta.url` lookup of `dist-client`.
-async function loadHandler(options: McpDevtoolsNextHandlerOptions): Promise<LoadedHandler> {
-  const [{ createMcpDevtools }, { createDevframeNextHandler }, { registerDevframeInstance }] =
+async function loadHandler(options: MedulaNextHandlerOptions): Promise<LoadedHandler> {
+  const [{ createMedula }, { createDevframeNextHandler }, { registerDevframeInstance }] =
     await Promise.all([
       import(/* webpackIgnore: true */ /* turbopackIgnore: true */ selfPackage) as Promise<
         typeof import('medula')
@@ -73,9 +73,9 @@ async function loadHandler(options: McpDevtoolsNextHandlerOptions): Promise<Load
         typeof import('devframe/internal')
       >,
     ])
-  const base = options.base ?? MCP_DEVTOOLS_BASE
+  const base = options.base ?? MEDULA_BASE
   const mcp = options.mcp ?? true
-  const handler = createDevframeNextHandler(createMcpDevtools({ base }), {
+  const handler = createDevframeNextHandler(createMedula({ base }), {
     ...options,
     base,
     auth: options.auth ?? false,
@@ -95,8 +95,8 @@ async function loadHandler(options: McpDevtoolsNextHandlerOptions): Promise<Load
       port,
       origin: url.origin,
       basePath: base,
-      id: MCP_DEVTOOLS_ID,
-      name: 'MCP DevTools',
+      id: MEDULA_ID,
+      name: 'medula',
       rootDir: process.cwd(),
       mcp: mcp === false ? null : { path: `${base}__mcp` },
       startedAt: Date.now(),
@@ -119,16 +119,14 @@ async function loadHandler(options: McpDevtoolsNextHandlerOptions): Promise<Load
  * @example
  * export const runtime = 'nodejs'
  * export const dynamic = 'force-dynamic'
- * const handler = createMcpDevtoolsHandler()
+ * const handler = createMedulaHandler()
  * export const GET = handler.fetch
  * export const POST = handler.fetch
  * export const DELETE = handler.fetch
  */
-export function createMcpDevtoolsHandler(
-  options: McpDevtoolsNextHandlerOptions = {},
-): DevframeNextHandler {
+export function createMedulaHandler(options: MedulaNextHandlerOptions = {}): DevframeNextHandler {
   const loaded = loadHandler(options)
-  const base = options.base ?? MCP_DEVTOOLS_BASE
+  const base = options.base ?? MEDULA_BASE
   return {
     fetch: (request) =>
       loaded.then(({ handler, register }) => {

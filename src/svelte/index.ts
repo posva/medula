@@ -6,7 +6,7 @@ export { exposeState } from '../client'
 export type { ExposedState, ExposedStateOptions } from '../client'
 export { installSvelteInternals, onSvelteComponent } from './internals'
 export type {
-  McpDevtoolsSvelteProtocol,
+  MedulaSvelteProtocol,
   SvelteComponentNode,
   SvelteComponentState,
   SvelteStateValue,

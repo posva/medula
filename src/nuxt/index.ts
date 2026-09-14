@@ -1,11 +1,11 @@
 import { addVitePlugin, defineNuxtModule } from '@nuxt/kit'
 import type { NuxtModule } from '@nuxt/schema'
-import { McpDevtools } from '../vite'
-import type { McpDevtoolsVitePluginOptions } from '../vite'
+import { Medula } from '../vite'
+import type { MedulaVitePluginOptions } from '../vite'
 import { BOOTSTRAP_SCRIPT } from '../page/bootstrap'
-import { MCP_DEVTOOLS_BASE, connectScriptUrl } from '../shared'
+import { MEDULA_BASE, connectScriptUrl } from '../shared'
 
-export type McpDevtoolsNuxtOptions = Omit<McpDevtoolsVitePluginOptions, 'inject'>
+export type MedulaNuxtOptions = Omit<MedulaVitePluginOptions, 'inject'>
 
 /**
  * Nuxt module: mounts the devframe on the Vite dev server and adds the
@@ -14,26 +14,25 @@ export type McpDevtoolsNuxtOptions = Omit<McpDevtoolsVitePluginOptions, 'inject'
  * @example
  * export default defineNuxtConfig({ modules: ['medula/nuxt'] })
  */
-const mcpDevtoolsModule: NuxtModule<McpDevtoolsNuxtOptions> =
-  defineNuxtModule<McpDevtoolsNuxtOptions>({
-    meta: {
-      name: 'medula',
-      configKey: 'mcpDevtools',
-      compatibility: { nuxt: '^4.0.0 || ^5.0.0-0' },
-    },
-    setup(options, nuxt) {
-      if (!nuxt.options.dev) return
-      const base = options.base ?? MCP_DEVTOOLS_BASE
-      // Nuxt renders the HTML itself, so the Vite `transformIndexHtml` injection
-      // does not apply: add the script to the head instead.
-      addVitePlugin(McpDevtools({ ...options, base, inject: false }), { server: false })
-      nuxt.options.app.head.script ??= []
-      nuxt.options.app.head.script.push(
-        // devtools hooks: must run before Vue loads
-        { innerHTML: BOOTSTRAP_SCRIPT, tagPosition: 'head', tagPriority: 'critical' },
-        { type: 'module', src: connectScriptUrl(base), tagPosition: 'bodyClose' },
-      )
-    },
-  })
+const medulaModule: NuxtModule<MedulaNuxtOptions> = defineNuxtModule<MedulaNuxtOptions>({
+  meta: {
+    name: 'medula',
+    configKey: 'medula',
+    compatibility: { nuxt: '^4.0.0 || ^5.0.0-0' },
+  },
+  setup(options, nuxt) {
+    if (!nuxt.options.dev) return
+    const base = options.base ?? MEDULA_BASE
+    // Nuxt renders the HTML itself, so the Vite `transformIndexHtml` injection
+    // does not apply: add the script to the head instead.
+    addVitePlugin(Medula({ ...options, base, inject: false }), { server: false })
+    nuxt.options.app.head.script ??= []
+    nuxt.options.app.head.script.push(
+      // devtools hooks: must run before Vue loads
+      { innerHTML: BOOTSTRAP_SCRIPT, tagPosition: 'head', tagPriority: 'critical' },
+      { type: 'module', src: connectScriptUrl(base), tagPosition: 'bodyClose' },
+    )
+  },
+})
 
-export default mcpDevtoolsModule
+export default medulaModule

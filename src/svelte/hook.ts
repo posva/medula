@@ -36,7 +36,7 @@ export interface SvelteHookStore {
 }
 
 /** `globalThis` key of the {@link SvelteHookStore}. */
-export const SVELTE_STORE_KEY: unique symbol = Symbol.for('mcp-devtools:svelte')
+export const SVELTE_STORE_KEY: unique symbol = Symbol.for('medula:svelte')
 
 /** Id of the pseudo component that owns module-level `$state` (`.svelte.ts` files). */
 export const SVELTE_MODULE_ID = 'module'
@@ -68,7 +68,7 @@ export interface SvelteHookedExports {
  * `tag(signal, label)` around every `$state`/`$derived` and
  * `tag_proxy(proxy, label)` around `$state` objects that are never reassigned.
  * Records each component and its labelled signals on
- * `globalThis[Symbol.for('mcp-devtools:svelte')]`. The parent is found with
+ * `globalThis[Symbol.for('medula:svelte')]`. The parent is found with
  * Svelte's own context (`getContext` before `setContext`), which the runtime
  * restores when a block re-renders later, and `onDestroy` removes the record.
  *
@@ -81,7 +81,7 @@ export function installSvelteRuntimeHook(
   target: typeof globalThis = globalThis,
 ): SvelteHookedExports {
   const g = target as unknown as Record<symbol, any>
-  const store: SvelteHookStore = (g[Symbol.for('mcp-devtools:svelte')] ??= {
+  const store: SvelteHookStore = (g[Symbol.for('medula:svelte')] ??= {
     components: new Map(),
     listeners: new Set(),
   })
@@ -91,7 +91,7 @@ export function installSvelteRuntimeHook(
     snapshot: original.snapshot,
     proxy: original.proxy,
   }
-  const OWNER = Symbol.for('mcp-devtools:svelte-owner')
+  const OWNER = Symbol.for('medula:svelte-owner')
   let uid = 0
   const announce = (record: SvelteComponentRecord) => {
     for (const listener of store.listeners) listener(record)

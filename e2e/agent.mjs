@@ -26,43 +26,43 @@ const scenarios = {
   fixture: {
     port: 5199,
     viteRoot: 'e2e/fixture',
-    readyTool: 'mcp-devtools_get-state',
-    read: async () => stateValue(await callTool('mcp-devtools_get-state', { name: 'counter' })),
+    readyTool: 'medula_get-state',
+    read: async () => stateValue(await callTool('medula_get-state', { name: 'counter' })),
     prompt:
-      'read the "counter" state with mcp-devtools_get-state, and change it so that count is 42 and label is "agent" (mcp-devtools_set-state or mcp-devtools_patch-state; their arguments are wrapped in an "arg0" object).',
+      'read the "counter" state with medula_get-state, and change it so that count is 42 and label is "agent" (medula_set-state or medula_patch-state; their arguments are wrapped in an "arg0" object).',
     check: (value) => value.count === 42 && value.label === 'agent',
   },
   vue: {
     port: 5173,
     viteRoot: 'playgrounds/vue-vite',
-    readyTool: 'mcp-devtools_vue_list-components',
+    readyTool: 'medula_vue_list-components',
     read: async () => {
-      const tree = await callTool('mcp-devtools_vue_list-components', {})
+      const tree = await callTool('medula_vue_list-components', {})
       const app = tree.find((node) => node.name === 'App') ?? tree[0]
-      const state = await callTool('mcp-devtools_vue_get-component-state', { id: app.id })
+      const state = await callTool('medula_vue_get-component-state', { id: app.id })
       return {
         id: app.id,
         title: state.setupState.title,
-        todos: await callTool('mcp-devtools_get-state', { name: 'pinia:todos' }),
+        todos: await callTool('medula_get-state', { name: 'pinia:todos' }),
       }
     },
     prompt:
-      'call mcp-devtools_vue_list-components, find the "App" component, read it with mcp-devtools_vue_get-component-state, then use mcp-devtools_vue_set-component-state to change its setupState "title" to "Title set by the agent". Also read the "pinia:todos" state with mcp-devtools_get-state and set its "filter" to "done" with mcp-devtools_patch-state. Tool arguments are wrapped in an "arg0" object.',
+      'call medula_vue_list-components, find the "App" component, read it with medula_vue_get-component-state, then use medula_vue_set-component-state to change its setupState "title" to "Title set by the agent". Also read the "pinia:todos" state with medula_get-state and set its "filter" to "done" with medula_patch-state. Tool arguments are wrapped in an "arg0" object.',
     check: (value) =>
       value.title === 'Title set by the agent' && value.todos?.value?.filter === 'done',
   },
   svelte: {
     port: 5175,
     viteRoot: 'playgrounds/svelte-vite',
-    readyTool: 'mcp-devtools_svelte_list-components',
+    readyTool: 'medula_svelte_list-components',
     read: async () => {
-      const tree = await callTool('mcp-devtools_svelte_list-components', {})
+      const tree = await callTool('medula_svelte_list-components', {})
       const app = flatten(tree).find((node) => node.name === 'App')
-      const state = await callTool('mcp-devtools_svelte_get-component-state', { id: app.id })
+      const state = await callTool('medula_svelte_get-component-state', { id: app.id })
       return { id: app.id, count: state.state.count, city: state.state.user?.address?.city }
     },
     prompt:
-      'call mcp-devtools_svelte_list-components, find the "App" component, read it with mcp-devtools_svelte_get-component-state, then use mcp-devtools_svelte_set-component-state to set its "count" state to 42 (empty path) and the "user" state at path ["address","city"] to "Lyon". Tool arguments are wrapped in an "arg0" object.',
+      'call medula_svelte_list-components, find the "App" component, read it with medula_svelte_get-component-state, then use medula_svelte_set-component-state to set its "count" state to 42 (empty path) and the "user" state at path ["address","city"] to "Lyon". Tool arguments are wrapped in an "arg0" object.',
     check: (value) => value.count === 42 && value.city === 'Lyon',
   },
 }

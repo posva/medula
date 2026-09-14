@@ -2,7 +2,7 @@ import type { Plugin } from 'vite'
 import { installSvelteRuntimeHook } from '../svelte/hook'
 
 const REAL_ID = 'svelte/internal/client'
-const WRAPPER_ID = '\0mcp-devtools:svelte-internal-client'
+const WRAPPER_ID = '\0medula:svelte-internal-client'
 
 /**
  * Source of the module served in place of `svelte/internal/client` to
@@ -30,7 +30,7 @@ export function svelteWrapperSource(): string {
  */
 export function svelteInstrumentation(): Plugin {
   return {
-    name: 'mcp-devtools:svelte',
+    name: 'medula:svelte',
     apply: 'serve',
     // must run before vite:resolve, which maps the specifier to the pre-bundled dep
     enforce: 'pre',

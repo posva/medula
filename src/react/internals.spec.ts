@@ -11,15 +11,13 @@ const REGISTRY_KEY = Symbol.for('devframe:browser-agent-registry')
 function reactToolIds(): string[] {
   const state = (globalThis as any)[REGISTRY_KEY] as { tools: Map<symbol, any> } | undefined
   return state
-    ? [...state.tools.values()]
-        .map((t) => t.id)
-        .filter((id) => id.startsWith('mcp-devtools:react:'))
+    ? [...state.tools.values()].map((t) => t.id).filter((id) => id.startsWith('medula:react:'))
     : []
 }
 
 function tool(name: string): { invoke: (args: Record<string, unknown>) => Promise<any> } {
   const state = (globalThis as any)[REGISTRY_KEY] as { tools: Map<symbol, any> }
-  const found = [...state.tools.values()].find((t) => t.id === `mcp-devtools:react:${name}`)
+  const found = [...state.tools.values()].find((t) => t.id === `medula:react:${name}`)
   if (!found) throw new Error(`missing tool ${name}`)
   return found
 }
@@ -78,10 +76,10 @@ describe('lazy registration', () => {
   it('registers the react tools once a renderer injects', () => {
     expect(toolsBeforeReact).toEqual([])
     expect(toolsAfterReact.sort()).toEqual([
-      'mcp-devtools:react:get-component',
-      'mcp-devtools:react:list-components',
-      'mcp-devtools:react:set-hook-state',
-      'mcp-devtools:react:set-props',
+      'medula:react:get-component',
+      'medula:react:list-components',
+      'medula:react:set-hook-state',
+      'medula:react:set-props',
     ])
     // disposed above: gone until installed again
     expect(toolsAfterDispose).toEqual([])
@@ -91,7 +89,7 @@ describe('lazy registration', () => {
   })
 
   it('records renderers for late subscribers', () => {
-    const store = (globalThis as any)[Symbol.for('mcp-devtools:react-hook')]
+    const store = (globalThis as any)[Symbol.for('medula:react-hook')]
     expect(store.renderers.size).toBeGreaterThan(0)
   })
 })

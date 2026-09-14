@@ -68,7 +68,7 @@ Flags:
 }
 
 const EXPECTED_BRANCH = 'main'
-const MAIN_PKG_NAME = 'template-lib-ts'
+const MAIN_PKG_NAME = 'medula'
 const IS_MAIN_PKG_AT_ROOT = true
 const PKG_FOLDERS = [
   // comment for multiline format

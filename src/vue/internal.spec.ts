@@ -11,7 +11,7 @@ const REGISTRY_KEY = Symbol.for('devframe:browser-agent-registry')
 
 function tool(name: string): { invoke: (args: Record<string, unknown>) => Promise<any> } {
   const state = (globalThis as any)[REGISTRY_KEY] as { tools: Map<symbol, any> }
-  const found = [...state.tools.values()].find((t) => t.id === `mcp-devtools:${name}`)
+  const found = [...state.tools.values()].find((t) => t.id === `medula:${name}`)
   if (!found) throw new Error(`missing tool ${name}`)
   return found
 }

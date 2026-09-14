@@ -12,7 +12,7 @@ export type {
   ComponentDetails,
   ComponentSummary,
   HookValue,
-  McpDevtoolsReactProtocol,
+  MedulaReactProtocol,
 } from './internals'
 
 // component inspection tools ride along with the state helpers

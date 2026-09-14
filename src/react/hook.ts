@@ -5,14 +5,14 @@ export interface ReactHookStore {
 }
 
 /** `globalThis` key of the {@link ReactHookStore}. */
-export const REACT_HOOK_STORE_KEY: unique symbol = Symbol.for('mcp-devtools:react-hook')
+export const REACT_HOOK_STORE_KEY: unique symbol = Symbol.for('medula:react-hook')
 
 /**
  * Minimal React DevTools global hook. React only injects its internals
  * (`overrideHookState`, `overrideProps`...) when
  * `__REACT_DEVTOOLS_GLOBAL_HOOK__` exists BEFORE react-dom evaluates, so this
  * must run first: inline it in `<head>` (see {@link REACT_DEVTOOLS_HOOK_SCRIPT}).
- * Every injected renderer is recorded on `globalThis[Symbol.for('mcp-devtools:react-hook')]`
+ * Every injected renderer is recorded on `globalThis[Symbol.for('medula:react-hook')]`
  * and announced to its listeners, also when another hook (React DevTools,
  * Fast Refresh) owns the global.
  *
@@ -20,7 +20,7 @@ export const REACT_HOOK_STORE_KEY: unique symbol = Symbol.for('mcp-devtools:reac
  */
 export function installReactDevtoolsHook(target: typeof globalThis = globalThis): void {
   const g = target as unknown as Record<string | symbol, any>
-  const STORE = Symbol.for('mcp-devtools:react-hook')
+  const STORE = Symbol.for('medula:react-hook')
   const store = (g[STORE] ??= { renderers: new Map(), listeners: new Set() })
   const announce = (id: number, renderer: unknown) => {
     store.renderers.set(id, renderer)

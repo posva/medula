@@ -23,7 +23,7 @@ describe('channel agent tools', () => {
         set: (v) => (user = v),
       }),
     )
-    const tool = (name: string) => agentTools().find((t) => t.id === `mcp-devtools:${name}`)!
+    const tool = (name: string) => agentTools().find((t) => t.id === `medula:${name}`)!
     expect(tool('list-states')).toBeDefined()
     expect(await tool('list-states').invoke({ arg0: {} })).toEqual([
       { name: 'user', description: 'Current user', preview: JSON.stringify(user) },

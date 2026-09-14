@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { McpDevtools } from 'medula/next'
+import { Medula } from 'medula/next'
 import './globals.css'
 
 export const metadata = {
@@ -11,7 +11,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         {/* development only: hook bootstrap + page script */}
-        <McpDevtools />
+        <Medula />
       </head>
       <body>{children}</body>
     </html>

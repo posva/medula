@@ -15,16 +15,16 @@
     "nuxt",
     "next"
   ],
-  "homepage": "https://github.com/posva/mcp-devtools",
+  "homepage": "https://github.com/posva/medula",
   "bugs": {
-    "url": "https://github.com/posva/mcp-devtools/issues"
+    "url": "https://github.com/posva/medula/issues"
   },
   "license": "MIT",
   "author": {
     "name": "Eduardo San Martin Morote",
     "email": "posva13@gmail.com"
   },
-  "repository": "posva/mcp-devtools",
+  "repository": "posva/medula",
   "funding": "https://github.com/sponsors/posva",
   "files": [
     "dist",

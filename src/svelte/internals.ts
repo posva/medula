@@ -40,7 +40,7 @@ export interface SvelteStateValue {
   value: JsonValue
 }
 
-export interface McpDevtoolsSvelteProtocol extends InPageChannelProtocol {
+export interface MedulaSvelteProtocol extends InPageChannelProtocol {
   pageScript: {
     'list-components': () => SvelteComponentNode[]
     'get-component-state': (args: { id: string }) => SvelteComponentState
@@ -90,7 +90,7 @@ function requireInternal(): SvelteRuntimeInternal {
   const internal = getStore().internal
   if (!internal) {
     throw new Error(
-      '[mcp-devtools] Svelte runtime not instrumented: this needs the Vite plugin (McpDevtools()) and a dev build (compilerOptions.dev).',
+      '[medula] Svelte runtime not instrumented: this needs the Vite plugin (Medula()) and a dev build (compilerOptions.dev).',
     )
   }
   return internal
@@ -99,7 +99,7 @@ function requireInternal(): SvelteRuntimeInternal {
 function requireComponent(id: string): SvelteComponentRecord {
   const record = getStore().components.get(id)
   if (!record || !record.alive) {
-    throw new Error(`[mcp-devtools] Unknown component id "${id}". Call list-components first.`)
+    throw new Error(`[medula] Unknown component id "${id}". Call list-components first.`)
   }
   return record
 }
@@ -166,20 +166,20 @@ function writeAtPath(target: unknown, path: StatePath, value: unknown): void {
   for (const key of path.slice(0, -1)) {
     parent = isObject(parent) ? parent[key] : undefined
   }
-  if (!isObject(parent)) throw new Error(`[mcp-devtools] Path ${JSON.stringify(path)} not found`)
+  if (!isObject(parent)) throw new Error(`[medula] Path ${JSON.stringify(path)} not found`)
   parent[path[path.length - 1]!] = value
 }
 
 /** A never-reassigned `$state` object has no signal to set: replace its contents instead. */
 function replaceContents(target: object, value: unknown): void {
   if (Array.isArray(target)) {
-    if (!Array.isArray(value)) throw new Error('[mcp-devtools] Expected an array value')
+    if (!Array.isArray(value)) throw new Error('[medula] Expected an array value')
     target.length = 0
     target.push(...value)
     return
   }
   if (!isObject(value) || Array.isArray(value)) {
-    throw new Error('[mcp-devtools] Expected an object value')
+    throw new Error('[medula] Expected an object value')
   }
   const record = target as Record<string, unknown>
   for (const key of Object.keys(record)) if (!(key in value)) delete record[key]
@@ -202,7 +202,7 @@ export function onSvelteComponent(listener: (record: SvelteComponentRecord) => v
 let dispose: (() => void) | undefined
 
 /**
- * Register the `svelte` agent tools (`mcp-devtools_svelte_*`): inspect and edit
+ * Register the `svelte` agent tools (`medula_svelte_*`): inspect and edit
  * component `$state` like a devtools would. The tools appear once the first
  * component renders through the instrumented `svelte/internal/client` (Vite
  * plugin, dev builds only). Idempotent, browser only.
@@ -222,7 +222,7 @@ export function installSvelteInternals(): () => void {
 }
 
 function registerTools(): () => void {
-  return registerAgentTools<McpDevtoolsSvelteProtocol>('svelte', {
+  return registerAgentTools<MedulaSvelteProtocol>('svelte', {
     'list-components': {
       type: 'query',
       jsonSerializable: true,
@@ -269,12 +269,12 @@ function registerTools(): () => void {
         const entry = record.signals.get(label)
         if (!entry) {
           throw new Error(
-            `[mcp-devtools] Component ${id} (${record.name}) has no $state "${label}". Call get-component-state to see its labels.`,
+            `[medula] Component ${id} (${record.name}) has no $state "${label}". Call get-component-state to see its labels.`,
           )
         }
         if (entry.kind === 'derived') {
           throw new Error(
-            `[mcp-devtools] "${label}" is a $derived: read-only. Change the $state it depends on.`,
+            `[medula] "${label}" is a $derived: read-only. Change the $state it depends on.`,
           )
         }
         const internal = requireInternal()

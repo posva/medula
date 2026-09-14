@@ -1,5 +1,5 @@
 /** Where the hook shim records Vue apps for the page script. */
-export const VUE_HOOK_KEY: unique symbol = Symbol.for('mcp-devtools:vue-hook') as never
+export const VUE_HOOK_KEY: unique symbol = Symbol.for('medula:vue-hook') as never
 
 export interface VueHookCapture {
   apps: Set<unknown>
@@ -13,7 +13,7 @@ export interface VueHookCapture {
  * real Vue DevTools hook is present, it subscribes to it instead.
  */
 export function installVueDevtoolsHook(target: any): void {
-  const KEY = Symbol.for('mcp-devtools:vue-hook')
+  const KEY = Symbol.for('medula:vue-hook')
   const capture = (target[KEY] ??= { apps: new Set(), listeners: new Set() })
   const announce = (app: unknown) => {
     if (!app || capture.apps.has(app)) return
@@ -32,7 +32,7 @@ export function installVueDevtoolsHook(target: any): void {
 
   const events = new Map<string, Array<(...args: unknown[]) => void>>()
   const hook = {
-    id: 'mcp-devtools',
+    id: 'medula',
     devtoolsVersion: '7.0',
     enabled: false,
     apps: [] as unknown[],

@@ -2,12 +2,12 @@ import type { Server } from 'node:http'
 import { initDevframe } from 'devframe/initiate'
 import type { DevframeInstance, InitDevframeOptions } from 'devframe/initiate'
 import type { Plugin } from 'vite'
-import { createMcpDevtools } from '../devframe'
+import { createMedula } from '../devframe'
 import { BOOTSTRAP_SCRIPT } from '../page/bootstrap'
-import { MCP_DEVTOOLS_BASE, connectScriptUrl } from '../shared'
+import { MEDULA_BASE, connectScriptUrl } from '../shared'
 import { svelteInstrumentation } from './svelte'
 
-export interface McpDevtoolsVitePluginOptions extends Pick<
+export interface MedulaVitePluginOptions extends Pick<
   InitDevframeOptions,
   'auth' | 'mcp' | 'host' | 'allowedOrigins'
 > {
@@ -34,14 +34,14 @@ export interface McpDevtoolsVitePluginOptions extends Pick<
  * Auth is off by default: this is a single-user localhost tool. Pass
  * `auth: true` for devframe's one-time-code gate.
  */
-export function McpDevtools(options: McpDevtoolsVitePluginOptions = {}): Plugin[] {
-  const base = options.base ?? MCP_DEVTOOLS_BASE
-  const def = createMcpDevtools({ base })
+export function Medula(options: MedulaVitePluginOptions = {}): Plugin[] {
+  const base = options.base ?? MEDULA_BASE
+  const def = createMedula({ base })
   let instance: DevframeInstance | undefined
 
   const plugins: Plugin[] = [
     {
-      name: 'mcp-devtools',
+      name: 'medula',
       apply: 'serve',
       async configureServer(server) {
         // Vite re-runs this on restarts: drop the previous WS transport first
@@ -79,7 +79,7 @@ export function McpDevtools(options: McpDevtoolsVitePluginOptions = {}): Plugin[
   if (options.inject !== false) {
     const connectUrl = connectScriptUrl(base)
     plugins.push({
-      name: 'mcp-devtools:inject',
+      name: 'medula:inject',
       apply: (_config, env) => env.command === 'serve' && !env.isSsrBuild,
       transformIndexHtml: {
         order: 'pre',
@@ -105,4 +105,4 @@ export function McpDevtools(options: McpDevtoolsVitePluginOptions = {}): Plugin[
   return plugins
 }
 
-export default McpDevtools
+export default Medula

@@ -84,25 +84,20 @@ export function exposeStore<S extends StateTree>(
  * Pinia plugin that exposes every store under its `$id`.
  *
  * @example
- * pinia.use(piniaMcpDevtools)
+ * pinia.use(piniaMedula)
  */
-export const piniaMcpDevtools: PiniaPlugin = ({ store }) => {
+export const piniaMedula: PiniaPlugin = ({ store }) => {
   exposeStore(store)
 }
 
-export { installVueInternals, mcpDevtoolsVue } from './internal'
+export { installVueInternals, medulaVue } from './internal'
 export { installPiniaInternals, piniaStateName } from './pinia'
 export { installRouterInternals } from './router'
-export type {
-  McpDevtoolsRouterProtocol,
-  NavigateTarget,
-  RouteInfo,
-  RouteRecordInfo,
-} from './router'
+export type { MedulaRouterProtocol, NavigateTarget, RouteInfo, RouteRecordInfo } from './router'
 export type {
   ComponentNode,
   ComponentSectionValue,
   ComponentState,
   ComponentStateSection,
-  McpDevtoolsVueProtocol,
+  MedulaVueProtocol,
 } from './internal'

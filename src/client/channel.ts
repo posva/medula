@@ -1,14 +1,14 @@
 import { createPageScriptChannel } from 'devframe/in-page-channel'
 import type { InPageChannelProtocol } from 'devframe/in-page-channel'
 import { z } from 'zod'
-import { MCP_DEVTOOLS_ID } from '../shared'
+import { MEDULA_ID } from '../shared'
 import { getAtPath, setAtPath } from './path'
 import type { StatePath } from './path'
 import { getExposedState, listExposedStates } from './registry'
 import { previewJson, toJsonValue } from './serialize'
 import type { JsonValue } from './serialize'
 
-export const MCP_DEVTOOLS_CHANNEL: typeof MCP_DEVTOOLS_ID = MCP_DEVTOOLS_ID
+export const MEDULA_CHANNEL: typeof MEDULA_ID = MEDULA_ID
 
 const nameSchema = z
   .string()
@@ -57,7 +57,7 @@ export interface StateValue {
   value: JsonValue
 }
 
-export interface McpDevtoolsChannelProtocol extends InPageChannelProtocol {
+export interface MedulaChannelProtocol extends InPageChannelProtocol {
   pageScript: {
     'list-states': () => StateSummary[]
     'get-state': (args: { name: string }) => StateValue
@@ -71,7 +71,7 @@ function requireState(name: string) {
   if (!state) {
     const names = listExposedStates().map((s) => s.name)
     throw new Error(
-      `[mcp-devtools] Unknown state "${name}". Exposed states: ${names.length ? names.join(', ') : 'none'}.`,
+      `[medula] Unknown state "${name}". Exposed states: ${names.length ? names.join(', ') : 'none'}.`,
     )
   }
   return state
@@ -81,22 +81,20 @@ function readState(name: string): StateValue {
   return { name, value: toJsonValue(requireState(name).get()) }
 }
 
-export type McpDevtoolsChannel = ReturnType<
-  typeof createPageScriptChannel<McpDevtoolsChannelProtocol>
->
+export type MedulaChannel = ReturnType<typeof createPageScriptChannel<MedulaChannelProtocol>>
 
 // one channel per page even when several bundles load this module
-const CHANNEL_KEY = Symbol.for('mcp-devtools:channel')
-const g = globalThis as { [CHANNEL_KEY]?: McpDevtoolsChannel }
+const CHANNEL_KEY = Symbol.for('medula:channel')
+const g = globalThis as { [CHANNEL_KEY]?: MedulaChannel }
 
 /**
  * Create the in-page channel once. Its `agent` functions become MCP tools as
  * soon as a devframe RPC client runs in the page (see `connect.js`).
  */
-export function ensureChannel(): McpDevtoolsChannel | undefined {
+export function ensureChannel(): MedulaChannel | undefined {
   if (g[CHANNEL_KEY] || typeof window === 'undefined') return g[CHANNEL_KEY]
-  g[CHANNEL_KEY] = createPageScriptChannel<McpDevtoolsChannelProtocol>({
-    name: MCP_DEVTOOLS_CHANNEL,
+  g[CHANNEL_KEY] = createPageScriptChannel<MedulaChannelProtocol>({
+    name: MEDULA_CHANNEL,
     functions: {
       'list-states': {
         type: 'query',
@@ -159,9 +157,7 @@ export function ensureChannel(): McpDevtoolsChannel | undefined {
           const current = toJsonValue(state.get())
           if (path.length > 0 && getAtPath(current, path.slice(0, -1)) === undefined) {
             // creating intermediate containers is allowed but worth a warning
-            console.warn(
-              `[mcp-devtools] Creating missing path ${JSON.stringify(path)} in "${name}"`,
-            )
+            console.warn(`[medula] Creating missing path ${JSON.stringify(path)} in "${name}"`)
           }
           state.set(setAtPath(current, path, value))
           return readState(name)

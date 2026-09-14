@@ -19,9 +19,9 @@ async function main() {
   const mcpUrl = new URL(mcpPath, document.baseURI)
   if (meta.mcp?.port) mcpUrl.port = String(meta.mcp.port)
   $('mcp-url').textContent = mcpUrl.href
-  $('snippet-claude').textContent = `claude mcp add --transport http mcp-devtools ${mcpUrl.href}`
+  $('snippet-claude').textContent = `claude mcp add --transport http medula ${mcpUrl.href}`
   $('snippet-json').textContent = JSON.stringify(
-    { mcpServers: { 'mcp-devtools': { type: 'http', url: mcpUrl.href } } },
+    { mcpServers: { medula: { type: 'http', url: mcpUrl.href } } },
     null,
     2,
   )

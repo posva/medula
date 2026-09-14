@@ -5,8 +5,8 @@ name: Publish to npm
 # npm login
 # npm publish
 #
-# Add "repository": "posva/template-lib-ts", to package.json
-# Go to the settings page on npm: https://www.npmjs.com/package/template-lib-ts/access
+# Add "repository": "posva/medula", to package.json
+# Go to the settings page on npm: https://www.npmjs.com/package/medula/access
 # Set the Trusted Published, add an environment if added on GitHub repository settings / Environments
 # Disallow tokens
 #
@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     if: |
       startsWith(github.ref_name, 'v') &&
-      github.repository == 'posva/template-lib-ts'
+      github.repository == 'posva/medula'
 
     environment: release
 

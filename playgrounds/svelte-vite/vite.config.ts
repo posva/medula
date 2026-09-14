@@ -1,8 +1,8 @@
 import { defineConfig } from 'vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
-import { McpDevtools } from 'medula/vite'
+import { Medula } from 'medula/vite'
 
 export default defineConfig({
   server: { port: 5175 },
-  plugins: [svelte(), McpDevtools()],
+  plugins: [svelte(), Medula()],
 })

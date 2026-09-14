@@ -36,9 +36,9 @@ discovers frameworks like the official devtools do.
 | `src/panel/connect.ts`   | browser | The page script (`dist-client/connect.js`): state channel + Vue/Pinia/Router discovery + React discovery + `connectDevframe()`                                    |
 | `src/vue/internal.ts`    | browser | Component tree walker + StateEditor-like setter (mirrors Vue DevTools), Pinia/Router tools                                                                        |
 | `src/react/internals.ts` | browser | Fiber walker + `overrideHookState`/`overrideProps` through the hook shim (mirrors React DevTools)                                                                 |
-| `medula`                 | node    | `createMcpDevtools()` devframe definition (+ `help` tool and resource)                                                                                            |
-| `medula/vite`            | node    | `McpDevtools()` Vite plugin: bridge + config page + injects bootstrap and `connect.js`                                                                            |
-| `medula/next`            | node    | `createMcpDevtoolsHandler()` route handler, `withMcpDevtools()`, `<McpDevtools />` head component                                                                 |
+| `medula`                 | node    | `createMedula()` devframe definition (+ `help` tool and resource)                                                                                                 |
+| `medula/vite`            | node    | `Medula()` Vite plugin: bridge + config page + injects bootstrap and `connect.js`                                                                                 |
+| `medula/next`            | node    | `createMedulaHandler()` route handler, `withMedula()`, `<Medula />` head component                                                                                |
 | `medula/nuxt`            | node    | Nuxt module: adds the Vite plugin, injects bootstrap and `connect.js` through `app.head`                                                                          |
 | `medula/client`          | browser | Manual escape hatch: `exposeState(name, { get, set })` for state no devtools can reach                                                                            |
 | `medula/vue              | react   | svelte`                                                                                                                                                           | browser | Manual helpers over `exposeState`; not needed for Vue/React apps |
@@ -49,18 +49,18 @@ discovers frameworks like the official devtools do.
 ### How a tool call reaches the page
 
 1. App code calls `exposeState()` (`src/client/registry.ts`). The registry lives on
-   `globalThis[Symbol.for('mcp-devtools:registry')]` so several bundles share it.
+   `globalThis[Symbol.for('medula:registry')]` so several bundles share it.
 2. The first call creates the in-page channel (`src/client/channel.ts`,
    `createPageScriptChannel`). Its functions carry `agent` metadata, so devframe registers them in
    its global browser-agent registry.
 3. `connect.js` (served at `<base>connect.js`) runs `connectDevframe()` in the page. Devframe mirrors
    the browser-agent registry to the node side over RPC (`devframe:agent:sync-client-tools`) and
    invokes tools back in the page (`devframe:agent:invoke-client-tool`).
-4. The node side exposes them on the MCP route `<base>__mcp` as `mcp-devtools_list-states`,
-   `mcp-devtools_get-state`, `mcp-devtools_set-state`, `mcp-devtools_patch-state`. Tool args are a
+4. The node side exposes them on the MCP route `<base>__mcp` as `medula_list-states`,
+   `medula_get-state`, `medula_set-state`, `medula_patch-state`. Tool args are a
    single object under `arg0`.
 
-Tools exist only while a page is connected. `mcp-devtools_help` (node side) explains that to the
+Tools exist only while a page is connected. `medula_help` (node side) explains that to the
 agent.
 
 ### Local devframe
@@ -70,9 +70,10 @@ agent.
 `package.json` and `pnpm-workspace.yaml` overrides point at them. To refresh:
 
 ```bash
+MEDULA_VENDOR_DIR="$PWD/vendor"
 cd ~/oss/devframe/.posva/worktrees/eager-client-script
 pnpm exec turbo run build --filter=devframe --filter=@devframes/vite --filter=@devframes/next
-for p in devframe vite next; do (cd packages/$p && pnpm pack --pack-destination ~/oss/mcp-devtools/vendor); done
+for p in devframe vite next; do (cd packages/$p && pnpm pack --pack-destination "$MEDULA_VENDOR_DIR"); done
 ```
 
 The devframe tarball also carries a local patch (most recently synced page wins in
@@ -90,7 +91,7 @@ Vite plugin registers with `register: true`). Direct URL: `<origin>/__medula/__m
 1. Start a playground, `agent-browser open http://localhost:<port>/` (use
    `AGENT_BROWSER_SESSION=<name>` when several servers run at once).
 2. `curl -s -X POST <origin>/__medula/__mcp -H 'Origin: <origin>' -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'`
-3. `tools/call` with `{"name":"mcp-devtools_patch-state","arguments":{"arg0":{"name":"…","path":["…"],"value":…}}}`.
+3. `tools/call` with `{"name":"medula_patch-state","arguments":{"arg0":{"name":"…","path":["…"],"value":…}}}`.
 
 Routing between pages: the page script only stays connected while its tab is visible and
 reconnects on `focus`, and the vendored devframe is patched so the MOST RECENTLY synced page wins

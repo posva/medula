@@ -159,6 +159,6 @@ describe('svelteWrapperSource', () => {
     }
     // self-contained: the hook is inlined, nothing imported from medula
     expect(code).not.toContain('medula/')
-    expect(code).toMatch(/Symbol\.for\(['"]mcp-devtools:svelte['"]\)/)
+    expect(code).toMatch(/Symbol\.for\(['"]medula:svelte['"]\)/)
   })
 })

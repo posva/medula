@@ -40,7 +40,7 @@ export interface ComponentSectionValue {
   value: Record<string, JsonValue>
 }
 
-export interface McpDevtoolsVueProtocol extends InPageChannelProtocol {
+export interface MedulaVueProtocol extends InPageChannelProtocol {
   pageScript: {
     'list-components': () => ComponentNode[]
     'get-component-state': (args: { id: string }) => ComponentState
@@ -61,7 +61,7 @@ type Instance = ComponentInternalInstance & {
   [UID_KEY]?: string
 }
 
-const UID_KEY = '__MCP_DEVTOOLS_UID__'
+const UID_KEY = '__MEDULA_UID__'
 
 interface Shared {
   apps: Set<App>
@@ -70,7 +70,7 @@ interface Shared {
 }
 
 // shared across bundles that load their own copy of the adapter
-const shared: Shared = ((globalThis as any)[Symbol.for('mcp-devtools:vue')] ??= {
+const shared: Shared = ((globalThis as any)[Symbol.for('medula:vue')] ??= {
   apps: new Set(),
   registered: false,
   seq: 0,
@@ -173,9 +173,7 @@ function requireInstance(id: string): Instance {
     if (found) break
   }
   if (!found) {
-    throw new Error(
-      `[mcp-devtools] Unknown component "${id}". Call list-components to get current ids.`,
-    )
+    throw new Error(`[medula] Unknown component "${id}". Call list-components to get current ids.`)
   }
   return found
 }
@@ -264,7 +262,7 @@ function writeAtPath(target: Record<string, unknown>, path: StatePath, value: un
   for (const key of path.slice(0, -1)) {
     parent = step(parent, key)
     if (parent == null || typeof parent !== 'object') {
-      throw new Error(`[mcp-devtools] Path ${JSON.stringify(path)} not found`)
+      throw new Error(`[medula] Path ${JSON.stringify(path)} not found`)
     }
   }
   if (isRef(parent)) parent = parent.value
@@ -310,7 +308,7 @@ const sectionValueSchema = z.object({ id: z.string(), section: sectionSchema, va
 function registerVueTools(): void {
   if (shared.registered || typeof window === 'undefined') return
   shared.registered = true
-  registerAgentTools<McpDevtoolsVueProtocol>('vue', {
+  registerAgentTools<MedulaVueProtocol>('vue', {
     'list-components': {
       type: 'query',
       jsonSerializable: true,
@@ -349,7 +347,7 @@ function registerVueTools(): void {
         const instance = requireInstance(id)
         if (section === 'setupState' && readonlyKeys(instance).includes(String(path[0]))) {
           throw new Error(
-            `[mcp-devtools] "${String(path[0])}" is read-only (computed without setter or readonly)`,
+            `[medula] "${String(path[0])}" is read-only (computed without setter or readonly)`,
           )
         }
         const target =
@@ -368,10 +366,10 @@ function registerVueTools(): void {
 /**
  * Vue plugin: lets agents inspect and edit the internal state of every
  * component (props, setup bindings, data) like Vue DevTools does. Registers
- * the `mcp-devtools_vue_*` tools once per page. Browser only, no-op on SSR.
+ * the `medula_vue_*` tools once per page. Browser only, no-op on SSR.
  *
  * @example
- * createApp(App).use(mcpDevtoolsVue)
+ * createApp(App).use(medulaVue)
  */
 function registerApp(app: App): void {
   if (typeof window === 'undefined') return
@@ -379,7 +377,7 @@ function registerApp(app: App): void {
   registerVueTools()
 }
 
-export const mcpDevtoolsVue: Plugin = {
+export const medulaVue: Plugin = {
   install(app) {
     registerApp(app)
   },

@@ -16,7 +16,7 @@ import { installReactInternals } from '../react/internals'
 import { installSvelteInternals } from '../svelte/internals'
 import { installVueInternals } from '../vue/internal'
 
-const KEY = Symbol.for('mcp-devtools:connect')
+const KEY = Symbol.for('medula:connect')
 const g = globalThis as { [KEY]?: true }
 
 if (!g[KEY]) {
@@ -33,7 +33,7 @@ if (!g[KEY]) {
 
   const connect = () => {
     connection ??= connectDevframe({ baseURL }).catch((error) => {
-      console.warn('[mcp-devtools] could not connect to the dev server', error)
+      console.warn('[medula] could not connect to the dev server', error)
       return undefined
     })
   }

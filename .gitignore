@@ -15,3 +15,9 @@ tsconfig.vitest-temp.json
 .tsc-types
 .cursor
 .pnpm-store/
+
+.next
+.nuxt
+.output
+dist-client
+playgrounds/*/dist

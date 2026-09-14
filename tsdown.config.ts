@@ -1,5 +1,4 @@
 import { defineConfig } from 'tsdown'
-import type { UserConfig } from 'tsdown'
 import pkg from './package.json' with { type: 'json' }
 
 const banner = `
@@ -10,34 +9,46 @@ const banner = `
  */
 `.trim()
 
-const commonOptions = {
+export default defineConfig({
   banner,
-  // change to true if this helps debugging your library
+  clean: true,
   sourcemap: false,
   format: ['esm'],
-  deps: {
-    onlyBundle: [],
-    neverBundle: ['vue'],
-  },
+  platform: 'node',
   target: 'esnext',
   tsconfig: 'tsconfig.build.json',
+  entry: {
+    index: 'src/index.ts',
+    client: 'src/client/index.ts',
+    vue: 'src/vue/index.ts',
+    react: 'src/react/index.ts',
+    svelte: 'src/svelte/index.ts',
+    vite: 'src/vite/index.ts',
+    next: 'src/next/index.ts',
+    nuxt: 'src/nuxt/index.ts',
+  },
+  deps: {
+    onlyBundle: [],
+    neverBundle: [
+      'vue',
+      'pinia',
+      'react',
+      'svelte',
+      'devframe',
+      'zod',
+      '@nuxt/kit',
+      '@nuxt/schema',
+      'vite',
+      'next',
+    ],
+    // host framework type graphs (vite, @nuxt/*) cannot be bundled
+    dts: { neverBundle: true },
+  },
   dts: {
     enabled: true,
-    // NOTE: if you cannot use isolatedDeclarations, this makes writing types
-    // bit harder but makes the generation way faster. Use tsc if you can't
-    // explicitely type all exported values.
-    // See https://github.com/microsoft/TypeScript/issues/58944#issuecomment-4213203205
+    // needs `isolatedDeclarations`: explicitly type every export
     generator: 'oxc',
   },
-  // sets package.json "exports" field to the generated files
+  // keeps package.json "exports" in sync with the entries above
   exports: true,
-} satisfies UserConfig
-
-export default defineConfig([
-  {
-    ...commonOptions,
-    clean: true,
-    entry: ['src/index.ts'],
-    globalName: 'PosvaTemplateLib',
-  },
-])
+})

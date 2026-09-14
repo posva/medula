@@ -3,7 +3,6 @@ import Vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
   plugins: [Vue()],
-
   test: {
     include: ['src/**/*.{test,spec}.ts'],
     environment: 'happy-dom',
@@ -15,7 +14,14 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'lcovonly', 'html'],
       include: ['src'],
-      exclude: ['**/src/index.ts', '**/*.test-d.ts'],
+      exclude: [
+        '**/src/index.ts',
+        '**/*.test-d.ts',
+        'src/panel/**',
+        'src/vite/**',
+        'src/next/**',
+        'src/nuxt/**',
+      ],
     },
   },
 })

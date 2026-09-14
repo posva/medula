@@ -1,54 +1,78 @@
-# template-lib-ts
+# mcp-devtools
 
-[![npm version](https://img.shields.io/npm/v/template-lib-ts.svg)](https://npmx.dev/package/template-lib-ts)
-[![ci](https://github.com/posva/template-lib-ts/actions/workflows/ci.yml/badge.svg)](https://github.com/posva/template-lib-ts/actions/workflows/ci.yml)
+Headless devtools for web apps: let a coding agent read and change the state of the page you have
+open, through [MCP](https://modelcontextprotocol.io). Built on [devframe](https://devfra.me).
 
-A modern, AI-ready TypeScript library template.
+- Expose any state with `exposeState()`; helpers for Vue, Pinia, React and Svelte.
+- Works with Vite, Nuxt and Next.js dev servers.
+- No UI to learn: a plain config page at `/__mcp-devtools/` shows how to connect your agent.
 
-- ⚡ Ultra-fast formatting, linting, and bundling with the [oxc](https://oxc.rs/) toolchain
-- 🤖 [AGENTS.md](./AGENTS.md) support for AI-assisted development
-- 🔁 [Claude Code hooks](https://code.claude.com/docs/en/hooks) for automated linting on stop
-- 📦 Automatic release previews on every PR with [pkg.pr.new](https://pkg.pr.new)
-- 🚀 One-command interactive release with changelog generation
-- 🏷️ Better GitHub labels and repo settings out of the box
+## Setup
 
-## Getting Started
+### Vite
 
-1. Fork or clone this repository
-2. Follow the **Migration Checklist** below to customize it for your library
-3. Replace `src/useHello.ts` with your own code
-4. Run `pnpm install` and start developing
+```ts
+// vite.config.ts
+import { McpDevtools } from 'mcp-devtools/vite'
 
-## Migration Checklist
+export default defineConfig({
+  plugins: [McpDevtools()],
+})
+```
 
-After forking, find & replace `template-lib-ts` with your package name, then go through these steps:
+### Nuxt
 
-1. **Find & replace** `template-lib-ts` with your package name in all files
-2. **Update `globalName`** in `tsdown.config.ts` (e.g. `PosvaTemplateLib` → `YourLibName`)
-3. **Update `package.json`**: `description`, `keywords`, `homepage`, `bugs`, `repository`
-4. **Update `LICENSE`** year and copyright holder
-5. **Update `release.yml`** repo condition (`github.repository == '...'`)
-6. **Set up npm trusted publishing** (see comments in `release.yml`)
-7. **Set up [pkg.pr.new](https://pkg.pr.new)** (optional): install the [GitHub App](https://github.com/apps/pkg-pr-new/installations/select_target) on your repo, or remove `.github/workflows/pkg.pr.new.yml`
-8. **Set up [Settings](https://github.com/apps/settings)** (optional): install the [GitHub App](https://github.com/apps/settings) on your repo and update `.github/settings.yml`, or remove it
-9. **Set up Codecov** (optional): add `codecov/codecov-action` step to `ci.yml`
-10. **Replace `src/`** with your library code
-11. **Update `AGENTS.md`**: title, description, and Architecture section to match your project
+```ts
+// nuxt.config.ts
+export default defineNuxtConfig({
+  modules: ['mcp-devtools/nuxt'],
+})
+```
 
-## Scripts
+### Next.js
 
-| Command           | Description                |
-| ----------------- | -------------------------- |
-| `pnpm dev`        | Start Vitest UI            |
-| `pnpm build`      | Build with tsdown          |
-| `pnpm test`       | Build + test + typecheck   |
-| `pnpm test:cov`   | Run tests with coverage    |
-| `pnpm test:types` | Typecheck                  |
-| `pnpm lint`       | Lint with oxlint           |
-| `pnpm fmt`        | Format with oxfmt          |
-| `pnpm release`    | Interactive release script |
-| `pnpm size`       | Check bundle size          |
+```ts
+// app/__mcp-devtools/[[...path]]/route.ts
+import { createMcpDevtoolsHandler } from 'mcp-devtools/next'
 
-## License
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+const handler = createMcpDevtoolsHandler()
+export const GET = handler.fetch
+export const POST = handler.fetch
+export const DELETE = handler.fetch
+```
 
-[MIT](./LICENSE)
+Then add `<script type="module" src="/__mcp-devtools/connect.js" />` to your root layout in
+development.
+
+## Expose state
+
+```ts
+import { exposeState } from 'mcp-devtools/client'
+
+let cart = { items: [] }
+exposeState('cart', {
+  description: 'Shopping cart',
+  get: () => cart,
+  set: (value) => (cart = value),
+})
+```
+
+See `mcp-devtools/vue`, `mcp-devtools/react` and `mcp-devtools/svelte` for framework helpers.
+
+## Connect your agent
+
+Open `http://localhost:<port>/__mcp-devtools/` while the dev server runs. It shows the MCP URL and
+ready-to-copy snippets, for example:
+
+```sh
+claude mcp add --transport http mcp-devtools http://localhost:5173/__mcp-devtools/__mcp
+```
+
+Tools: `mcp-devtools_list-states`, `mcp-devtools_get-state`, `mcp-devtools_set-state`,
+`mcp-devtools_patch-state`. They exist while a page of your app is open in the browser.
+
+## Development
+
+See [AGENTS.md](./AGENTS.md).

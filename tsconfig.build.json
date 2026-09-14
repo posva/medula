@@ -5,15 +5,16 @@
     "composite": true,
     "declaration": true,
     "isolatedModules": true,
-    // remove if not possible to explicitly type everything
-    // this enables fast oxc type emitting
     "isolatedDeclarations": true,
     "emitDeclarationOnly": true,
     "declarationDir": "./.tsc-types/src",
     "noEmit": false,
+    "jsx": "react-jsx",
     "paths": {
-      "template-lib-ts": ["./src/index.ts"]
+      "mcp-devtools": ["./src/index.ts"],
+      "mcp-devtools/*": ["./src/*/index.ts"]
     }
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["src/panel/**/*"]
 }

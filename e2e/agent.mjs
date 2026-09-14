@@ -4,7 +4,8 @@
  * E2E: a real coding agent changes page state through the `devframe connect`
  * MCP server (configured in .mcp.json / .codex/config.toml like pinia-colada).
  *
- *   node e2e/agent.mjs            # Claude Code
+ *   node e2e/agent.mjs                       # Claude Code, explicit exposeState fixture
+ *   node e2e/agent.mjs --scenario vue        # zero-config Vue playground (component + Pinia tools)
  *   node e2e/agent.mjs --agent codex
  */
 import { execFileSync, spawn } from 'node:child_process'
@@ -14,10 +15,48 @@ import { fileURLToPath } from 'node:url'
 const root = fileURLToPath(new URL('..', import.meta.url))
 const args = process.argv.slice(2)
 const agent = args[args.indexOf('--agent') + 1] || 'claude'
-const port = Number(args[args.indexOf('--port') + 1]) || 5199
+const scenarioName = args[args.indexOf('--scenario') + 1] || 'fixture'
+
+/**
+ * Scenarios: `fixture` uses the explicit `exposeState` API; `vue` drives the
+ * zero-config Vue playground through the component tools (no app code).
+ */
+const scenarios = {
+  fixture: {
+    port: 5199,
+    viteRoot: 'e2e/fixture',
+    readyTool: 'mcp-devtools_get-state',
+    read: async () => stateValue(await callTool('mcp-devtools_get-state', { name: 'counter' })),
+    prompt:
+      'read the "counter" state with mcp-devtools_get-state, and change it so that count is 42 and label is "agent" (mcp-devtools_set-state or mcp-devtools_patch-state; their arguments are wrapped in an "arg0" object).',
+    check: (value) => value.count === 42 && value.label === 'agent',
+  },
+  vue: {
+    port: 5173,
+    viteRoot: 'playgrounds/vue-vite',
+    readyTool: 'mcp-devtools_vue_list-components',
+    read: async () => {
+      const tree = await callTool('mcp-devtools_vue_list-components', {})
+      const app = tree.find((node) => node.name === 'App') ?? tree[0]
+      const state = await callTool('mcp-devtools_vue_get-component-state', { id: app.id })
+      return {
+        id: app.id,
+        title: state.setupState.title,
+        todos: await callTool('mcp-devtools_get-state', { name: 'pinia:todos' }),
+      }
+    },
+    prompt:
+      'call mcp-devtools_vue_list-components, find the "App" component, read it with mcp-devtools_vue_get-component-state, then use mcp-devtools_vue_set-component-state to change its setupState "title" to "Title set by the agent". Also read the "pinia:todos" state with mcp-devtools_get-state and set its "filter" to "done" with mcp-devtools_patch-state. Tool arguments are wrapped in an "arg0" object.',
+    check: (value) =>
+      value.title === 'Title set by the agent' && value.todos?.value?.filter === 'done',
+  },
+}
+const scenario = scenarios[scenarioName]
+if (!scenario)
+  {throw new Error(`Unknown scenario "${scenarioName}" (${Object.keys(scenarios).join(', ')})`)}
+const port = Number(args[args.indexOf('--port') + 1]) || scenario.port
 const origin = `http://localhost:${port}`
 const base = `${origin}/__mcp-devtools/`
-const expected = { count: 42, label: 'agent' }
 
 const children = []
 function cleanup() {
@@ -65,14 +104,13 @@ async function mcp(method, params, id = 1) {
   return JSON.parse(data ?? text)
 }
 
-async function getCounter() {
-  const result = await mcp('tools/call', {
-    name: 'mcp-devtools_get-state',
-    arguments: { arg0: { name: 'counter' } },
-  })
+async function callTool(name, arg0) {
+  const result = await mcp('tools/call', { name, arguments: { arg0 } })
   if (result.result?.isError) throw new Error(result.result.content[0].text)
-  return JSON.parse(result.result.content[0].text).value
+  return JSON.parse(result.result.content[0].text)
 }
+
+const stateValue = (result) => result.value
 
 function runAgent(prompt) {
   // a nested Claude Code refuses to start while CLAUDECODE is set
@@ -143,7 +181,7 @@ async function main() {
     process.execPath,
     [
       fileURLToPath(new URL('../node_modules/vite/bin/vite.js', import.meta.url)),
-      'e2e/fixture',
+      scenario.viteRoot,
       '--port',
       String(port),
       '--strictPort',
@@ -157,18 +195,17 @@ async function main() {
   execFileSync('agent-browser', ['open', `${origin}/`], { stdio: 'ignore' })
   await waitFor(async () => {
     const list = await mcp('tools/list', {})
-    return list.result?.tools.some((t) => t.name === 'mcp-devtools_get-state')
+    return list.result?.tools.some((t) => t.name === scenario.readyTool)
   }, 'page tools over MCP')
 
-  const before = await getCounter()
+  const before = await scenario.read()
   console.log('▶ state before:', JSON.stringify(before))
 
   const prompt = [
     'You control an open web page through the "devframe" MCP server.',
     'First call devframe_connect_list-instances to find the running dev server and its tools.',
-    'Then use devframe_connect_call-tool (args: { port, tool, args }) to run mcp-devtools_list-states,',
-    'read the "counter" state with mcp-devtools_get-state, and change it so that count is 42 and label is "agent"',
-    '(mcp-devtools_set-state or mcp-devtools_patch-state; their arguments are wrapped in an "arg0" object).',
+    'Then use devframe_connect_call-tool (args: { port, tool, args }) on that port:',
+    scenario.prompt,
     'Do not read or edit any file. Finish by printing the final state JSON only.',
   ].join(' ')
 
@@ -179,10 +216,10 @@ async function main() {
   console.log(`▶ MCP tool calls: ${mcpCalls.length} (${[...new Set(mcpCalls)].join(', ')})`)
 
   // the page connection can be re-established right after the run
-  const after = await waitFor(getCounter, 'state read-back', 30_000)
+  const after = await waitFor(scenario.read, 'state read-back', 30_000)
   console.log('▶ state after:', JSON.stringify(after))
   const usedMcp = mcpCalls.length > 0
-  const pass = usedMcp && after.count === expected.count && after.label === expected.label
+  const pass = usedMcp && scenario.check(after)
   console.log(pass ? '✔ PASS: the agent changed the page state' : '✘ FAIL: state does not match')
   process.exit(pass ? 0 : 1)
 }

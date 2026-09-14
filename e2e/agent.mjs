@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/* oxlint-disable no-console */
+/* oxlint-disable no-console, no-await-in-loop */
 /**
  * E2E: a real coding agent changes page state through the `devframe connect`
  * MCP server (configured in .mcp.json / .codex/config.toml like pinia-colada).

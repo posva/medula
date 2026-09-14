@@ -13,7 +13,12 @@ pnpm exec vitest run src/client/path.spec.ts # one test file
 pnpm lint / pnpm lint:fix                    # oxlint
 pnpm test:types                              # tsc
 pnpm play:vue | play:react | play:next | play:nuxt   # playgrounds (run pnpm build first)
+pnpm e2e:agent                               # Claude Code changes the fixture state over MCP
+pnpm e2e:agent:codex                         # same with Codex
 ```
+
+Playground ports: vue-vite 5173, react-vite 5174, svelte-vite 5175, e2e fixture 5199, nextjs 3000,
+nuxt 3001.
 
 ## Important
 
@@ -68,6 +73,22 @@ for p in devframe vite next; do (cd packages/$p && pnpm pack --pack-destination 
 ```
 
 Replace with npm versions once the PR is released.
+
+## Agent access
+
+`.mcp.json` and `.codex/config.toml` register `npx devframe connect` (same shape as pinia-colada):
+one stdio MCP server that discovers running dev servers through `~/.devframe/instances/` (the
+Vite plugin registers with `register: true`). Direct URL: `<origin>/__mcp-devtools/__mcp`.
+
+## Verifying a change by hand
+
+1. Start a playground, `agent-browser open http://localhost:<port>/` (use
+   `AGENT_BROWSER_SESSION=<name>` when several servers run at once).
+2. `curl -s -X POST <origin>/__mcp-devtools/__mcp -H 'Origin: <origin>' -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'`
+3. `tools/call` with `{"name":"mcp-devtools_patch-state","arguments":{"arg0":{"name":"…","path":["…"],"value":…}}}`.
+
+Known devframe caveat: when the first connected tab navigates away, the next tool call can hit a
+`[birpc] timeout on calling "devframe:agent:invoke-client-tool"` before calls succeed again.
 
 ## Constraints
 

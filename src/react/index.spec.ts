@@ -38,7 +38,11 @@ describe('useExposedState', () => {
     expect(state?.get()).toBe(0)
     act(() => container.querySelector('button')!.click())
     expect(getExposedState('count')?.get()).toBe(1)
-    act(() => getExposedState('count')?.set(10))
+    act(() => {
+      getExposedState('count')?.set(10)
+      // readable before React commits
+      expect(getExposedState('count')?.get()).toBe(10)
+    })
     expect(container.textContent).toBe('10')
     expect(getExposedState('count')?.get()).toBe(10)
   })

@@ -28,3 +28,33 @@ export function getAtPath(root: unknown, path: StatePath): unknown {
   }
   return current
 }
+
+function isObject(value: unknown): value is Record<string | number, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+/** Mutate `target` at `path` (non-empty). Throws when a container on the path is missing. */
+export function writeAtPath(target: unknown, path: StatePath, value: unknown): void {
+  let parent: unknown = target
+  for (const key of path.slice(0, -1)) {
+    parent = isObject(parent) ? parent[key] : undefined
+  }
+  if (!isObject(parent)) throw new Error(`[medula] Path ${JSON.stringify(path)} not found`)
+  parent[path[path.length - 1]!] = value
+}
+
+/** Replace the contents of an object or array in place, keeping its identity. */
+export function replaceContents(target: object, value: unknown): void {
+  if (Array.isArray(target)) {
+    if (!Array.isArray(value)) throw new Error('[medula] Expected an array value')
+    target.length = 0
+    target.push(...value)
+    return
+  }
+  if (!isObject(value) || Array.isArray(value)) {
+    throw new Error('[medula] Expected an object value')
+  }
+  const record = target as Record<string, unknown>
+  for (const key of Object.keys(record)) if (!(key in value)) delete record[key]
+  Object.assign(record, value)
+}

@@ -3,13 +3,14 @@
 [![npm version](https://img.shields.io/npm/v/medula.svg)](https://npmx.dev/package/medula)
 [![ci](https://github.com/posva/medula/actions/workflows/ci.yml/badge.svg)](https://github.com/posva/medula/actions/workflows/ci.yml)
 
-medula lets your coding agent inspect and change the state of a running web app through
+> Change your web app's state from within it
+
+medula lets your coding agent inspect and change the internal state of a running web app through
 [MCP](https://modelcontextprotocol.io). Ask it to check a component, change a value, or navigate
 to another route, and see the result in your browser.
 
 It supports **Vue 3, React, Svelte 5, and Solid**, with integrations for **Vite, Nuxt, and
-Next.js**. Vue apps also get support for Pinia and Vue Router. Add medula to your dev server;
-you do not need to change your components or register stores.
+Next.js**. Vue apps also get support for Pinia and Vue Router. Add medula to your dev server, it infiltrates your app so you don't need to adapt anything in it.
 
 | Framework | What your agent can do                                                                                    |
 | --------- | --------------------------------------------------------------------------------------------------------- |
@@ -23,7 +24,7 @@ your agent.
 
 ## Setup
 
-### Vue, React, Svelte, and Solid with Vite
+### Vue, React, Svelte, and Solid with Vite 8
 
 Install medula and Vite DevTools in your app:
 
@@ -79,8 +80,6 @@ export default defineNuxtConfig({
   modules: ['medula/nuxt'],
 })
 ```
-
-If you use Pinia, keep `@pinia/nuxt` in your modules. medula finds your stores automatically.
 
 ### Next.js (App Router)
 

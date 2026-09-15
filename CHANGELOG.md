@@ -1,3 +1,14 @@
+# [0.2.0](https://github.com/posva/medula/compare/v0.1.0...v0.2.0) (2026-09-15)
+
+### Bug Fixes
+
+- nuxt ([733a983](https://github.com/posva/medula/commit/733a98371e0a9662cf29e106b6be02a4420a92d9))
+
+### Features
+
+- icon ([098b7d0](https://github.com/posva/medula/commit/098b7d05fad0f4418f2e4673a78b6a28d1522164))
+- **solid:** zero-config Solid adapter and medula/solid export ([d11335f](https://github.com/posva/medula/commit/d11335f82f242baaedef85d47cbb7e9c25d917e4))
+
 # [0.1.0](https://github.com/posva/medula/compare/v0.0.2...v0.1.0) (2026-09-14)
 
 - refactor(next)!: follow the devframe hub-next example ([9094419](https://github.com/posva/medula/commit/9094419ceff6aefdc3b083614ad5c0d82a0c8890))

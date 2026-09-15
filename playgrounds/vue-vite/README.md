@@ -1,16 +1,19 @@
 # Vue + Vite playground
 
-Small todo app (Vue 3 + Pinia, Vite 8). It imports nothing from `medula`: the only
+Counter, todos, user profile, and display settings (Vue 3 + Pinia, Vite 8). It imports nothing from `medula`: the only
 integration is `medula()` in `vite.config.ts`, next to `@vitejs/plugin-vue` and the Vite
 DevTools dock (`devtools: true`).
 
 The plugin injects a bootstrap script (Vue DevTools hook shim) and the page script. From there
 agents get, with zero app code:
 
-| Tool                                                                                             | Reaches                                                                                                         |
-| ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| `medula_list-states`, `get-state`, `set-state`, `patch-state`                                    | every Pinia store as `pinia:<id>`: here `pinia:todos` (`src/stores/todos.ts`)                                   |
-| `medula_vue_list-components`, `medula_vue_get-component-state`, `medula_vue_set-component-state` | props, setup bindings and data of any component: `title` and `settings` in `App.vue`, `draft` in `TodoList.vue` |
+| Tool                                                                                             | Reaches                                                                                                                           |
+| ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| `medula_list-states`, `get-state`, `set-state`, `patch-state`                                    | every Pinia store as `pinia:<id>`: here `pinia:todos` (`src/stores/todos.ts`)                                                     |
+| `medula_vue_list-components`, `medula_vue_get-component-state`, `medula_vue_set-component-state` | props, setup bindings and data of any component: `title`, `count`, `user`, and `settings` in `App.vue`, `draft` in `TodoList.vue` |
+
+The [common demo](../../CONTRIBUTING.md#playgrounds) includes counter, nested user, todos, and
+settings. The todo form, filters, and remove buttons also exercise the Pinia store.
 
 ## Try it
 

@@ -25,6 +25,10 @@ pnpm e2e:agent:vue | e2e:agent:svelte | e2e:agent:solid   # zero-config playgrou
 
 Playground ports: vue-vite 5173, react-vite 5174, svelte-vite 5175, solid-vite 5176, nextjs 3000, nuxt 3001.
 
+All playgrounds share a counter, todos, a nested user profile, derived greeting/remaining count,
+and theme/font/settings visibility controls. Keep their initial values and common actions aligned;
+see CONTRIBUTING.md. Shared styles live in `playgrounds/shared/style.css`. Use each framework's native state APIs and keep framework-specific examples.
+
 ## Important
 
 Keep this file up to date when commands, structure or tooling change.

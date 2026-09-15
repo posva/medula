@@ -11,6 +11,10 @@ components and read/write their `$state` like a devtools would.
 | `label`, `done` props, `highlighted` | `src/Item.svelte`        | `props` / `state` of each `Item` (`{#each}`) |
 | `settings`                           | `src/settings.svelte.ts` | `state` of the pseudo component `module`     |
 
+The [common playground demo](../../CONTRIBUTING.md#playgrounds) includes a counter, todos,
+a nested user profile, and theme/font controls. Toggle the user or hide and show settings from
+the page; agents can also change the nested city and see the greeting update.
+
 ## Try it
 
 ```bash

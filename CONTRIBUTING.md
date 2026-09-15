@@ -42,6 +42,20 @@ pnpm -C playgrounds/nuxt exec nuxt prepare
 
 Nuxt preparation does not run during install because it needs the built medula module.
 
+All six playgrounds share the same demo state and controls:
+
+- A counter starts at `0`.
+- The user starts as `Ada` in `Paris`, with the city nested at `user.address.city`. Toggle the
+  name between Ada and Bob and watch the greeting update.
+- Two todos start as “Open the page” (done) and “Try the MCP tools” (not done). Add todos or
+  toggle their checkboxes and watch the remaining count update.
+- Settings start with the light theme and a font size of `16`. Change the theme, set the font
+  size from `12` to `24`, or hide and show the settings controls.
+
+Each playground uses its framework's state APIs. Framework-specific examples remain available,
+such as Pinia filters, React class state, and the Nuxt cart. This gives agents common tasks to
+compare across frameworks while keeping useful adapter examples.
+
 The repository MCP config uses `npx devframe connect` to find running dev servers. Keep the
 playground tab visible while you use its tools. Playground configs disable client authentication
 for local testing.

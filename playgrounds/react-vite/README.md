@@ -9,7 +9,9 @@ pnpm build          # at the repo root, once
 pnpm play:react     # http://localhost:5174
 ```
 
-Components: `Counter` (`useState`), `Todos` (`useReducer`), `Settings` (`useSyncExternalStore`),
-`Greeting` (props), `Clock` (class component state + props).
+The [common demo](../../CONTRIBUTING.md#playgrounds) lives in `App`: counter and nested user
+(`useState`), todos (`useReducer`), and settings (`useSyncExternalStore`). Each `Item` has props
+and local hover state. “More state examples” contains `Greeting` (props) and `Clock` (class
+component state + props).
 
 MCP endpoint: `http://localhost:5174/__devtools/__mcp`. medula dock page: `http://localhost:5174/__medula/` (open it from the Vite DevTools dock).

@@ -10,9 +10,10 @@ pnpm build          # at the repo root, once
 pnpm play:next      # http://localhost:3000
 ```
 
-- `next.config.ts`: `withMedula({...})`
-- `app/%5F_medula/[[...path]]/route.ts`: `createMedulaHandler().fetch` as `GET`/`POST`/`DELETE`
+- `next.config.ts`: `withDevframe({...})`
+- `app/%5F_devframes/[[...path]]/route.ts`: the app-owned devframe hub
 - `app/layout.tsx`: `<head><Medula /></head>`
+- `app/playground.tsx`: the [common demo](../../CONTRIBUTING.md#playgrounds), with counter, nested user, todos, and settings
 - `app/profile.tsx`: `Profile` (`useState`), `Greeting` (props), `Clock` (class component)
 
 MCP endpoint: `http://localhost:3000/__devframes/__mcp`. medula dock page: `http://localhost:3000/__devframes/medula/`.

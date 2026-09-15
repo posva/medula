@@ -11,13 +11,17 @@ export default function App() {
   // store: nested writes go through the store setter
   const [todos, setTodos] = createStore([
     { id: 1, text: 'Open the page', done: true },
-    { id: 2, text: 'Call medula_solid_list-components', done: false },
+    { id: 2, text: 'Try the MCP tools', done: false },
   ])
   const remaining = createMemo(() => todos.filter((t) => !t.done).length)
   const greeting = createMemo(() => `Hello ${user().name} from ${user().address.city}`)
 
   function addTodo() {
-    setTodos(todos.length, { id: Date.now(), text: `Todo ${todos.length + 1}`, done: false })
+    setTodos(todos.length, {
+      id: Math.max(0, ...todos.map((todo) => todo.id)) + 1,
+      text: `Todo ${todos.length + 1}`,
+      done: false,
+    })
   }
 
   return (
@@ -28,10 +32,8 @@ export default function App() {
           {greeting()} · {remaining()} remaining
         </p>
         <p class="hint">
-          No app code: agents talk to this page at <code>/__devtools/__mcp</code>. Config page:{' '}
-          <a href="/__medula/" target="_blank">
-            /__medula/
-          </a>
+          Agents talk to this page at <code>/__devtools/__mcp</code>. Open the medula dock for the
+          MCP config.
         </p>
       </header>
 
@@ -54,6 +56,15 @@ export default function App() {
           )}
         </For>
       </ul>
+
+      <label>
+        <input
+          type="checkbox"
+          checked={settings.showSettings}
+          onChange={(e) => setSettings('showSettings', e.currentTarget.checked)}
+        />
+        Show settings
+      </label>
 
       <Show when={settings.showSettings}>
         <section class="settings">

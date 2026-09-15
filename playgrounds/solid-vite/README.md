@@ -12,6 +12,10 @@ signals after their variable (`createSignal(0, { name: 'count' })`) so the label
 | `label`, `done` props, `highlighted` | `src/Item.tsx`    | `props` / `state` of each `Item` (inside `<For>`) |
 | `theme`, `settings`                  | `src/settings.ts` | `state` of the pseudo component `module`          |
 
+The [common playground demo](../../CONTRIBUTING.md#playgrounds) includes a counter, todos,
+a nested user profile, and theme/font controls. Toggle the user or hide and show settings from
+the page; agents can also change the nested city and see the greeting update.
+
 ## Try it
 
 ```bash

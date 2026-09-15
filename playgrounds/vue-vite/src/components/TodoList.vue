@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import TodoItem from './TodoItem.vue'
 import { useTodosStore } from '../stores/todos'
 import { settings } from '../settings'
 
@@ -31,20 +32,17 @@ function submit() {
       </button>
     </div>
     <ul>
-      <li
+      <TodoItem
         v-for="todo in todos.visible"
         v-show="settings.showCompleted || !todo.done"
         :key="todo.id"
-        :class="{ done: todo.done }"
+        :label="todo.text"
+        v-model:done="todo.done"
       >
-        <label>
-          <input type="checkbox" :checked="todo.done" @change="todos.toggle(todo.id)" />
-          {{ todo.text }}
-        </label>
         <button class="remove" :aria-label="`Remove ${todo.text}`" @click="todos.remove(todo.id)">
           ×
         </button>
-      </li>
+      </TodoItem>
     </ul>
   </section>
 </template>

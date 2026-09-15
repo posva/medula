@@ -3,6 +3,7 @@ import { useSyncExternalStore } from 'react'
 export interface Settings {
   theme: 'light' | 'dark'
   fontSize: number
+  showSettings: boolean
 }
 
 // tiny external store, no devtools code
@@ -22,7 +23,11 @@ function createStore<T>(initial: T) {
   }
 }
 
-export const settingsStore = createStore<Settings>({ theme: 'light', fontSize: 16 })
+export const settingsStore = createStore<Settings>({
+  theme: 'light',
+  fontSize: 16,
+  showSettings: true,
+})
 
 export function useSettings(): Settings {
   return useSyncExternalStore(settingsStore.subscribe, settingsStore.getState)

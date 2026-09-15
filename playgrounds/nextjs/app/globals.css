@@ -1,18 +1,1 @@
-:root {
-  font-family: system-ui, sans-serif;
-  color-scheme: light dark;
-}
-body {
-  margin: 0;
-  padding: 2rem;
-  max-width: 40rem;
-}
-section {
-  border: 1px solid #8884;
-  border-radius: 0.5rem;
-  padding: 1rem;
-  margin-block: 1rem;
-}
-button {
-  margin-inline-end: 0.5rem;
-}
+@import '../../shared/style.css';

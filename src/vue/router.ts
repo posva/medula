@@ -1,8 +1,9 @@
 import type { App } from 'vue'
 import type { InPageChannelProtocol } from 'devframe/in-page-channel'
 import { z } from 'zod'
-import { registerAgentTools, toJsonValue } from '../client'
-import type { JsonValue } from '../client'
+import { registerAgentTools } from '../client/tools'
+import { toJsonValue } from '../client/serialize'
+import type { JsonValue } from '../client/serialize'
 
 // vue-router is not imported: duck-typed on the public router surface
 interface RouteLike {

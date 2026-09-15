@@ -4,7 +4,7 @@
  * E2E: a real coding agent changes page state through the `devframe connect`
  * MCP server (configured in .mcp.json / .codex/config.toml like pinia-colada).
  *
- *   node e2e/agent.mjs                       # Claude Code, explicit exposeState fixture
+ *   node e2e/agent.mjs                       # Claude Code, zero-config Vue playground
  *   node e2e/agent.mjs --scenario vue        # zero-config Vue playground (component + Pinia tools)
  *   node e2e/agent.mjs --scenario svelte     # zero-config Svelte playground
  *   node e2e/agent.mjs --scenario solid      # zero-config Solid playground
@@ -16,23 +16,11 @@ import { fileURLToPath } from 'node:url'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
 const args = process.argv.slice(2)
-const agent = args[args.indexOf('--agent') + 1] || 'claude'
-const scenarioName = args[args.indexOf('--scenario') + 1] || 'fixture'
+const option = (name) => (args.includes(name) ? args[args.indexOf(name) + 1] : undefined)
+const agent = option('--agent') || 'claude'
+const scenarioName = option('--scenario') || 'vue'
 
-/**
- * Scenarios: `fixture` uses the explicit `exposeState` API; `vue` drives the
- * zero-config Vue playground through the component tools (no app code).
- */
 const scenarios = {
-  fixture: {
-    port: 5199,
-    viteRoot: 'e2e/fixture',
-    readyTool: 'medula_get-state',
-    read: async () => stateValue(await callTool('medula_get-state', { name: 'counter' })),
-    prompt:
-      'read the "counter" state with medula_get-state, and change it so that count is 42 and label is "agent" (medula_set-state or medula_patch-state; their arguments are wrapped in an "arg0" object).',
-    check: (value) => value.count === 42 && value.label === 'agent',
-  },
   vue: {
     port: 5173,
     viteRoot: 'playgrounds/vue-vite',
@@ -86,7 +74,7 @@ const scenario = scenarios[scenarioName]
 if (!scenario) {
   throw new Error(`Unknown scenario "${scenarioName}" (${Object.keys(scenarios).join(', ')})`)
 }
-const port = Number(args[args.indexOf('--port') + 1]) || scenario.port
+const port = Number(option('--port')) || scenario.port
 const origin = `http://localhost:${port}`
 // medula is a Vite DevTools dock: the hub owns the connection meta and the MCP route
 const base = `${origin}/__devtools/`
@@ -142,8 +130,6 @@ async function callTool(name, arg0) {
   if (result.result?.isError) throw new Error(result.result.content[0].text)
   return JSON.parse(result.result.content[0].text)
 }
-
-const stateValue = (result) => result.value
 
 function runAgent(prompt) {
   // a nested Claude Code refuses to start while CLAUDECODE is set
@@ -207,7 +193,7 @@ function runAgent(prompt) {
 }
 
 async function main() {
-  console.log(`▶ starting fixture dev server on ${origin}`)
+  console.log(`▶ starting playground dev server on ${origin}`)
   // run vite's bin directly (no pnpm wrapper) in its own process group so
   // cleanup can kill it reliably
   const vite = spawn(

@@ -38,14 +38,9 @@
   "types": "./dist/index.d.mts",
   "exports": {
     ".": "./dist/index.mjs",
-    "./client": "./dist/client.mjs",
     "./next": "./dist/next.mjs",
     "./nuxt": "./dist/nuxt.mjs",
-    "./react": "./dist/react.mjs",
-    "./solid": "./dist/solid.mjs",
-    "./svelte": "./dist/svelte.mjs",
     "./vite": "./dist/vite.mjs",
-    "./vue": "./dist/vue.mjs",
     "./package.json": "./package.json"
   },
   "publishConfig": {

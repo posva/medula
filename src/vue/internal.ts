@@ -1,12 +1,14 @@
 import type { App, ComponentInternalInstance, Plugin, VNode } from 'vue'
 import type { InPageChannelProtocol } from 'devframe/in-page-channel'
 import { z } from 'zod'
-import { registerAgentTools, toJsonValue } from '../client'
+import { registerAgentTools } from '../client/tools'
+import { toJsonValue } from '../client/serialize'
 import { onVueApp } from '../page/vue-hook'
 import { installPiniaInternals } from './pinia'
 import { installRouterInternals } from './router'
 import { isReactive, isReadonly, isRef, isVNode } from './utils'
-import type { JsonValue, StatePath } from '../client'
+import type { JsonValue } from '../client/serialize'
+import type { StatePath } from '../client/path'
 
 export interface ComponentNode {
   /** Stable id for the lifetime of the component instance. */
@@ -317,7 +319,7 @@ function registerVueTools(): void {
       agent: {
         title: 'List Vue components',
         description:
-          'Component tree of every mounted Vue app in the open page, with ids for get-component-state and set-component-state. Call this first. Prefer the exposed states (list-states) when the app exposes what you need: component internals are lower level.',
+          'Component tree of every mounted Vue app in the open page, with ids for get-component-state and set-component-state. Call this first.',
       },
       handler: () => roots().map((root) => captureTree(root)),
     },

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest'
-import { exposeState } from './index'
-import { listExposedStates } from './registry'
+import { ensureChannel } from './channel'
+import { listExposedStates, registerState } from './registry'
 
 // the channel registers agent tools in devframe's global browser-agent registry
 const REGISTRY_KEY = Symbol.for('devframe:browser-agent-registry')
@@ -15,9 +15,10 @@ describe('channel agent tools', () => {
   afterEach(() => disposers.splice(0).forEach((d) => d()))
 
   it('lists, reads, sets and patches exposed states', async () => {
+    ensureChannel()
     let user = { name: 'Ada', tags: ['a'] }
     disposers.push(
-      exposeState('user', {
+      registerState('user', {
         description: 'Current user',
         get: () => user,
         set: (v) => (user = v),

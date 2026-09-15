@@ -19,11 +19,6 @@ export default defineConfig({
   tsconfig: 'tsconfig.build.json',
   entry: {
     index: 'src/index.ts',
-    client: 'src/client/index.ts',
-    vue: 'src/vue/index.ts',
-    react: 'src/react/index.ts',
-    svelte: 'src/svelte/index.ts',
-    solid: 'src/solid/index.ts',
     vite: 'src/vite/index.ts',
     next: 'src/next/index.ts',
     nuxt: 'src/nuxt/index.ts',

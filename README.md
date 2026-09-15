@@ -166,27 +166,6 @@ Dev builds only (`vite build` and `solid({ dev: false })` are untouched: the pro
 internal signals and memos. Labels fall back to `signalN`/`storeN`/`memoN` by creation order when
 a signal has no name, for example in pre-bundled libraries.
 
-### Explicit exposure (escape hatch)
-
-For state no devtools can reach, name it yourself from `medula/client`; it shows up in the
-`*-state` tools:
-
-```ts
-import { exposeState } from 'medula/client'
-
-exposeState('cart', {
-  description: 'Shopping cart',
-  get: () => cart,
-  set: (value) => (cart = value),
-})
-```
-
-Thin helpers exist for Vue (`exposeRef`, `exposeReactive`, `exposeStore`), React
-(`useExposedState`, `useExposeState`, `exposeStore`), Svelte (`exposeStore`, `exposeRune`) and
-Solid (`exposeSignal`, `exposeStore`); none of them is needed for Vue, React, Svelte or Solid
-apps.
-Every helper returns a dispose function and needs JSON-friendly values.
-
 ## Connect your agent
 
 Open your app, then the **medula** dock in the devtools. It shows the MCP URL of the hub and
@@ -215,7 +194,7 @@ Or let `devframe connect` discover every running dev server (this is what `.mcp.
 `pnpm play:solid` (all with Vite DevTools), `pnpm play:next` (Next 16, own hub) or `pnpm play:nuxt`
 (Nuxt 4 + Nuxt DevTools 4 alpha). Open the app, then the medula dock.
 
-`pnpm e2e:agent` starts a fixture app, opens it in a browser and asks Claude Code (or Codex with
+`pnpm e2e:agent` starts the Vue playground, opens it in a browser and asks Claude Code (or Codex with
 `pnpm e2e:agent:codex`) to change its state through the `devframe connect` MCP server;
 `pnpm e2e:agent:vue`, `pnpm e2e:agent:svelte` and `pnpm e2e:agent:solid` do the same against
 the zero-config Vue, Svelte and Solid playgrounds (component tools).

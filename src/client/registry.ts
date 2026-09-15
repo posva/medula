@@ -16,7 +16,7 @@ interface Registry {
   listeners: Set<() => void>
 }
 
-// Shared across bundles (app code + connect script) that load their own copy.
+// Shared across copies of the page script.
 const REGISTRY_KEY = Symbol.for('medula:registry')
 const registry: Registry = ((globalThis as any)[REGISTRY_KEY] ??= {
   states: new Map(),
@@ -28,10 +28,10 @@ function notify(): void {
 }
 
 /**
- * Expose a piece of state to agents. Re-exposing a name replaces the previous
- * entry (HMR friendly). Returns a function that removes the entry.
+ * Register discovered framework state. Reusing a name replaces the previous
+ * entry for HMR. Returns a function that removes the entry.
  */
-export function exposeState<T>(name: string, options: ExposedStateOptions<T>): () => void {
+export function registerState<T>(name: string, options: ExposedStateOptions<T>): () => void {
   const entry: ExposedState<T> = { name, ...options }
   registry.states.set(name, entry as ExposedState)
   notify()

@@ -1,5 +1,6 @@
 import type { App } from 'vue'
-import { exposeState } from '../client'
+import { ensureChannel } from '../client/channel'
+import { registerState } from '../client/registry'
 import { replaceInPlace } from './utils'
 
 // Pinia is not imported: duck-typed on the public store surface
@@ -22,7 +23,8 @@ export function piniaStateName(id: string): string {
 const seen = new WeakSet<object>()
 
 function exposePiniaStore(store: StoreLike): () => void {
-  return exposeState<Record<string, unknown>>(piniaStateName(store.$id), {
+  ensureChannel()
+  return registerState<Record<string, unknown>>(piniaStateName(store.$id), {
     description: `Pinia store "${store.$id}" ($state). set replaces the whole state.`,
     get: () => store.$state,
     set: (value) => store.$patch((state) => replaceInPlace(state, value)),

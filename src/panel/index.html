@@ -47,24 +47,14 @@
       </section>
 
       <section>
-        <h2>2. Expose state from your app</h2>
+        <h2>2. Read and change your app state</h2>
         <p>
-          Tools appear while a page of your app is open in the browser:
-          <code>medula_list-states</code>, <code>medula_get-state</code>,
-          <code>medula_set-state</code>, <code>medula_patch-state</code>, plus component tools for
-          Vue, Pinia, Vue Router, React, Svelte and Solid. Call <code>medula_help</code> for the
-          details. Expose extra state with the helpers:
+          Open your app in the browser. medula finds Vue, Pinia, Vue Router, React, Svelte and Solid
+          state automatically. No state registration is needed.
         </p>
-        <pre><code>import { exposeState } from 'medula/client'
-
-exposeState('cart', {
-  description: 'Shopping cart items',
-  get: () => cart,
-  set: (value) => (cart = value),
-})</code></pre>
         <p>
-          See <code>medula/vue</code>, <code>medula/react</code>, <code>medula/svelte</code> and
-          <code>medula/solid</code> for refs, stores, hooks and signals.
+          Ask your agent to call <code>medula_help</code> for the available tools, then read and
+          change component state or Pinia stores. Tools appear while the app page is open.
         </p>
       </section>
     </main>

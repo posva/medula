@@ -11,14 +11,16 @@ export interface MedulaOptions {
 
 const HELP = `# medula
 
-The open web page exposes its state through these MCP tools:
+Framework state is discovered automatically in the open web page. Use the \`medula_vue_*\`, \`medula_react_*\`, \`medula_svelte_*\` or \`medula_solid_*\` tools to list components, read their state and change it.
+
+Pinia stores also appear as \`pinia:<id>\` through these MCP tools:
 
 - \`${MEDULA_ID}_list-states\`: names, descriptions and a preview of every exposed state. Call it first.
 - \`${MEDULA_ID}_get-state\`: full JSON value of one state.
 - \`${MEDULA_ID}_set-state\`: replace the whole value. The page updates immediately.
 - \`${MEDULA_ID}_patch-state\`: write a value at a path (object keys and array indexes) and keep the rest.
 
-Arguments are passed as a single object under \`arg0\`, for example \`{ "arg0": { "name": "cart" } }\`.
+Arguments are passed as a single object under \`arg0\`, for example \`{ "arg0": { "name": "pinia:cart" } }\`.
 
 If these tools are missing, no page is connected: open the app in a browser (dev server running) and list the tools again. Each open tab is a separate page; the tools act on the tab that synced last, the one the user looked at most recently.
 `
@@ -57,7 +59,7 @@ export function medulaHubEntry(hubBase: string = '/__devframes/'): {
 /**
  * The headless devframe: no UI besides a plain config page, meant to run as a
  * hub dock (Vite DevTools, Nuxt DevTools, a Next hub). The state tools come
- * from the page itself (see `medula/client`) and appear as MCP tools of the
+ * from automatic framework discovery in the page and appear as MCP tools of the
  * hub while a page is connected.
  */
 export function createMedula(options: MedulaOptions = {}): DevframeDefinition {

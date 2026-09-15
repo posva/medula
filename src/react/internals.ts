@@ -271,7 +271,7 @@ function registerTools(): () => void {
       agent: {
         title: 'List React components',
         description:
-          'Tree of the mounted React components with their number of stateful hooks (useState/useReducer) and prop names. Prefer the exposed states (list-states) when they cover what you need; use this to reach internal component state. Ids are stable while the component stays mounted.',
+          'Tree of the mounted React components with their number of stateful hooks (useState/useReducer) and prop names. Use this to reach internal component state. Ids are stable while the component stays mounted.',
       },
       handler: () => {
         const out: ComponentSummary[] = []

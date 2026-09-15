@@ -2,12 +2,13 @@
  * The dock client script (page script), served at `<base>connect.js` next to
  * the config page. The hub client runtime imports it into the app page, so no
  * app code is needed. It registers the state tools and discovers Vue apps,
- * React renderers and Svelte components through the hooks the bootstrap
- * script installed. The hub's own RPC connection mirrors the tools to MCP;
+ * React renderers, Svelte and Solid components through the hooks the
+ * bootstrap script and the Vite wrappers installed. The hub's own RPC connection mirrors the tools to MCP;
  * this script never connects on its own, so it coexists with any other dock.
  */
 import { ensureChannel } from '../client/channel'
 import { installReactInternals } from '../react/internals'
+import { installSolidInternals } from '../solid/internals'
 import { installSvelteInternals } from '../svelte/internals'
 import { installVueInternals } from '../vue/internal'
 
@@ -22,6 +23,7 @@ export default function setup(): void {
   installVueInternals()
   installReactInternals()
   installSvelteInternals()
+  installSolidInternals()
 }
 
 setup()

@@ -52,8 +52,8 @@
           Tools appear while a page of your app is open in the browser:
           <code>medula_list-states</code>, <code>medula_get-state</code>,
           <code>medula_set-state</code>, <code>medula_patch-state</code>, plus component tools for
-          Vue, Pinia, Vue Router, React and Svelte. Call <code>medula_help</code> for the details.
-          Expose extra state with the helpers:
+          Vue, Pinia, Vue Router, React, Svelte and Solid. Call <code>medula_help</code> for the
+          details. Expose extra state with the helpers:
         </p>
         <pre><code>import { exposeState } from 'medula/client'
 
@@ -63,8 +63,8 @@ exposeState('cart', {
   set: (value) => (cart = value),
 })</code></pre>
         <p>
-          See <code>medula/vue</code>, <code>medula/react</code> and <code>medula/svelte</code> for
-          refs, stores and hooks.
+          See <code>medula/vue</code>, <code>medula/react</code>, <code>medula/svelte</code> and
+          <code>medula/solid</code> for refs, stores, hooks and signals.
         </p>
       </section>
     </main>

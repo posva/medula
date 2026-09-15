@@ -6,11 +6,18 @@ import type { Plugin } from 'vite'
 import { createMedula, medulaDockClientScript } from '../devframe'
 import { BOOTSTRAP_SCRIPT } from '../page/bootstrap'
 import { MEDULA_BASE, MEDULA_ID } from '../shared'
+import { solidInstrumentation } from './solid'
 import { svelteInstrumentation } from './svelte'
 
 export interface MedulaVitePluginOptions {
   /** Mount base of the medula dock page inside the dev server. @default '/__medula/' */
   base?: string
+  /**
+   * Solid apps: name signals, memos and stores after their variable in dev
+   * (`createSignal(0, { name: 'count' })`) so the tools show readable labels.
+   * @default true
+   */
+  solidAutoname?: boolean
 }
 
 /**
@@ -18,7 +25,8 @@ export interface MedulaVitePluginOptions {
  * DevTools 4 runs too). The hub serves the config page at `<base>`, loads the
  * page script into the app and exposes the page tools on its own MCP route.
  * The plugin also inlines the hook bootstrap in dev so Vue apps, Pinia stores,
- * React and Svelte components are discovered like the official devtools do.
+ * React, Svelte and Solid components are discovered like the official devtools
+ * do.
  *
  * Requires Vite DevTools: `devtools: true` in the Vite config with
  * `@vitejs/devtools` installed, or Nuxt DevTools in a Nuxt app.
@@ -75,6 +83,8 @@ export function medula(options: MedulaVitePluginOptions = {}): Plugin[] {
     },
     // Svelte 5 components import `svelte/internal/client`; the wrapper records them
     svelteInstrumentation(),
+    // Solid apps import `solid-js`; the wrapper hooks its DEV object
+    solidInstrumentation({ autoname: options.solidAutoname }),
   ]
 }
 

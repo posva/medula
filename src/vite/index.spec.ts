@@ -26,6 +26,7 @@ describe('medula vite plugin', () => {
     expect(kit?.name).toBe('devframe:medula')
     expect(typeof kit?.devtools?.setup).toBe('function')
     expect(plugins.map((p) => p.name)).toContain('medula:svelte')
+    expect(plugins.map((p) => p.name)).toContain('medula:solid')
   })
 
   it('injects only the hook bootstrap into the served HTML', async () => {

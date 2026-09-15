@@ -101,7 +101,8 @@ the cached copy otherwise). Replace with npm versions once the PR is released.
 `.mcp.json` and `.codex/config.toml` register `npx devframe connect` (same shape as pinia-colada):
 one stdio MCP server that discovers running dev servers through `~/.devframe/instances/` (Vite
 DevTools does not publish itself there, so `medula/vite` registers its hub when the dev server
-listens; the Next hub passes `register: true`). Direct URL:
+listens; Nuxt uses its own `listen` hook because Vite runs in middleware mode, and removes the
+registration on Nuxt `close`; the Next hub passes `register: true`). Direct URL:
 `<origin>/__devtools/__mcp` (Vite/Nuxt DevTools) or `<origin>/__devframes/__mcp` (Next).
 
 ## Verifying a change by hand

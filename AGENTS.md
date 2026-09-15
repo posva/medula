@@ -15,14 +15,14 @@ pnpm test                                    # build + coverage + typecheck
 pnpm exec vitest run src/client/path.spec.ts # one test file
 pnpm lint / pnpm lint:fix                    # oxlint
 pnpm test:types                              # tsc
-pnpm play:vue | play:react | play:svelte | play:next | play:nuxt   # playgrounds (run pnpm build first)
+pnpm play:vue | play:react | play:svelte | play:solid | play:next | play:nuxt   # playgrounds (run pnpm build first)
 pnpm e2e:agent                               # Claude Code changes the fixture state over MCP
 pnpm e2e:agent:codex                         # same with Codex
-pnpm e2e:agent:vue | e2e:agent:svelte        # zero-config playground scenarios
+pnpm e2e:agent:vue | e2e:agent:svelte | e2e:agent:solid   # zero-config playground scenarios
 ```
 
-Playground ports: vue-vite 5173, react-vite 5174, svelte-vite 5175, e2e fixture 5199, nextjs 3000,
-nuxt 3001.
+Playground ports: vue-vite 5173, react-vite 5174, svelte-vite 5175, solid-vite 5176, e2e fixture
+5199, nextjs 3000, nuxt 3001.
 
 ## Important
 
@@ -34,19 +34,21 @@ Zero app code: a host adapter inlines the hook bootstrap into the app page in de
 medula as a hub dock; the hub client runtime imports the page script (the dock `clientScript`,
 `eager: true`) into the page, and that script discovers frameworks like the official devtools do.
 
-| Piece                    | Runs in | Purpose                                                                                                                                                           |
-| ------------------------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/page/bootstrap.ts`  | browser | `BOOTSTRAP_SCRIPT`: inline `<head>` script = Vue hook shim (`src/page/vue-hook.ts`) + React hook shim (`src/react/hook.ts`). Must run before the frameworks load. |
-| `src/panel/connect.ts`   | browser | The page script (`dist-client/connect.js`, dock `clientScript`): state channel + Vue/Pinia/Router + React + Svelte discovery. Never connects on its own.          |
-| `src/panel/main.ts`      | browser | The dock page: static instructions; reads the hub connection of the parent window to show the MCP URL (`resolveMcpUrl` in `src/shared.ts`)                        |
-| `src/vue/internal.ts`    | browser | Component tree walker + StateEditor-like setter (mirrors Vue DevTools), Pinia/Router tools                                                                        |
-| `src/react/internals.ts` | browser | Fiber walker + `overrideHookState`/`overrideProps` through the hook shim (mirrors React DevTools)                                                                 |
-| `medula`                 | node    | `createMedula()` devframe definition (+ `help` tool and resource), `medulaDockClientScript()`                                                                     |
-| `medula/vite`            | node    | `medula()` Vite plugins: `createPluginFromDevframe` (Vite DevTools dock at `/__medula/`) + bootstrap injection + Svelte instrumentation. Needs Vite DevTools.     |
-| `medula/next`            | node    | `<Medula />` head component (hook shims only). The hub is the app's: `nextDevframeHub({ devframes: [medulaHubEntry()] })` as in devframe's `hub-next` example     |
-| `medula/nuxt`            | node    | Nuxt module: adds the Vite plugins (Nuxt DevTools 4 hosts Vite DevTools docks), inlines the bootstrap through `app.head`                                          |
-| `medula/client`          | browser | Manual escape hatch: `exposeState(name, { get, set })` for state no devtools can reach                                                                            |
-| `medula/vue              | react   | svelte`                                                                                                                                                           | browser | Manual helpers over `exposeState`; not needed for Vue/React apps |
+| Piece                                    | Runs in | Purpose                                                                                                                                                                                                     |
+| ---------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/page/bootstrap.ts`                  | browser | `BOOTSTRAP_SCRIPT`: inline `<head>` script = Vue hook shim (`src/page/vue-hook.ts`) + React hook shim (`src/react/hook.ts`). Must run before the frameworks load.                                           |
+| `src/panel/connect.ts`                   | browser | The page script (`dist-client/connect.js`, dock `clientScript`): state channel + Vue/Pinia/Router + React + Svelte + Solid discovery. Never connects on its own.                                            |
+| `src/panel/main.ts`                      | browser | The dock page: static instructions; reads the hub connection of the parent window to show the MCP URL (`resolveMcpUrl` in `src/shared.ts`)                                                                  |
+| `src/vue/internal.ts`                    | browser | Component tree walker + StateEditor-like setter (mirrors Vue DevTools), Pinia/Router tools                                                                                                                  |
+| `src/react/internals.ts`                 | browser | Fiber walker + `overrideHookState`/`overrideProps` through the hook shim (mirrors React DevTools)                                                                                                           |
+| `src/svelte/*`                           | browser | `hook.ts` wraps the `svelte/internal/client` dev entry points (inlined by `src/vite/svelte.ts`); `internals.ts` = `medula_svelte_*` tools                                                                   |
+| `src/solid/*`                            | browser | `hook.ts` installs the `DEV.hooks` of the `solid-js` dev build (inlined by `src/vite/solid.ts`, which also autonames signals); `internals.ts` walks roots -> owners -> `sourceMap` = `medula_solid_*` tools |
+| `medula`                                 | node    | `createMedula()` devframe definition (+ `help` tool and resource), `medulaDockClientScript()`                                                                                                               |
+| `medula/vite`                            | node    | `medula()` Vite plugins: `createPluginFromDevframe` (Vite DevTools dock at `/__medula/`) + bootstrap injection + Svelte/Solid instrumentation. Needs Vite DevTools.                                         |
+| `medula/next`                            | node    | `<Medula />` head component (hook shims only). The hub is the app's: `nextDevframeHub({ devframes: [medulaHubEntry()] })` as in devframe's `hub-next` example                                               |
+| `medula/nuxt`                            | node    | Nuxt module: adds the Vite plugins (Nuxt DevTools 4 hosts Vite DevTools docks), inlines the bootstrap through `app.head`                                                                                    |
+| `medula/client`                          | browser | Manual escape hatch: `exposeState(name, { get, set })` for state no devtools can reach                                                                                                                      |
+| `medula/vue \| react \| svelte \| solid` | browser | Manual helpers over `exposeState`; not needed for Vue/React/Svelte/Solid apps                                                                                                                               |
 
 `src/panel/` also holds the dock page (plain HTML + CSS); `panel.vite.config.ts` builds it and
 `connect.js` (keeps its default export: the hub runtime calls it) into `dist-client/`, which is
@@ -125,7 +127,17 @@ private port and `AGENT_BROWSER_SESSION` when verifying; `agent-browser tab N` d
 Adapter-specific tools use `registerAgentTools(namespace, functions)` (`src/client/tools.ts`):
 `src/vue/internal.ts` (component tree walker + StateEditor-like setter, mirrors Vue DevTools) and
 `src/react/internals.ts` + `src/react/hook.ts` (DevTools hook shim that captures renderer internals
-such as `overrideHookState`; must run before React loads).
+such as `overrideHookState`; must run before React loads), `src/svelte/*` and `src/solid/*` (Vite
+wrappers around the framework runtime, dev builds only; the hook functions are stringified into the
+wrapper module so they must stay self-contained).
+
+Solid notes: `afterCreateOwner` fires before `devComponent` sets `props`/`name`/`component`, so the
+hook records only roots and the tools walk `owned` + `subRoots` (`createRoot` inside `<For>` /
+`<Portal>`) at call time. solid-refresh 0.6 passes its `{ name }` as the memo's initial value, so
+the HMR memo is unnamed: it is detected as the single memo child of a `[solid-refresh]*` component.
+Module-level `createStore` registers a transient `{ value, name }`: only the raw object is kept
+(`WeakRef`). Stores are written with `produce` on the raw object (the store proxy refuses direct
+writes); signals with `DEV.writeSignal` and a structural copy (`setAtPath`).
 
 ## Constraints
 

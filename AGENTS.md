@@ -8,6 +8,8 @@ to another one (two devframes on one page fight over the shared `__DEVFRAME_CONN
 
 ## Commands
 
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for local setup, playgrounds, and pull request guidelines.
+
 ```bash
 pnpm build                                   # tsdown (lib) + vite (config page, connect.js)
 pnpm build:lib                               # lib only

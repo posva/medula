@@ -7,6 +7,7 @@
  *   node e2e/agent.mjs                       # Claude Code, explicit exposeState fixture
  *   node e2e/agent.mjs --scenario vue        # zero-config Vue playground (component + Pinia tools)
  *   node e2e/agent.mjs --scenario svelte     # zero-config Svelte playground
+ *   node e2e/agent.mjs --scenario solid      # zero-config Solid playground
  *   node e2e/agent.mjs --agent codex
  */
 import { execFileSync, spawn } from 'node:child_process'
@@ -63,6 +64,20 @@ const scenarios = {
     },
     prompt:
       'call medula_svelte_list-components, find the "App" component, read it with medula_svelte_get-component-state, then use medula_svelte_set-component-state to set its "count" state to 42 (empty path) and the "user" state at path ["address","city"] to "Lyon". Tool arguments are wrapped in an "arg0" object.',
+    check: (value) => value.count === 42 && value.city === 'Lyon',
+  },
+  solid: {
+    port: 5176,
+    viteRoot: 'playgrounds/solid-vite',
+    readyTool: 'medula_solid_list-components',
+    read: async () => {
+      const tree = await callTool('medula_solid_list-components', {})
+      const app = flatten(tree).find((node) => node.name === 'App')
+      const state = await callTool('medula_solid_get-component-state', { id: app.id })
+      return { id: app.id, count: state.state.count, city: state.state.user?.address?.city }
+    },
+    prompt:
+      'call medula_solid_list-components, find the "App" component, read it with medula_solid_get-component-state, then use medula_solid_set-component-state to set its "count" state to 42 (empty path) and the "user" state at path ["address","city"] to "Lyon". Tool arguments are wrapped in an "arg0" object.',
     check: (value) => value.count === 42 && value.city === 'Lyon',
   },
 }

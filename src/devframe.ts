@@ -69,7 +69,8 @@ export function createMedula(options: MedulaOptions = {}): DevframeDefinition {
     homepage: pkg.homepage,
     description: pkg.description,
     importMetaUrl: import.meta.url,
-    icon: 'ph:plugs-connected-duotone',
+    // TODO: replace with actual icon
+    icon: 'solar:bones-bold-duotone',
     basePath: options.base ?? MEDULA_BASE,
     clientAssets: fileURLToPath(new URL('../dist-client', import.meta.url)),
     cli: { mcp: true },

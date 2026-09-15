@@ -1,4 +1,4 @@
-import { act, createElement, useReducer, useState } from 'react'
+import { act, createElement, useReducer, useState, useSyncExternalStore } from 'react'
 import type { Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { REACT_DEVTOOLS_HOOK_SCRIPT, installReactDevtoolsHook } from './hook'
@@ -36,7 +36,7 @@ function Counter({ label }: { label: string }) {
   const [step, dispatch] = useReducer((s: number, by: number) => s + by, 1)
   return createElement(
     'button',
-    { onClick: () => (setCount(count + step), dispatch(1)) },
+    { onClick: () => (setCount((value) => value + step), dispatch(1)) },
     `${label}:${count}:${step}`,
   )
 }
@@ -143,6 +143,47 @@ describe('react internals tools', () => {
     expect(container.querySelector('button')!.textContent).toBe('a:42:2')
     const after = await tool('get-component').invoke({ arg0: { id: counter.id } })
     expect(after.hooks.map((h: any) => h.value)).toEqual([42, 2])
+  })
+
+  it('keeps edited state for functional updates after an idle render', async () => {
+    function IdleCounter() {
+      const [count, setCount] = useState(0)
+      return createElement('button', { onClick: () => setCount((value) => value + 1) }, count)
+    }
+    act(() => root.render(createElement(IdleCounter)))
+    const [counter] = await tool('list-components').invoke({ arg0: {} })
+    await act(async () => {
+      await tool('set-hook-state').invoke({
+        arg0: { id: counter.id, hookIndex: 0, path: [], value: 41 },
+      })
+    })
+    expect(container.querySelector('button')!.textContent).toBe('41')
+    act(() => root.render(createElement(IdleCounter)))
+    act(() => container.querySelector('button')!.click())
+    expect(container.querySelector('button')!.textContent).toBe('42')
+  })
+
+  it('rejects external store snapshot writes', async () => {
+    const settings = { theme: 'light' }
+    const subscribe = () => () => {}
+    function Settings() {
+      const value = useSyncExternalStore(subscribe, () => settings)
+      return createElement('p', null, value.theme)
+    }
+    act(() => root.render(createElement(Settings)))
+    const [component] = await tool('list-components').invoke({ arg0: {} })
+    const before = await tool('get-component').invoke({ arg0: { id: component.id } })
+    expect(before.hooks).toEqual([{ index: 0, kind: 'other', value: settings }])
+    await act(async () => {
+      await expect(
+        tool('set-hook-state').invoke({
+          arg0: { id: component.id, hookIndex: 0, path: ['theme'], value: 'dark' },
+        }),
+      ).rejects.toThrow(/Only useState and useReducer/)
+    })
+    expect(container.querySelector('p')!.textContent).toBe('light')
+    const after = await tool('get-component').invoke({ arg0: { id: component.id } })
+    expect(after.hooks).toEqual(before.hooks)
   })
 
   it('overrides props at a path', async () => {

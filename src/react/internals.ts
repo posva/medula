@@ -40,7 +40,10 @@ interface FiberRoot {
 
 interface Hook {
   memoizedState: unknown
-  queue: { lastRenderedReducer?: (...args: unknown[]) => unknown } | null
+  queue: {
+    lastRenderedReducer?: (...args: unknown[]) => unknown
+    lastRenderedState?: unknown
+  } | null
   next: Hook | null
 }
 
@@ -287,7 +290,7 @@ function registerTools(): () => void {
       agent: {
         title: 'Inspect a React component',
         description:
-          'Props and stateful hook values of one component (id from list-components). `hooks[].index` is the hook position you pass to set-hook-state. Class components also return `state`.',
+          'Props and stateful hook values of one component (id from list-components). `hooks[].index` is the hook position you pass to set-hook-state. Hooks with kind `other`, including external store snapshots, are read-only. Class components also return `state`.',
       },
       handler: ({ id }) => details(id, requireFiber(id).fiber),
     },
@@ -306,7 +309,7 @@ function registerTools(): () => void {
       agent: {
         title: 'Set React hook state',
         description:
-          'Write a value into a useState/useReducer hook of a component, like editing it in React DevTools; the component re-renders. Flow: list-components -> get-component -> set-hook-state. Development builds of React only.',
+          'Write a value into a useState/useReducer hook of a component, like editing it in React DevTools; the component re-renders. Hooks with kind `other` are read-only: external stores must be changed through their own APIs. Flow: list-components -> get-component -> set-hook-state. Development builds of React only.',
       },
       handler: ({ id, hookIndex, path, value }) => {
         const { fiber, renderer } = requireFiber(id)
@@ -322,7 +325,16 @@ function registerTools(): () => void {
         if (!hook) {
           throw new Error(`[medula] Component ${id} has no stateful hook at index ${hookIndex}.`)
         }
+        if (typeof hook[1].queue?.lastRenderedReducer !== 'function') {
+          throw new Error(
+            '[medula] Only useState and useReducer hooks can be edited. External store snapshots are read-only; update the store through its own API.',
+          )
+        }
         renderer.overrideHookState(fiber, hookIndex, path, value)
+        // React's override leaves the eager update cache at the old value.
+        if (hook[1].queue && 'lastRenderedState' in hook[1].queue) {
+          hook[1].queue.lastRenderedState = hook[1].memoizedState
+        }
         return hookValue(hookIndex, hook[1])
       },
     },

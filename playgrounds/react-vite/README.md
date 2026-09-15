@@ -10,7 +10,7 @@ pnpm play:react     # http://localhost:5174
 ```
 
 The [common demo](../../CONTRIBUTING.md#playgrounds) lives in `App`: counter and nested user
-(`useState`), todos (`useReducer`), and settings (`useSyncExternalStore`). Each `Item` has props
+(`useState`), todos (`useReducer`), and settings (`useState`). Each `Item` has props
 and local hover state. “More state examples” contains `Greeting` (props) and `Clock` (class
 component state + props).
 

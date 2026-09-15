@@ -1,5 +1,4 @@
 import { Component, useReducer, useState } from 'react'
-import { settingsStore, useSettings } from './store'
 
 interface Todo {
   id: number
@@ -77,7 +76,11 @@ export function App() {
     { id: 1, text: 'Open the page', done: true },
     { id: 2, text: 'Try the MCP tools', done: false },
   ])
-  const settings = useSettings()
+  const [settings, setSettings] = useState({
+    theme: 'light' as 'light' | 'dark',
+    fontSize: 16,
+    showSettings: true,
+  })
   const remaining = todos.filter((todo) => !todo.done).length
   const greeting = `Hello ${user.name} from ${user.address.city}`
 
@@ -119,7 +122,7 @@ export function App() {
           type="checkbox"
           checked={settings.showSettings}
           onChange={(event) =>
-            settingsStore.setState({ ...settings, showSettings: event.currentTarget.checked })
+            setSettings({ ...settings, showSettings: event.currentTarget.checked })
           }
         />
         Show settings
@@ -131,7 +134,7 @@ export function App() {
             <select
               value={settings.theme}
               onChange={(event) =>
-                settingsStore.setState({
+                setSettings({
                   ...settings,
                   theme: event.currentTarget.value as 'light' | 'dark',
                 })
@@ -149,7 +152,7 @@ export function App() {
               max="24"
               value={settings.fontSize}
               onChange={(event) =>
-                settingsStore.setState({ ...settings, fontSize: Number(event.currentTarget.value) })
+                setSettings({ ...settings, fontSize: Number(event.currentTarget.value) })
               }
             />
           </label>

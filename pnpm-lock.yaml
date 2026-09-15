@@ -230,6 +230,9 @@ importers:
       '@devframes/next':
         specifier: file:vendor/devframes-next-0.9.19.tgz
         version: file:vendor/devframes-next-0.9.19.tgz(86b5087f1104376c005f37cfa755f879)
+      '@devframes/plugin-terminals':
+        specifier: ^0.9.19
+        version: 0.9.19(@devframes/hub-ui@file:vendor/devframes-hub-ui-0.9.19.tgz(@devframes/hub@file:vendor/devframes-hub-0.9.19.tgz(crossws@0.4.12(srvx@1.0.4))(devframe@file:vendor/devframe-0.9.19.tgz(@modelcontextprotocol/client@2.0.0)(cac@7.0.0)(srvx@1.0.4)))(@devframes/json-render@0.9.19(@devframes/hub@file:vendor/devframes-hub-0.9.19.tgz(crossws@0.4.12(srvx@1.0.4))(devframe@file:vendor/devframe-0.9.19.tgz(@modelcontextprotocol/client@2.0.0)(cac@7.0.0)(srvx@1.0.4)))(devframe@file:vendor/devframe-0.9.19.tgz(@modelcontextprotocol/client@2.0.0)(cac@7.0.0)(srvx@1.0.4)))(devframe@file:vendor/devframe-0.9.19.tgz(@modelcontextprotocol/client@2.0.0)(cac@7.0.0)(srvx@1.0.4)))(@devframes/hub@file:vendor/devframes-hub-0.9.19.tgz(crossws@0.4.12(srvx@1.0.4))(devframe@file:vendor/devframe-0.9.19.tgz(@modelcontextprotocol/client@2.0.0)(cac@7.0.0)(srvx@1.0.4)))(devframe@file:vendor/devframe-0.9.19.tgz(@modelcontextprotocol/client@2.0.0)(cac@7.0.0)(srvx@1.0.4))(vite@8.3.0)
       medula:
         specifier: link:../..
         version: link:../..

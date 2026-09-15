@@ -15,6 +15,10 @@ const hub = nextDevframeHub({
       import(/* webpackIgnore: true */ /* turbopackIgnore: true */ 'medula').then((m) =>
         m.medulaHubEntry(),
       ),
+    () =>
+      import(
+        /* webpackIgnore: true */ /* turbopackIgnore: true */ '@devframes/plugin-terminals'
+      ).then((m) => m.createTerminalsDevframe()),
   ],
   // single-user localhost: no one-time code
   auth: false,

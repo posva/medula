@@ -11,9 +11,12 @@ pnpm play:next      # http://localhost:3000
 ```
 
 - `next.config.ts`: `withDevframe({...})`
-- `app/%5F_devframes/[[...path]]/route.ts`: the app-owned devframe hub
+- `app/%5F_devframes/[[...path]]/route.ts`: the app-owned devframe hub with medula and Terminals panels
 - `app/layout.tsx`: `<head><Medula /></head>`
 - `app/playground.tsx`: the [common demo](../../CONTRIBUTING.md#playgrounds), with counter, nested user, todos, and settings
 - `app/profile.tsx`: `Profile` (`useState`), `Greeting` (props), `Clock` (class component)
 
-MCP endpoint: `http://localhost:3000/__devframes/__mcp`. medula dock page: `http://localhost:3000/__devframes/medula/`.
+MCP endpoint: `http://localhost:3000/__devframes/__mcp`. Dock pages:
+
+- medula: `http://localhost:3000/__devframes/medula/`
+- Terminals: `http://localhost:3000/__devframes/devframes_plugin_terminals/`

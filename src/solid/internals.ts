@@ -167,7 +167,7 @@ interface Entry {
   id: string
   name: string
   signals: Map<string, SolidSourceMapValue>
-  memos: Map<string, SolidComputation>
+  memos: Map<string, SolidSourceMapValue>
   props: Record<string, unknown>
   children: Entry[]
 }
@@ -175,11 +175,18 @@ interface Entry {
 /** Labels: the `name` option (autoname gives the variable name) or a positional fallback. */
 function labelled(collected: Collected): Pick<Entry, 'signals' | 'memos'> {
   const signals = new Map<string, SolidSourceMapValue>()
-  collected.signals.forEach((value, i) => {
-    signals.set(value.name ?? `${isSignal(value) ? 'signal' : 'store'}${i}`, value)
+  const memos = new Map<string, SolidSourceMapValue>()
+  collected.signals.forEach((value) => {
+    if (value.readonly) memos.set(value.name ?? `memo${memos.size}`, value)
+    else signals.set(value.name ?? `${isSignal(value) ? 'signal' : 'store'}${signals.size}`, value)
   })
-  const memos = new Map<string, SolidComputation>()
-  collected.memos.forEach((memo, i) => memos.set(memo.name ?? `memo${i}`, memo))
+  collected.memos.forEach((memo, i) =>
+    memos.set(memo.name ?? `memo${i}`, {
+      get value() {
+        return memo.value
+      },
+    }),
+  )
   return { signals, memos }
 }
 
@@ -368,7 +375,13 @@ function registerTools(): () => void {
           )
         }
         const internal = requireInternal()
-        if (isSignal(target)) {
+        if (target.edit) {
+          target.edit((current: any) => {
+            if (isSignal(target)) return setAtPath(current, path, value)
+            if (path.length === 0) replaceContents(current, value)
+            else writeAtPath(current, path, value)
+          })
+        } else if (isSignal(target)) {
           internal.writeSignal(target, setAtPath(target.value, path, value))
         } else {
           internal.batch(() =>

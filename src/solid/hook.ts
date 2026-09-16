@@ -1,6 +1,8 @@
 /** `registerGraph` entry: a signal (`createSignal`) or a store root (`createStore`/`createMutable`). */
 export interface SolidSourceMapValue {
   value: unknown
+  readonly?: boolean
+  edit?: (update: (value: any) => any) => void
   name?: string
   /** The owner that created it; missing when created outside any owner. */
   graph?: SolidOwner

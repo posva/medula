@@ -1,0 +1,21 @@
+{
+  "name": "playground-solid2-vite",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "medula": "link:../..",
+    "solid-js": "2.0.0-rc.8",
+    "@solidjs/web": "2.0.0-rc.8"
+  },
+  "devDependencies": {
+    "@vitejs/devtools": "^0.7.3",
+    "typescript": "~7.0.2",
+    "vite": "^8.3.0",
+    "@solidjs/vite-plugin": "3.0.0-next.43"
+  }
+}

@@ -70,3 +70,36 @@ describe('solidInstrumentation', () => {
     expect(solidInstrumentation({ autoname: false }).transform).toBeUndefined()
   })
 })
+
+it('detects Solid 2 from the app and wraps its primitives without removed exports', () => {
+  const plugin = solidInstrumentation()
+  ;(plugin.configResolved as any)({
+    root: new URL('../../playgrounds/solid2-vite', import.meta.url).pathname,
+  })
+  const load = plugin.load as (id: string) => string
+  const resolve = plugin.resolveId as any
+  const code = load('\0medula:solid-js')
+  expect(code).not.toContain("from 'solid-js/store'")
+  expect(code).toContain('export const createSignal =')
+  expect(resolve('@solidjs/web', '/app/main.tsx')).toBe('\0medula:@solidjs/web')
+  expect(resolve('@solidjs/signals', '/app/main.tsx')).toBe('\0medula:@solidjs/signals')
+  expect(resolve('solid-js/web', '/app/main.tsx')).toBeUndefined()
+  const transform = plugin.transform as any
+  expect(
+    transform(`import { createMemo } from 'solid-js'; const n = createMemo(() => 1)`, '/app/a.ts')
+      .code,
+  ).toContain('createMemo(() => 1, { name: "n" })')
+})
+
+it('names Solid 2 memos, projections, and optimistic primitives at their options argument', () => {
+  const input = `import { createMemo, createStore, createOptimistic, createProjection } from 'solid-js'
+const memo = createMemo(() => 1)
+const [store] = createStore(() => ({ n: 1 }), {})
+const [optimistic] = createOptimistic(0)
+const projected = createProjection(() => {}, {})`
+  const output = solidAutoname(input, '/app/a.ts', 2)
+  expect(output).toContain('createMemo(() => 1, { name: "memo" })')
+  expect(output).toContain('createStore(() => ({ n: 1 }), {}, { name: "store" })')
+  expect(output).toContain('createOptimistic(0, { name: "optimistic" })')
+  expect(output).toContain('createProjection(() => {}, {}, { name: "projected" })')
+})

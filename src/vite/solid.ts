@@ -1,8 +1,12 @@
+import { createRequire } from 'node:module'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { installSolid2RuntimeHook } from '../solid/hook2'
 import { parseAst } from 'vite'
 import type { Plugin } from 'vite'
 import { installSolidRuntimeHook } from '../solid/hook'
 
-type Wrapped = 'solid-js' | 'solid-js/web'
+type Wrapped = 'solid-js' | 'solid-js/web' | '@solidjs/web' | '@solidjs/signals'
 const WRAPPED: ReadonlySet<string> = new Set<Wrapped>(['solid-js', 'solid-js/web'])
 const WRAPPER_PREFIX = '\0medula:'
 
@@ -12,7 +16,25 @@ const WRAPPER_PREFIX = '\0medula:'
  * `DEV` object. Everything resolves to the same pre-bundled runtime, so the
  * hook sees the roots the app renders.
  */
-export function solidWrapperSource(real: Wrapped): string {
+export function solidWrapperSource(real: Wrapped, major: 1 | 2 = 1): string {
+  if (major === 2) {
+    const runtime = real === '@solidjs/signals' ? real : 'solid-js'
+    return [
+      `import * as __solid from '${runtime}'`,
+      `export * from '${real}'`,
+      `const __medula = (${installSolid2RuntimeHook.toString()})(__solid, globalThis)`,
+      ...(real === '@solidjs/web'
+        ? []
+        : [
+            'createSignal',
+            'createMemo',
+            'createStore',
+            'createOptimistic',
+            'createOptimisticStore',
+            'createProjection',
+          ].map((name) => `export const ${name} = __medula.${name}`)),
+    ].join('\n')
+  }
   return [
     `import * as __solid from 'solid-js'`,
     `import * as __store from 'solid-js/store'`,
@@ -21,15 +43,25 @@ export function solidWrapperSource(real: Wrapped): string {
   ].join('\n')
 }
 
-type Named = 'createSignal' | 'createMemo' | 'createStore' | 'createMutable'
+type Named =
+  | 'createSignal'
+  | 'createMemo'
+  | 'createStore'
+  | 'createMutable'
+  | 'createOptimistic'
+  | 'createOptimisticStore'
+  | 'createProjection'
 /** Position of the `{ name }` options argument. */
 const OPTIONS_INDEX: Record<Named, number> = {
   createSignal: 1,
   createMemo: 2,
   createStore: 1,
   createMutable: 1,
+  createOptimistic: 1,
+  createOptimisticStore: 1,
+  createProjection: 2,
 }
-const SOURCES = new Set(['solid-js', 'solid-js/store'])
+const SOURCES = new Set(['solid-js', 'solid-js/store', '@solidjs/signals'])
 const LANGS: Record<string, 'js' | 'jsx' | 'ts' | 'tsx'> = {
   js: 'js',
   mjs: 'js',
@@ -64,7 +96,12 @@ function calleeName(
 }
 
 function declaredName(id: Node, fn: Named): string | undefined {
-  if (fn === 'createSignal' || fn === 'createStore') {
+  if (
+    fn === 'createSignal' ||
+    fn === 'createStore' ||
+    fn === 'createOptimistic' ||
+    fn === 'createOptimisticStore'
+  ) {
     const first = id.type === 'ArrayPattern' ? id.elements[0] : undefined
     return first?.type === 'Identifier' ? first.name : undefined
   }
@@ -79,8 +116,10 @@ function declaredName(id: Node, fn: Named): string | undefined {
  * are left alone. Only inserts text, so line numbers do not move. Returns
  * `undefined` when nothing changes or the file does not parse.
  */
-export function solidAutoname(code: string, id: string): string | undefined {
-  if (!/\bcreate(?:Signal|Memo|Store|Mutable)\b/.test(code)) return
+export function solidAutoname(code: string, id: string, major: 1 | 2 = 1): string | undefined {
+  if (!/\bcreate(?:Signal|Memo|Store|Mutable|Optimistic|OptimisticStore|Projection)\b/.test(code)) {
+    return
+  }
   const lang =
     LANGS[
       id
@@ -120,7 +159,23 @@ export function solidAutoname(code: string, id: string): string | undefined {
     const name = declaredName(node.id, fn)
     if (!name) return
     const args: Node[] = init.arguments
-    const index = OPTIONS_INDEX[fn]
+    let index = OPTIONS_INDEX[fn]
+    if (major === 2) {
+      if (fn === 'createMutable') return
+      if (fn === 'createMemo') index = 1
+      if ((fn === 'createStore' || fn === 'createOptimisticStore') && args.length >= 2) {
+        const first = args[0]!
+        if (first.type === 'ArrowFunctionExpression' || first.type === 'FunctionExpression') {
+          index = 2
+        } else if (first.type !== 'ObjectExpression' && first.type !== 'ArrayExpression') return
+      }
+    } else if (
+      fn === 'createOptimistic' ||
+      fn === 'createOptimisticStore' ||
+      fn === 'createProjection'
+    ) {
+      return
+    }
     if (args.length > index || args.some((arg) => arg.type === 'SpreadElement')) return
     const option = `{ name: ${JSON.stringify(name)} }`
     if (args.length === 0) {
@@ -170,26 +225,38 @@ export interface SolidInstrumentationOptions {
  * Harmless for non-Solid apps: nothing imports those specifiers.
  */
 export function solidInstrumentation(options: SolidInstrumentationOptions = {}): Plugin {
+  let major: 1 | 2 = 1
+  let wrapped = WRAPPED
   const plugin: Plugin = {
     name: 'medula:solid',
     apply: 'serve',
+    configResolved(config) {
+      try {
+        const require = createRequire(resolve(config.root, 'package.json'))
+        const pkg = JSON.parse(readFileSync(require.resolve('solid-js/package.json'), 'utf8'))
+        major = Number.parseInt(pkg.version, 10) === 2 ? 2 : 1
+      } catch {
+        // Non-Solid apps have no runtime to instrument.
+      }
+      wrapped = major === 2 ? new Set(['solid-js', '@solidjs/web', '@solidjs/signals']) : WRAPPED
+    },
     // must run before vite:resolve, which maps the specifier to the pre-bundled dep
     enforce: 'pre',
     resolveId(id, importer, options) {
-      if (!WRAPPED.has(id) || options?.ssr || !importer) return
+      if (!wrapped.has(id) || options?.ssr || !importer) return
       if (importer.startsWith('\0')) return
       return WRAPPER_PREFIX + id
     },
     load(id) {
       if (!id.startsWith(WRAPPER_PREFIX)) return
       const real = id.slice(WRAPPER_PREFIX.length) as Wrapped
-      if (WRAPPED.has(real)) return solidWrapperSource(real)
+      if (wrapped.has(real)) return solidWrapperSource(real, major)
     },
   }
   if (options.autoname !== false) {
     plugin.transform = (code, id) => {
       if (id.startsWith('\0') || id.includes('/node_modules/')) return
-      const out = solidAutoname(code, id)
+      const out = solidAutoname(code, id, major)
       // inserts only: the previous map stays valid line by line
       return out === undefined ? undefined : { code: out, map: null }
     }

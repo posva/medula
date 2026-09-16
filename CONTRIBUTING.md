@@ -30,7 +30,8 @@ Start a playground and open its URL in your browser:
 | Vue and Pinia | `pnpm play:vue`    | http://localhost:5173 |
 | React         | `pnpm play:react`  | http://localhost:5174 |
 | Svelte 5      | `pnpm play:svelte` | http://localhost:5175 |
-| Solid         | `pnpm play:solid`  | http://localhost:5176 |
+| Solid 1       | `pnpm play:solid`  | http://localhost:5176 |
+| Solid 2 RC    | `pnpm play:solid2` | http://localhost:5177 |
 | Next.js       | `pnpm play:next`   | http://localhost:3000 |
 | Nuxt          | `pnpm play:nuxt`   | http://localhost:3001 |
 

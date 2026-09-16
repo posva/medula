@@ -12,12 +12,12 @@ to another route, and see the result in your browser.
 It supports **Vue 3, React, Svelte 5, and Solid**, with integrations for **Vite, Nuxt, and
 Next.js**. Vue apps also get support for Pinia and Vue Router. Add medula to your dev server, it infiltrates your app so you don't need to adapt anything in it.
 
-| Framework | What your agent can do                                                                                    |
-| --------- | --------------------------------------------------------------------------------------------------------- |
-| Vue 3     | Inspect the component tree, read and edit component state and Pinia stores, and navigate with Vue Router. |
-| React     | Inspect components, read and edit hook state, and override props.                                         |
-| Svelte 5  | Inspect components, read props and derived values, and edit `$state`.                                     |
-| Solid 1.9 | Inspect components, read props and memos, and edit signals and stores.                                    |
+| Framework        | What your agent can do                                                                                    |
+| ---------------- | --------------------------------------------------------------------------------------------------------- |
+| Vue 3            | Inspect the component tree, read and edit component state and Pinia stores, and navigate with Vue Router. |
+| React            | Inspect components, read and edit hook state, and override props.                                         |
+| Svelte 5         | Inspect components, read props and derived values, and edit `$state`.                                     |
+| Solid 1.9 / 2 RC | Inspect components, read props and memos, and edit signals and stores.                                    |
 
 medula runs during development and uses [devframe](https://devfra.me) to connect your app to
 your agent.
@@ -58,10 +58,18 @@ import react from '@vitejs/plugin-react'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 // plugins: [svelte(), medula()]
 
-// Solid
+// Solid 1
 import solid from 'vite-plugin-solid'
 // plugins: [solid(), medula()]
+
+// Solid 2
+import solid from '@solidjs/vite-plugin'
+// plugins: [solid(), medula()]
 ```
+
+medula detects the Solid version installed in the app. Solid 2 support is tested against
+`2.0.0-rc.8`. It captures public setters from instrumented primitive imports; pending or failed
+values appear as `null` until they can be read.
 
 ### Nuxt
 

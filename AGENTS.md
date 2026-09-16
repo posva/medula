@@ -17,13 +17,13 @@ pnpm test                                    # build + coverage + typecheck
 pnpm exec vitest run src/client/path.spec.ts # one test file
 pnpm lint / pnpm lint:fix                    # oxlint
 pnpm test:types                              # tsc
-pnpm play:vue | play:react | play:svelte | play:solid | play:next | play:nuxt   # playgrounds (run pnpm build first)
+pnpm play:vue | play:react | play:svelte | play:solid | play:solid2 | play:next | play:nuxt   # playgrounds (run pnpm build first)
 pnpm e2e:agent                               # Claude Code changes Vue playground state over MCP
 pnpm e2e:agent:codex                         # same with Codex
 pnpm e2e:agent:vue | e2e:agent:svelte | e2e:agent:solid   # zero-config playground scenarios
 ```
 
-Playground ports: vue-vite 5173, react-vite 5174, svelte-vite 5175, solid-vite 5176, nextjs 3000, nuxt 3001.
+Playground ports: vue-vite 5173, react-vite 5174, svelte-vite 5175, solid-vite 5176, solid2-vite 5177, nextjs 3000, nuxt 3001.
 
 All playgrounds share a counter, todos, a nested user profile, derived greeting/remaining count,
 and theme/font/settings visibility controls. Keep their initial values and common actions aligned;
@@ -149,6 +149,13 @@ the HMR memo is unnamed: it is detected as the single memo child of a `[solid-re
 Module-level `createStore` registers a transient `{ value, name }`: only the raw object is kept
 (`WeakRef`). Stores are written with `produce` on the raw object (the store proxy refuses direct
 writes); signals with `DEV.writeSignal` and a structural copy (`setAtPath`).
+
+Solid 2 uses `hook2.ts`: the Vite plugin detects the app's installed Solid major and captures
+public setters from `solid-js` / `@solidjs/signals` primitive wrappers. The adapter uses
+`DEV.onOwner`, `getChildren` and `getParent`, normalizes owners for the shared tools, and flushes
+writes before returning. Projections and memos are read-only; pending/failed reads return null.
+The Solid 1 playground stays on 1.9; `solid2-vite` uses Solid 2 RC. The root `solid-js-v2` npm
+alias supplies runtime tests, with a Vitest alias selecting its browser development build.
 
 ## Constraints
 

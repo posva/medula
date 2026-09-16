@@ -24,13 +24,15 @@ async function main() {
   const mcpUrl = await findMcpUrl()
   if (!mcpUrl) {
     $('status').textContent =
-      'Open this page from the devtools dock to see the MCP URL of this dev server. `devframe connect` (below) finds it on its own.'
+      'Open this page from the devtools dock to see the MCP URL of this dev server.'
     return
   }
   $('mcp-url').textContent = mcpUrl
-  $('snippet-claude').textContent = `claude mcp add --transport http medula ${mcpUrl}`
+  const origin = new URL(mcpUrl).origin
+  $('snippet-claude').textContent =
+    `claude mcp add --transport http medula ${mcpUrl} --header "Origin: ${origin}"`
   $('snippet-json').textContent = JSON.stringify(
-    { mcpServers: { medula: { type: 'http', url: mcpUrl } } },
+    { mcpServers: { medula: { type: 'http', url: mcpUrl, headers: { Origin: origin } } } },
     null,
     2,
   )

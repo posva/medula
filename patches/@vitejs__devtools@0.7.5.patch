@@ -1,0 +1,18 @@
+diff --git a/dist/server-BIAKwFxh.js b/dist/server-BIAKwFxh.js
+index 4594ef0224ee797ca8b141335a44c4f465e8ad73..98a909871634693dcd9d07ed13a9a6ee3fc603be 100644
+--- a/dist/server-BIAKwFxh.js
++++ b/dist/server-BIAKwFxh.js
+@@ -141,6 +141,13 @@ async function createDevToolsHub(options) {
+ 		context,
+ 		ui: createViteDevToolsUi(options.ui),
+ 		renderers: resolveDockRendererRegistrations(options.renderers),
++		...context.viteServer ? {
++			register: {
++				id: "vite-devtools",
++				name: "Vite DevTools",
++				rootDir: context.cwd
++			}
++		} : {},
+ 		...context.viteServer ? { clientModuleResolution: "/@id/{specifier}" } : {},
+ 		auth: authDisabled ? false : getAuthHandler(context),
+ 		...allowedOrigins ? { allowedOrigins } : {},

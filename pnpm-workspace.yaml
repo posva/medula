@@ -24,3 +24,5 @@ minimumReleaseAgeExclude:
   - '@vitejs/devtools-kit@0.7.5'
   - '@vitejs/devtools@0.7.5'
   - 'devframe@1.0.0'
+patchedDependencies:
+  '@vitejs/devtools@0.7.5': patches/@vitejs__devtools@0.7.5.patch

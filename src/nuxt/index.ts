@@ -1,12 +1,9 @@
 import { addVitePlugin, defineNuxtModule } from '@nuxt/kit'
 import type { NuxtModule } from '@nuxt/schema'
-import { DEVTOOLS_MOUNT_PATH } from '@vitejs/devtools-kit/constants'
-import { registerDevframeInstance } from 'devframe/internal'
-import type { DevframeInstanceRegistration } from 'devframe/internal'
 import { medula } from '../vite'
 import type { MedulaVitePluginOptions } from '../vite'
 import { BOOTSTRAP_SCRIPT } from '../page/bootstrap'
-import { MEDULA_BASE, MEDULA_ID } from '../shared'
+import { MEDULA_BASE } from '../shared'
 
 export type MedulaNuxtOptions = MedulaVitePluginOptions
 
@@ -34,28 +31,6 @@ const medulaModule: NuxtModule<MedulaNuxtOptions> = defineNuxtModule<MedulaNuxtO
     // Nuxt DevTools hosts Vite DevTools docks; Nuxt renders the HTML itself, so
     // the Vite `transformIndexHtml` injection does not apply: add the shims to the head.
     addVitePlugin(medula({ ...options, base }), { server: false })
-    // Vite has no HTTP server in Nuxt's middleware mode.
-    let registration: DevframeInstanceRegistration | undefined
-    nuxt.hook('listen', (server, listener) => {
-      const address = server.address()
-      if (!address || typeof address === 'string') return
-      registration?.unregister()
-      registration = registerDevframeInstance({
-        pid: process.pid,
-        port: address.port,
-        origin: new URL(listener.url).origin,
-        basePath: DEVTOOLS_MOUNT_PATH,
-        id: MEDULA_ID,
-        name: 'medula',
-        rootDir: nuxt.options.rootDir,
-        mcp: { path: `${DEVTOOLS_MOUNT_PATH}__mcp` },
-        startedAt: Date.now(),
-      })
-    })
-    nuxt.hook('close', () => {
-      registration?.unregister()
-      registration = undefined
-    })
     nuxt.options.app.head.script ??= []
     nuxt.options.app.head.script.push({
       innerHTML: BOOTSTRAP_SCRIPT,

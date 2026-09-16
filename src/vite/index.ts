@@ -1,11 +1,8 @@
-import type { AddressInfo } from 'node:net'
-import { DEVTOOLS_MOUNT_PATH } from '@vitejs/devtools-kit/constants'
 import { createPluginFromDevframe } from '@vitejs/devtools-kit/node'
-import { registerDevframeInstance } from 'devframe/internal'
 import type { Plugin } from 'vite'
 import { createMedula, medulaDockClientScript } from '../devframe'
 import { BOOTSTRAP_SCRIPT } from '../page/bootstrap'
-import { MEDULA_BASE, MEDULA_ID } from '../shared'
+import { MEDULA_BASE } from '../shared'
 import { solidInstrumentation } from './solid'
 import { svelteInstrumentation } from './svelte'
 
@@ -49,28 +46,6 @@ export function medula(options: MedulaVitePluginOptions = {}): Plugin[] {
         console.warn(
           '[medula] medula runs as a Vite DevTools dock. Enable Vite DevTools (`devtools: true` in vite.config with `@vitejs/devtools` installed) or Nuxt DevTools, otherwise no tool reaches MCP.',
         )
-      },
-      configureServer(server) {
-        // Vite DevTools does not publish itself to `~/.devframe/instances/`;
-        // register its hub so `devframe connect` discovers this dev server.
-        const httpServer = server.httpServer
-        if (!httpServer) return
-        httpServer.once('listening', () => {
-          const address = httpServer.address() as AddressInfo | string | null
-          if (!address || typeof address === 'string') return
-          const registration = registerDevframeInstance({
-            pid: process.pid,
-            port: address.port,
-            origin: `http://localhost:${address.port}`,
-            basePath: DEVTOOLS_MOUNT_PATH,
-            id: MEDULA_ID,
-            name: 'medula',
-            rootDir: server.config.root,
-            mcp: { path: `${DEVTOOLS_MOUNT_PATH}__mcp` },
-            startedAt: Date.now(),
-          })
-          httpServer.once('close', () => registration.unregister())
-        })
       },
       transformIndexHtml: {
         order: 'pre',

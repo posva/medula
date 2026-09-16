@@ -2,6 +2,7 @@
 export interface ReactHookStore {
   renderers: Map<number, unknown>
   listeners: Set<(id: number, renderer: unknown) => void>
+  committedRenderers?: Set<number>
 }
 
 /** `globalThis` key of the {@link ReactHookStore}. */
@@ -22,6 +23,7 @@ export function installReactDevtoolsHook(target: typeof globalThis = globalThis)
   const g = target as unknown as Record<string | symbol, any>
   const STORE = Symbol.for('medula:react-hook')
   const store = (g[STORE] ??= { renderers: new Map(), listeners: new Set() })
+  store.committedRenderers ??= new Set()
   const announce = (id: number, renderer: unknown) => {
     store.renderers.set(id, renderer)
     for (const listener of store.listeners) listener(id, renderer)
@@ -29,6 +31,7 @@ export function installReactDevtoolsHook(target: typeof globalThis = globalThis)
   const fiberRoots: Record<number, Set<unknown>> = {}
   const getFiberRoots = (id: number) => (fiberRoots[id] ??= new Set())
   const track = (id: number, root: any) => {
+    store.committedRenderers.add(id)
     const roots = getFiberRoots(id)
     const state = root.current.memoizedState
     if (state == null || state.element == null) roots.delete(root)
@@ -48,13 +51,14 @@ export function installReactDevtoolsHook(target: typeof globalThis = globalThis)
       return id
     }
     for (const [id, renderer] of existing.renderers) announce(id, renderer)
-    if (typeof existing.getFiberRoots !== 'function') {
-      const onCommitFiberRoot = existing.onCommitFiberRoot
-      existing.onCommitFiberRoot = function (id: number, root: unknown) {
-        track(id, root)
-        return onCommitFiberRoot?.apply(this, arguments)
-      }
-      existing.getFiberRoots = getFiberRoots
+    const onCommitFiberRoot = existing.onCommitFiberRoot
+    existing.onCommitFiberRoot = function (id: number, root: unknown) {
+      track(id, root)
+      return onCommitFiberRoot?.apply(this, arguments)
+    }
+    if (typeof existing.getFiberRoots !== 'function') existing.getFiberRoots = getFiberRoots
+    for (const id of existing.renderers.keys()) {
+      if (existing.getFiberRoots(id).size) store.committedRenderers.add(id)
     }
     return
   }

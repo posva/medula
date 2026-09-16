@@ -135,6 +135,13 @@ such as `overrideHookState`; must run before React loads), `src/svelte/*` and `s
 wrappers around the framework runtime, dev builds only; the hook functions are stringified into the
 wrapper module so they must stay self-contained).
 
+React `list-components` waits for document load, the first commit from each injected renderer,
+and hydration of all known roots and Suspense boundaries. It then requires 250 ms without root
+or renderer changes. After 5 seconds it throws a readiness error instead of returning a partial
+tree. The result remains an array; roots mounted after this discovery window appear on the next
+call. A renderer that never commits also produces a readiness error. The hook records first
+commits so a renderer whose roots were all unmounted does not block later calls.
+
 Solid notes: `afterCreateOwner` fires before `devComponent` sets `props`/`name`/`component`, so the
 hook records only roots and the tools walk `owned` + `subRoots` (`createRoot` inside `<For>` /
 `<Portal>`) at call time. solid-refresh 0.6 passes its `{ name }` as the memo's initial value, so

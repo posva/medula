@@ -1,6 +1,6 @@
 import { act, createElement, useReducer, useState, useSyncExternalStore } from 'react'
 import type { Root } from 'react-dom/client'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { REACT_DEVTOOLS_HOOK_SCRIPT, installReactDevtoolsHook } from './hook'
 import { installReactInternals } from './internals'
 
@@ -105,6 +105,117 @@ describe('hook script', () => {
 })
 
 describe('react internals tools', () => {
+  it('waits for a later application root before returning the merged tree', async () => {
+    vi.useFakeTimers()
+    const appContainer = document.createElement('div')
+    document.body.append(appContainer)
+    const appRoot = createRoot(appContainer)
+    try {
+      act(() => root.render(createElement(Child, { user: { name: 'Overlay' } })))
+      let settled = false
+      const listing = tool('list-components')
+        .invoke({ arg0: {} })
+        .then((value) => {
+          settled = true
+          return value
+        })
+      await vi.advanceTimersByTimeAsync(100)
+      expect(settled).toBe(false)
+      act(() => appRoot.render(createElement(App)))
+      await vi.advanceTimersByTimeAsync(500)
+      const list = await listing
+      expect(list.map((c: any) => c.name)).toEqual(['Child', 'App'])
+      const counter = list[1].children[0]
+      await act(async () => {
+        await tool('set-hook-state').invoke({
+          arg0: { id: counter.id, hookIndex: 0, path: [], value: 1_000_000_000 },
+        })
+      })
+      expect(appContainer.textContent).toContain('a:1000000000:1')
+      await expect(
+        tool('get-component').invoke({ arg0: { id: counter.id } }),
+      ).resolves.toMatchObject({
+        hooks: [
+          { index: 0, value: 1_000_000_000 },
+          { index: 1, value: 1 },
+        ],
+      })
+    } finally {
+      act(() => appRoot.unmount())
+      appContainer.remove()
+      vi.useRealTimers()
+    }
+  })
+
+  it('reports a readiness error while a root still has unhydrated content', async () => {
+    vi.useFakeTimers()
+    const hook = (globalThis as any).__REACT_DEVTOOLS_GLOBAL_HOOK__
+    const [rendererId] = hook.renderers.keys()
+    const hydratingRoot = {
+      current: {
+        tag: 3,
+        memoizedState: { element: {}, isDehydrated: false },
+        child: {
+          tag: 13,
+          memoizedState: { dehydrated: document.createComment('$') },
+          child: null,
+          sibling: null,
+        },
+        sibling: null,
+      },
+    }
+    hook.onCommitFiberRoot(rendererId, hydratingRoot)
+    try {
+      const result = expect(tool('list-components').invoke({ arg0: {} })).rejects.toThrow(
+        /React component discovery is not ready.*hydration/,
+      )
+      await Promise.all([result, vi.advanceTimersByTimeAsync(5000)])
+    } finally {
+      hook.getFiberRoots(rendererId).delete(hydratingRoot)
+      vi.useRealTimers()
+    }
+  })
+
+  it('waits for a second renderer to commit even after the discovery window', async () => {
+    vi.useFakeTimers()
+    const hook = (globalThis as any).__REACT_DEVTOOLS_GLOBAL_HOOK__
+    const rendererId = hook.inject({})
+    const lateRoot = {
+      current: {
+        tag: 3,
+        memoizedState: { element: {} },
+        sibling: null,
+        child: {
+          tag: 0,
+          type: function LateApp() {},
+          memoizedState: null,
+          child: null,
+          sibling: null,
+        },
+      },
+    }
+    try {
+      let settled = false
+      const listing = tool('list-components')
+        .invoke({ arg0: {} })
+        .then((value) => {
+          settled = true
+          return value
+        })
+      await vi.advanceTimersByTimeAsync(600)
+      expect(settled).toBe(false)
+      hook.onCommitFiberRoot(rendererId, lateRoot)
+      await vi.advanceTimersByTimeAsync(500)
+      expect((await listing).map((c: any) => c.name)).toEqual(['App', 'LateApp'])
+    } finally {
+      hook.renderers.delete(rendererId)
+      hook.getFiberRoots(rendererId).delete(lateRoot)
+      const store = (globalThis as any)[Symbol.for('medula:react-hook')]
+      store.renderers.delete(rendererId)
+      vi.useRealTimers()
+    }
+  })
+
   it('lists components with hooks and props', async () => {
     const list = await tool('list-components').invoke({ arg0: {} })
     const app = list.find((c: any) => c.name === 'App')

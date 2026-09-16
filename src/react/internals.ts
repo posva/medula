@@ -84,7 +84,7 @@ export interface ComponentDetails {
 
 export interface MedulaReactProtocol extends InPageChannelProtocol {
   pageScript: {
-    'list-components': () => ComponentSummary[]
+    'list-components': () => Promise<ComponentSummary[]>
     'get-component': (args: { id: number }) => ComponentDetails
     'set-hook-state': (args: {
       id: number
@@ -139,6 +139,60 @@ function* liveRoots(): Generator<[RendererInternals, FiberRoot]> {
   const hook = getHook()
   for (const [id, renderer] of hook.renderers) {
     for (const root of hook.getFiberRoots!(id)) yield [renderer, root]
+  }
+}
+
+function hasPendingHydration(fiber: Fiber | null): boolean {
+  for (; fiber; fiber = fiber.sibling) {
+    if (fiber.tag === 3 && fiber.memoizedState?.isDehydrated) return true
+    if (fiber.tag === 13 && fiber.memoizedState?.dehydrated) return true
+    if (hasPendingHydration(fiber.child)) return true
+  }
+  return false
+}
+
+async function listComponents(): Promise<ComponentSummary[]> {
+  const started = Date.now()
+  let stableSince = started
+  let previousRoots: FiberRoot[] = []
+  let previousRenderers: RendererInternals[] = []
+  for (;;) {
+    const hook = getHook()
+    const roots = [...liveRoots()].map(([, root]) => root)
+    const renderers = [...hook.renderers.values()]
+    const store = (globalThis as any)[REACT_HOOK_STORE_KEY] as ReactHookStore | undefined
+    let reason = ''
+    if (document.readyState !== 'complete') reason = 'the document is still loading'
+    else if (
+      [...hook.renderers.keys()].some(
+        (id) => !hook.getFiberRoots!(id).size && !store?.committedRenderers?.has(id),
+      )
+    ) {
+      reason = 'a React renderer has not committed its first root'
+    } else if (roots.some((root) => hasPendingHydration(root.current))) {
+      reason = 'hydration is still pending'
+    }
+    const changed =
+      roots.length !== previousRoots.length ||
+      roots.some((root, i) => root !== previousRoots[i]) ||
+      renderers.length !== previousRenderers.length ||
+      renderers.some((renderer, i) => renderer !== previousRenderers[i])
+    const now = Date.now()
+    if (reason || changed) stableSince = now
+    // Initial mounts can follow the document load event, especially in Next.
+    if (!reason && now - stableSince >= 250) {
+      return roots.flatMap((root) => collectChildren(root.current))
+    }
+    if (now - started >= 5000) {
+      throw new Error(
+        `[medula] React component discovery is not ready after 5000 ms: ${reason || 'React roots are still changing'}. No partial tree was returned.`,
+      )
+    }
+    previousRoots = roots
+    previousRenderers = renderers
+    // Each check needs the mounts that occurred after the previous check.
+    // eslint-disable-next-line no-await-in-loop
+    await new Promise((resolve) => setTimeout(resolve, 25))
   }
 }
 
@@ -274,13 +328,9 @@ function registerTools(): () => void {
       agent: {
         title: 'List React components',
         description:
-          'Tree of the mounted React components with their number of stateful hooks (useState/useReducer) and prop names. Use this to reach internal component state. Ids are stable while the component stays mounted.',
+          'Tree of the mounted React components across all renderers, with their number of stateful hooks (useState/useReducer) and prop names. Waits for document load, each renderer to commit, hydration to finish, and 250 ms without root or renderer changes. Throws a readiness error after 5 seconds instead of returning a partial tree. Later mounts appear on the next call. Use this to reach internal component state. Ids are stable while the component stays mounted.',
       },
-      handler: () => {
-        const out: ComponentSummary[] = []
-        for (const [, root] of liveRoots()) out.push(...collectChildren(root.current))
-        return out
-      },
+      handler: listComponents,
     },
     'get-component': {
       type: 'query',

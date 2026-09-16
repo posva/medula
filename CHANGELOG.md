@@ -1,3 +1,14 @@
+# [0.3.0](https://github.com/posva/medula/compare/v0.2.0...v0.3.0) (2026-09-16)
+
+### Bug Fixes
+
+- use host registration for devframe discovery ([f760515](https://github.com/posva/medula/commit/f760515fc7a8f5d58081e7322af83218595e4a63))
+- wait for React component discovery before listing ([ba1f4b5](https://github.com/posva/medula/commit/ba1f4b5ad4ce80ce1a859541cf086a752770db74))
+
+### Features
+
+- **solid:** support Solid 2 alongside Solid 1 ([aa4eecd](https://github.com/posva/medula/commit/aa4eecd8e59e313d52d523a1f898b0b0656ef0e9))
+
 # [0.2.0](https://github.com/posva/medula/compare/v0.1.0...v0.2.0) (2026-09-15)
 
 ### Bug Fixes

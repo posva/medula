@@ -94,7 +94,7 @@ export default defineNuxtConfig({
 Install medula and the devframe packages:
 
 ```sh
-pnpm add -D medula @devframes/next @devframes/hub-ui
+pnpm add -D medula @devframes/agentic @devframes/next @devframes/hub-ui
 ```
 
 Wrap your Next.js config with `withDevframe`:
@@ -174,12 +174,12 @@ Add this server to your agent's MCP configuration:
 }
 ```
 
-`devframe connect` finds your running dev servers, so you do not need to configure a URL or port
-for each app.
+`devframe connect` finds all running dev servers. Its instance list identifies each app and its
+port, and tool calls use that port to select the app.
 
 Start your dev server and open the app in your browser. If DevTools asks for a connection code,
 complete that step. Keep the app tab visible while your agent works: its tools are available
-while the page is connected. With several app tabs open, medula uses the tab you focused last.
+while the page is connected.
 
 Try asking your agent:
 

@@ -76,36 +76,15 @@ the definition's `clientAssets`. The hub serves them at the dock base.
 Tools exist only while a page is connected. `medula_help` (node side) explains that to the
 agent.
 
-### Local devframe
-
-`vendor/*.tgz` (`devframe`, `@devframes/hub`, `@devframes/hub-ui`, `@devframes/next`) are built
-from `~/oss/devframe/.posva/worktrees/medula-vendor` (branch `medula-vendor` = PR
-devframes/devframe#376 `eager-client-script`, in-page functions exposed through MCP and eager dock
-client scripts, merged with `origin/main`; the PR alone is behind the released hub 0.9.19 and
-`@vitejs/devtools-kit` 0.7.3, which import `toolInputToCommandArgs` from `devframe/internal`).
-`pnpm-workspace.yaml` overrides point at them, so Vite DevTools, Nuxt DevTools and the Next hub
-all run the PR code. To refresh:
-
-```bash
-MEDULA_VENDOR_DIR="$PWD/vendor"
-cd ~/oss/devframe/.posva/worktrees/medula-vendor
-git merge origin/main   # and re-merge eager-client-script when the PR moves
-pnpm install && pnpm exec turbo run build --filter=devframe --filter=@devframes/hub --filter=@devframes/hub-ui --filter=@devframes/next
-for p in devframe hub hub-ui next; do (cd packages/$p && pnpm pack --pack-destination "$MEDULA_VENDOR_DIR"); done
-```
-
-The devframe tarball also carries a local patch (most recently synced page wins in
-`node/client-agent.ts`, uncommitted in the PR worktree, committed on `medula-vendor`); after
-repacking under the same file name, update the tarball integrity in `pnpm-lock.yaml` (pnpm keeps
-the cached copy otherwise). Replace with npm versions once the PR is released.
-
 ## Agent access
 
 `.mcp.json` and `.codex/config.toml` register `npx devframe connect` (same shape as pinia-colada):
 one stdio MCP server that discovers running dev servers through `~/.devframe/instances/` (Vite
 DevTools does not publish itself there, so `medula/vite` registers its hub when the dev server
 listens; Nuxt uses its own `listen` hook because Vite runs in middleware mode, and removes the
-registration on Nuxt `close`; the Next hub passes `register: true`). Direct URL:
+registration on Nuxt `close`; the Next hub passes `register: true`). The connector lists every
+running instance and calls one instance by its port, so multiple apps can run at the same time.
+Direct URL:
 `<origin>/__devtools/__mcp` (Vite/Nuxt DevTools) or `<origin>/__devframes/__mcp` (Next).
 
 ## Verifying a change by hand
@@ -118,15 +97,9 @@ registration on Nuxt `close`; the Next hub passes `register: true`). Direct URL:
    syncs and the page script never loads.
 3. `tools/call` with `{"name":"medula_patch-state","arguments":{"arg0":{"name":"…","path":["…"],"value":…}}}`.
 
-Routing between pages: the page script only stays connected while its tab is visible and
-reconnects on `focus`, and the vendored devframe is patched so the MOST RECENTLY synced page wins
-(`packages/devframe/src/node/client-agent.ts` in the worktree, uncommitted there: later manifests
-overwrite earlier ones and a re-sync moves the session last). So tool calls go to the page the user
-looked at last. Stray headless pages (`agent-browser close --all`) still compete until they lose
-focus. When a connected tab goes away, the next call can hit
-`[birpc] timeout on calling "devframe:agent:invoke-client-tool"` before calls succeed again. Use a
-private port and `AGENT_BROWSER_SESSION` when verifying; `agent-browser tab N` does not switch the
-`eval` target, use one session per page.
+Routing between apps: call `devframe_connect_list-instances` first, then pass its instance port to
+`devframe_connect_call-tool`. Tabs in one app share one server MCP surface; medula does not select
+a tab. Use one browser session per app when you verify page-backed tools.
 
 Adapter-specific tools use `registerAgentTools(namespace, functions)` (`src/client/tools.ts`):
 `src/vue/internal.ts` (component tree walker + StateEditor-like setter, mirrors Vue DevTools) and
@@ -167,7 +140,8 @@ alias supplies runtime tests, with a Vitest alias selecting its browser developm
 - The dock page cannot compute the MCP URL alone: the hub meta served under the dock base carries
   `mcp.path` relative to the hub base. It reads the parent window's connection instead, so the URL
   only shows inside the dock.
-- Tests: `src/**/*.spec.ts`, happy-dom, keep them simple. Playgrounds have no tests.
+- Tests: `src/**/*.spec.ts`, happy-dom, keep them simple. Add tests only for behavior that can
+  regress. Do not test one-time dependency migration details. Playgrounds have no tests.
 - Playgrounds live in `playgrounds/*` (pnpm workspace) and depend on `medula` via
   `link:../..`, so run `pnpm build` before `pnpm play:*`.
 - The Nuxt playground must not run `nuxt prepare` during install: `medula/nuxt` needs

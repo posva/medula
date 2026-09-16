@@ -12,6 +12,7 @@ pnpm play:next      # http://localhost:3000
 
 - `next.config.ts`: `withDevframe({...})`
 - `app/%5F_devframes/[[...path]]/route.ts`: the app-owned devframe hub with medula and Terminals panels
+- `@devframes/agentic`: the MCP surface used by the hub and `devframe connect`
 - `app/layout.tsx`: `<head><Medula /></head>`
 - `app/playground.tsx`: the [common demo](../../CONTRIBUTING.md#playgrounds), with counter, nested user, todos, and settings
 - `app/profile.tsx`: `Profile` (`useState`), `Greeting` (props), `Clock` (class component)

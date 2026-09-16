@@ -22,7 +22,7 @@ Pinia stores also appear as \`pinia:<id>\` through these MCP tools:
 
 Arguments are passed as a single object under \`arg0\`, for example \`{ "arg0": { "name": "pinia:cart" } }\`.
 
-If these tools are missing, no page is connected: open the app in a browser (dev server running) and list the tools again. Each open tab is a separate page; the tools act on the tab that synced last, the one the user looked at most recently.
+If these tools are missing, no page is connected: open the app in a browser (dev server running) and list the tools again. When several apps run, call \`devframe_connect_list-instances\` first and use the selected instance port with \`devframe_connect_call-tool\`.
 `
 
 /**
@@ -75,7 +75,6 @@ export function createMedula(options: MedulaOptions = {}): DevframeDefinition {
     icon: 'solar:bones-bold-duotone',
     basePath: options.base ?? MEDULA_BASE,
     clientAssets: fileURLToPath(new URL('../dist-client', import.meta.url)),
-    cli: { mcp: true },
     setup(ctx) {
       ctx.agent.registerTool({
         id: `${MEDULA_ID}:help`,

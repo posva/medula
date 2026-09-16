@@ -2,21 +2,25 @@ ignoreWorkspaceRootCheck: true
 strictPeerDependencies: false
 packages:
   - playgrounds/*
-# Local devframe build from PR devframes/devframe#376 (branch eager-client-script).
-# Replace with npm versions once the PR is released.
-overrides:
-  devframe: file:./vendor/devframe-0.9.19.tgz
-  '@devframes/next': file:./vendor/devframes-next-0.9.19.tgz
-  '@devframes/hub': file:./vendor/devframes-hub-0.9.19.tgz
-  '@devframes/hub-ui': file:./vendor/devframes-hub-ui-0.9.19.tgz
 allowBuilds:
   esbuild: true
   simple-git-hooks: true
 minimumReleaseAgeExclude:
-  - '@devframes/hub@0.9.19'
-  - '@devframes/plugin-code-server@0.9.19'
-  - '@devframes/plugin-data-inspector@0.9.19'
-  - '@nuxt/devtools-kit@4.0.0-alpha.19'
-  - '@nuxt/devtools@4.0.0-alpha.19'
-  - '@devframes/vite@0.9.19'
-  - '@devframes/hub-ui@0.9.19'
+  - '@devframes/agentic@1.0.0'
+  - '@devframes/hub-ui@1.0.0'
+  - '@devframes/hub@1.0.0'
+  - '@devframes/json-render-ui@1.0.0'
+  - '@devframes/json-render@1.0.0'
+  - '@devframes/next@1.0.0'
+  - '@devframes/plugin-code-server@1.0.0'
+  - '@devframes/plugin-data-inspector@1.0.0'
+  - '@devframes/plugin-inspect@1.0.0'
+  - '@devframes/plugin-messages@1.0.0'
+  - '@devframes/plugin-terminals@1.0.0'
+  - '@devframes/service-open@1.0.0'
+  - '@devframes/vite@1.0.0'
+  - '@nuxt/devtools-kit@4.0.0-beta.1'
+  - '@nuxt/devtools@4.0.0-beta.1'
+  - '@vitejs/devtools-kit@0.7.5'
+  - '@vitejs/devtools@0.7.5'
+  - 'devframe@1.0.0'

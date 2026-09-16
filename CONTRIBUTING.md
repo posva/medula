@@ -17,10 +17,6 @@ pnpm build
 The build produces the library and browser assets. Playgrounds use the local package, so build
 before you start one and rebuild after changes to medula.
 
-The workspace currently uses devframe packages from `vendor/` through pnpm overrides. Keep these
-overrides for local work. See [AGENTS.md](./AGENTS.md#local-devframe) for the patch details and
-instructions to refresh the archives.
-
 ## Playgrounds
 
 Start a playground and open its URL in your browser:

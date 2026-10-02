@@ -2,7 +2,7 @@
 
 Headless devtools built on [devframe](https://devfra.me). A coding agent reads and changes the
 state of an open web page through MCP. No panel UI: only a plain HTML instructions page. medula
-always runs as a **dock of a hub** (Vite DevTools, Nuxt DevTools 4, or its own hub in Next): the
+always runs as a **dock of a hub** (Vite DevTools, Nuxt DevTools, or its own hub in Next): the
 hub owns the connection, the auth gate and the MCP route. It never runs a devframe of its own next
 to another one (two devframes on one page fight over the shared `__DEVFRAME_CONNECTION__`).
 
@@ -51,7 +51,7 @@ medula as a hub dock; the hub client runtime imports the page script (the dock `
 | `medula`                 | node    | `createMedula()` devframe definition (+ `help` tool and resource), `medulaDockClientScript()`                                                                                                               |
 | `medula/vite`            | node    | `medula()` Vite plugins: `createPluginFromDevframe` (Vite DevTools dock at `/__medula/`) + bootstrap injection + Svelte/Solid instrumentation. Needs Vite DevTools.                                         |
 | `medula/next`            | node    | `<Medula />` head component (hook shims only). The hub is the app's: `nextDevframeHub({ devframes: [medulaHubEntry()] })` as in devframe's `hub-next` example                                               |
-| `medula/nuxt`            | node    | Nuxt module: adds the Vite plugins (Nuxt DevTools 4 hosts Vite DevTools docks), inlines the bootstrap through `app.head`                                                                                    |
+| `medula/nuxt`            | node    | Nuxt module: adds the Vite plugins (Nuxt DevTools hosts Vite DevTools docks), inlines the bootstrap through `app.head`                                                                                      |
 
 `src/panel/` also holds the dock page (plain HTML + CSS); `panel.vite.config.ts` builds it and
 `connect.js` (keeps its default export: the hub runtime calls it) into `dist-client/`, which is
@@ -80,12 +80,12 @@ agent.
 
 `.mcp.json` and `.codex/config.toml` register `npx devframe connect` (same shape as pinia-colada):
 one stdio MCP server that discovers running dev servers through `~/.devframe/instances/`. Vite
-and Nuxt hubs register automatically; the Next hub passes `register: true`. Vite DevTools 0.7.6
+and Nuxt hubs register automatically; the Next hub passes `register: true`. Vite DevTools
 passes the `vite-devtools` identity and the app directory (`rootDir: context.cwd`) to `initHub`
 when a Vite server is present.
-The hub registers when the first hub request supplies its origin and removes the record on
-close. The connector lists every
-running instance and calls one instance by its port, so multiple apps can run at the same time.
+The hub registers when the first hub request supplies its origin and removes the record on close.
+The connector lists every running instance and calls one instance by its port, so multiple apps
+can run at the same time.
 Direct URL:
 `<origin>/__devtools/__mcp` (Vite/Nuxt DevTools) or `<origin>/__devframes/__mcp` (Next).
 
@@ -119,18 +119,18 @@ commits so a renderer whose roots were all unmounted does not block later calls.
 
 Solid notes: `afterCreateOwner` fires before `devComponent` sets `props`/`name`/`component`, so the
 hook records only roots and the tools walk `owned` + `subRoots` (`createRoot` inside `<For>` /
-`<Portal>`) at call time. solid-refresh 0.6 passes its `{ name }` as the memo's initial value, so
+`<Portal>`) at call time. solid-refresh passes its `{ name }` as the memo's initial value, so
 the HMR memo is unnamed: it is detected as the single memo child of a `[solid-refresh]*` component.
 Module-level `createStore` registers a transient `{ value, name }`: only the raw object is kept
 (`WeakRef`). Stores are written with `produce` on the raw object (the store proxy refuses direct
 writes); signals with `DEV.writeSignal` and a structural copy (`setAtPath`).
 
-Solid 2 uses `hook2.ts`: the Vite plugin detects the app's installed Solid major and captures
-public setters from `solid-js` / `@solidjs/signals` primitive wrappers. The adapter uses
+The Vite plugin detects the installed Solid major. For the newer API, `hook2.ts` captures public
+setters from `solid-js` / `@solidjs/signals` primitive wrappers. The adapter uses
 `DEV.onOwner`, `getChildren` and `getParent`, normalizes owners for the shared tools, and flushes
 writes before returning. Projections and memos are read-only; pending/failed reads return null.
-The Solid 1 playground stays on 1.9; `solid2-vite` uses Solid 2 RC. The root `solid-js-v2` npm
-alias supplies runtime tests, with a Vitest alias selecting its browser development build.
+The `solid-vite` and `solid2-vite` playgrounds exercise the two adapters. The root `solid-js-v2`
+npm alias supplies runtime tests, with a Vitest alias selecting its browser development build.
 
 ## Constraints
 

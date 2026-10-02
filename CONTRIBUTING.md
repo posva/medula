@@ -57,8 +57,8 @@ The repository MCP config uses `npx devframe connect` to find running dev server
 playground tab visible while you use its tools. Playground configs disable client authentication
 for local testing.
 
-Vite and Nuxt hubs register automatically with the tracked Vite DevTools 0.7.5 patch in
-`patches/`. Install with pnpm so this patch is applied. Next sets `register: true` on its hub.
+Vite and Nuxt hubs register automatically with Vite DevTools 0.7.6. Next sets `register: true` on
+its hub.
 Registration starts with the first hub request, when its origin is known. The registration test
 checks the actual port, app directory, MCP path, and cleanup when the server closes.
 

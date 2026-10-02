@@ -1,6 +1,6 @@
 # Nuxt playground
 
-Nuxt 4 + `@pinia/nuxt`, with `@nuxt/devtools` 4 alpha enabled. The app imports nothing from
+Nuxt 4 + `@pinia/nuxt`, with `@nuxt/devtools` 4 beta enabled. The app imports nothing from
 `medula`: the only integration is the module in `nuxt.config.ts`
 (`modules: ['@pinia/nuxt', 'medula/nuxt']`).
 

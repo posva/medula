@@ -68,13 +68,11 @@ import solid from '@solidjs/vite-plugin'
 ```
 
 medula detects the Solid version installed in the app. Solid 2 support is tested against
-`2.0.0-rc.8`. It captures public setters from instrumented primitive imports; pending or failed
+`2.0.0-rc.13`. It captures public setters from instrumented primitive imports; pending or failed
 values appear as `null` until they can be read.
 
-Vite DevTools publishes its hub automatically for `devframe connect`. Vite DevTools 0.7.5 needs
-the tracked patch in [`patches/`](./patches) for this behavior. This workspace applies it through
-pnpm; other apps need the same patch until Vite DevTools ships the fix. Installing medula alone
-does not apply the patch. Registration starts with the first hub request, when its origin is known.
+Vite DevTools 0.7.6 publishes its hub automatically for `devframe connect`. Registration starts
+with the first hub request, when its origin is known.
 
 ### Nuxt
 

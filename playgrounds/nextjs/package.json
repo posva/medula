@@ -8,19 +8,19 @@
     "start": "next start"
   },
   "dependencies": {
-    "@devframes/agentic": "^1.0.0",
-    "@devframes/next": "^1.0.0",
-    "@devframes/plugin-terminals": "^1.0.0",
+    "@devframes/agentic": "1.2.0",
+    "@devframes/next": "1.2.0",
+    "@devframes/plugin-terminals": "1.2.0",
     "medula": "link:../..",
-    "next": "^16.3.5",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "next": "^16.3.8",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
   },
   "devDependencies": {
-    "@devframes/hub-ui": "^1.0.0",
-    "@types/node": "^26.4.0",
-    "@types/react": "^19.2.18",
-    "@types/react-dom": "^19.2.7",
+    "@devframes/hub-ui": "1.2.0",
+    "@types/node": "^26.6.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "typescript": "~7.0.2"
   }
 }

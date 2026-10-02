@@ -11,10 +11,10 @@
     "medula": "link:../..",
     "nuxt": "^4.5.2",
     "pinia": "^4.0.3",
-    "vue": "^3.5.42"
+    "vue": "^3.5.43"
   },
   "devDependencies": {
-    "@nuxt/devtools": "^4.0.0-beta.1",
+    "@nuxt/devtools": "4.0.0-beta.3",
     "typescript": "~7.0.2"
   }
 }

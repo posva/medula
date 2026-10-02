@@ -8,14 +8,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@solidjs/web": "2.0.0-rc.13",
     "medula": "link:../..",
-    "solid-js": "2.0.0-rc.8",
-    "@solidjs/web": "2.0.0-rc.8"
+    "solid-js": "2.0.0-rc.13"
   },
   "devDependencies": {
-    "@vitejs/devtools": "^0.7.5",
+    "@solidjs/vite-plugin": "3.0.0-next.47",
+    "@vitejs/devtools": "^0.7.6",
     "typescript": "~7.0.2",
-    "vite": "^8.3.0",
-    "@solidjs/vite-plugin": "3.0.0-next.43"
+    "vite": "^8.3.1"
   }
 }

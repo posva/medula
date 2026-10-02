@@ -1,6 +1,6 @@
 # Solid 2 + Vite playground
 
-The common counter, todos, profile, and settings demo runs on Solid `2.0.0-rc.8`.
+The common counter, todos, profile, and settings demo runs on Solid `2.0.0-rc.13`.
 App code imports primitives from `solid-js` and DOM APIs from `@solidjs/web`.
 The `medula()` Vite plugin detects Solid 2 and exposes its components and state through MCP.
 

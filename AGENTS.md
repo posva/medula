@@ -80,9 +80,9 @@ agent.
 
 `.mcp.json` and `.codex/config.toml` register `npx devframe connect` (same shape as pinia-colada):
 one stdio MCP server that discovers running dev servers through `~/.devframe/instances/`. Vite
-and Nuxt hubs register automatically; the Next hub passes `register: true`. A tracked pnpm patch
-adds automatic registration to Vite DevTools 0.7.5 when a Vite server is present. It passes the
-`vite-devtools` identity and the app directory (`rootDir: context.cwd`) to `initHub`.
+and Nuxt hubs register automatically; the Next hub passes `register: true`. Vite DevTools 0.7.6
+passes the `vite-devtools` identity and the app directory (`rootDir: context.cwd`) to `initHub`
+when a Vite server is present.
 The hub registers when the first hub request supplies its origin and removes the record on
 close. The connector lists every
 running instance and calls one instance by its port, so multiple apps can run at the same time.
@@ -135,7 +135,7 @@ alias supplies runtime tests, with a Vitest alias selecting its browser developm
 ## Constraints
 
 - Use public devframe APIs. Registration belongs to the host hub through `register`, not to
-  medula through `devframe/internal`. Remove the Vite DevTools patch when upstream ships it.
+  medula through `devframe/internal`.
 - `isolatedDeclarations` is on (oxc dts): every export needs an explicit type, default exports
   must be identifiers.
 - Auth and MCP belong to the hub. Vite/Nuxt DevTools: the app config decides (`clientAuth`). In

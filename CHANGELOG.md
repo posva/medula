@@ -1,3 +1,7 @@
+# [0.4.0](https://github.com/posva/medula/compare/v0.3.0...v0.4.0) (2026-10-02)
+
+- Devframe update
+
 # [0.3.0](https://github.com/posva/medula/compare/v0.2.0...v0.3.0) (2026-09-16)
 
 ### Bug Fixes

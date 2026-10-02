@@ -242,12 +242,12 @@ describe('react internals tools', () => {
       ],
     })
     let result: any
-    act(() => {
-      result = tool('set-hook-state').invoke({
+    await act(async () => {
+      result = await tool('set-hook-state').invoke({
         arg0: { id: counter.id, hookIndex: 0, path: [], value: 41 },
       })
     })
-    await expect(result).resolves.toMatchObject({ index: 0, value: 41 })
+    expect(result).toMatchObject({ index: 0, value: 41 })
     expect(container.querySelector('button')!.textContent).toBe('a:41:1')
     // the id stays stable across renders and the alternate fiber
     act(() => container.querySelector('button')!.click())
@@ -301,12 +301,12 @@ describe('react internals tools', () => {
     const list = await tool('list-components').invoke({ arg0: {} })
     const child = list.find((c: any) => c.name === 'App').children[1]
     let result: any
-    act(() => {
-      result = tool('set-props').invoke({
+    await act(async () => {
+      result = await tool('set-props').invoke({
         arg0: { id: child.id, path: ['user', 'name'], value: 'Grace' },
       })
     })
-    await expect(result).resolves.toMatchObject({ props: { user: { name: 'Grace' } } })
+    expect(result).toMatchObject({ props: { user: { name: 'Grace' } } })
     expect(container.querySelector('p')!.textContent).toBe('Grace')
   })
 

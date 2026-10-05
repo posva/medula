@@ -3,11 +3,10 @@
 [![npm version](https://img.shields.io/npm/v/medula.svg)](https://npmx.dev/package/medula)
 [![ci](https://github.com/posva/medula/actions/workflows/ci.yml/badge.svg)](https://github.com/posva/medula/actions/workflows/ci.yml)
 
-> Change your web app's state from within it
+> Headless devtools for your agents
 
 medula lets your coding agent inspect and change the internal state of a running web app through
-[MCP](https://modelcontextprotocol.io). Ask it to check a component, change a value, or navigate
-to another route, and see the result in your browser.
+[MCP](https://modelcontextprotocol.io). Use it at the **verification step** when fixing production bugs or to explore edge cases that are hard to reproduce with automated tests.
 
 It supports **Vue 3, React, Svelte 5, and Solid**, with integrations for **Vite, Nuxt, and
 Next.js**. Vue apps also get support for Pinia and Vue Router. Add medula to your dev server, it infiltrates your app so you don't need to adapt anything in it.
@@ -74,7 +73,8 @@ values appear as `null` until they can be read.
 Vite DevTools 0.7.6 publishes its hub automatically for `devframe connect`. Registration starts
 with the first hub request, when its origin is known.
 
-### Nuxt
+<details>
+<summary>Nuxt</summary>
 
 Install medula:
 
@@ -92,7 +92,10 @@ export default defineNuxtConfig({
 })
 ```
 
-### Next.js (App Router)
+</details>
+
+<details>
+<summary>Next.js (App Router)</summary>
 
 Install medula and the devframe packages:
 
@@ -161,6 +164,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   )
 }
 ```
+
+</details>
 
 ## Connect your agent
 

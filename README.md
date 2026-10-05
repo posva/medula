@@ -1,5 +1,11 @@
 # medula
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./graph-dark.png">
+  <source media="(prefers-color-scheme: light)" srcset="./graph-light.png">
+  <img alt="Medula connects coding agents to your app through the devframe hub." src="./graph-light.png">
+</picture>
+
 [![npm version](https://img.shields.io/npm/v/medula.svg)](https://npmx.dev/package/medula)
 [![ci](https://github.com/posva/medula/actions/workflows/ci.yml/badge.svg)](https://github.com/posva/medula/actions/workflows/ci.yml)
 

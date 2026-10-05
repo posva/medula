@@ -1,37 +1,25 @@
 # medula
 
 Headless devtools built on [devframe](https://devfra.me). A coding agent reads and changes the
-state of an open web page through MCP. No panel UI: only a plain HTML instructions page. medula
-always runs as a **dock of a hub** (Vite DevTools, Nuxt DevTools, or its own hub in Next): the
-hub owns the connection, the auth gate and the MCP route. It never runs a devframe of its own next
-to another one (two devframes on one page fight over the shared `__DEVFRAME_CONNECTION__`).
+state of an open web page through MCP. Use it to verify bug fixes and explore edge cases in a
+local dev server. State changes affect the running page, not source files.
 
-## Commands
+medula runs as a **dock of a hub**: Vite DevTools, Nuxt DevTools, or an app-owned hub in Next.
+The hub owns the connection, authentication, and MCP route. Do not create a separate devframe
+on the same page: two devframes conflict over `__DEVFRAME_CONNECTION__`.
+The dock contains only a plain HTML instructions page.
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for local setup, playgrounds, and pull request guidelines.
+## Development
 
-```bash
-pnpm build                                   # tsdown (lib) + vite (config page, connect.js)
-pnpm build:lib                               # lib only
-pnpm test                                    # build + coverage + typecheck
-pnpm exec vitest run src/client/path.spec.ts # one test file
-pnpm lint / pnpm lint:fix                    # oxlint
-pnpm test:types                              # tsc
-pnpm play:vue | play:react | play:svelte | play:solid | play:solid2 | play:next | play:nuxt   # playgrounds (run pnpm build first)
-pnpm e2e:agent                               # Claude Code changes Vue playground state over MCP
-pnpm e2e:agent:codex                         # same with Codex
-pnpm e2e:agent:vue | e2e:agent:svelte | e2e:agent:solid   # zero-config playground scenarios
-```
+See [README.md](./README.md) for user setup and supported frameworks.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for local setup, commands, playground ports, shared demo
+state, and checks.
 
-Playground ports: vue-vite 5173, react-vite 5174, svelte-vite 5175, solid-vite 5176, solid2-vite 5177, nextjs 3000, nuxt 3001.
-
-All playgrounds share a counter, todos, a nested user profile, derived greeting/remaining count,
-and theme/font/settings visibility controls. Keep their initial values and common actions aligned;
-see CONTRIBUTING.md. Shared styles live in `playgrounds/shared/style.css`. Use each framework's native state APIs and keep framework-specific examples.
-
-## Important
-
-Keep this file up to date when commands, structure or tooling change.
+- Run `pnpm build` before starting a playground and rebuild after changes to medula.
+- Run one test with `pnpm exec vitest run src/client/path.spec.ts`.
+- Keep the playgrounds' initial values and common actions aligned. Use each framework's native
+  state APIs and keep framework-specific examples. Shared styles are in `playgrounds/shared/style.css`.
+- Keep this file current when architecture, constraints, or tooling change.
 
 ## Architecture
 
@@ -78,16 +66,14 @@ agent.
 
 ## Agent access
 
-`.mcp.json` and `.codex/config.toml` register `npx devframe connect` (same shape as pinia-colada):
-one stdio MCP server that discovers running dev servers through `~/.devframe/instances/`. Vite
-and Nuxt hubs register automatically; the Next hub passes `register: true`. Vite DevTools
-passes the `vite-devtools` identity and the app directory (`rootDir: context.cwd`) to `initHub`
-when a Vite server is present.
-The hub registers when the first hub request supplies its origin and removes the record on close.
-The connector lists every running instance and calls one instance by its port, so multiple apps
-can run at the same time.
-Direct URL:
-`<origin>/__devtools/__mcp` (Vite/Nuxt DevTools) or `<origin>/__devframes/__mcp` (Next).
+`.mcp.json` and `.codex/config.toml` use `npx devframe connect`. The connector discovers dev
+servers through `~/.devframe/instances/` and selects an app by its port.
+Vite and Nuxt hubs register automatically; the Next hub needs `register: true`.
+Registration starts when the first hub request supplies its origin. The record is removed on close.
+
+Call `devframe_connect_list-instances` first, then pass the instance port to
+`devframe_connect_call-tool`. Tabs in one app share one server MCP surface; medula does not select
+a tab. Keep the app tab visible and use one browser session per app for verification.
 
 ## Verifying a change by hand
 
@@ -99,16 +85,10 @@ Direct URL:
    syncs and the page script never loads.
 3. `tools/call` with `{"name":"medula_patch-state","arguments":{"arg0":{"name":"…","path":["…"],"value":…}}}`.
 
-Routing between apps: call `devframe_connect_list-instances` first, then pass its instance port to
-`devframe_connect_call-tool`. Tabs in one app share one server MCP surface; medula does not select
-a tab. Use one browser session per app when you verify page-backed tools.
+## Adapter notes
 
-Adapter-specific tools use `registerAgentTools(namespace, functions)` (`src/client/tools.ts`):
-`src/vue/internal.ts` (component tree walker + StateEditor-like setter, mirrors Vue DevTools) and
-`src/react/internals.ts` + `src/react/hook.ts` (DevTools hook shim that captures renderer internals
-such as `overrideHookState`; must run before React loads), `src/svelte/*` and `src/solid/*` (Vite
-wrappers around the framework runtime, dev builds only; the hook functions are stringified into the
-wrapper module so they must stay self-contained).
+Adapter tools use `registerAgentTools(namespace, functions)` in `src/client/tools.ts`.
+Svelte and Solid hooks are embedded as strings in Vite wrappers and must stay self-contained.
 
 React `list-components` waits for document load, the first commit from each injected renderer,
 and hydration of all known roots and Suspense boundaries. It then requires 250 ms without root
@@ -146,8 +126,7 @@ npm alias supplies runtime tests, with a Vitest alias selecting its browser deve
   only shows inside the dock.
 - Tests: `src/**/*.spec.ts`, happy-dom, keep them simple. Add tests only for behavior that can
   regress. Do not test one-time dependency migration details. Playgrounds have no tests.
-- Playgrounds live in `playgrounds/*` (pnpm workspace) and depend on `medula` via
-  `link:../..`, so run `pnpm build` before `pnpm play:*`.
+- Playgrounds live in `playgrounds/*` (pnpm workspace) and depend on `medula` via `link:../..`.
 - The Nuxt playground must not run `nuxt prepare` during install: `medula/nuxt` needs
   the library build first. To generate Nuxt types, run
   `pnpm -C playgrounds/nuxt exec nuxt prepare` after `pnpm build`.
